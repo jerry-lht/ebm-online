@@ -1,0 +1,33 @@
+# API & Web
+fastapi~=0.115.0
+uvicorn[standard]~=0.32.0
+httpx~=0.28.0
+
+# Task Queue
+celery~=5.4.0
+redis~=5.2.0
+
+# LLM
+openai~=1.82.0
+
+# Configuration
+pydantic~=2.11.0
+pydantic-settings~=2.8.0
+
+# Search
+elasticsearch~=8.17.0
+
+# Scientific Computing
+numpy~=2.2.0
+scipy~=1.15.0
+
+# Frontend
+streamlit~=1.45.0
+
+# Database
+psycopg2-binary~=2.9.9
+
+# Testing
+pytest~=8.3.0
+pytest-asyncio~=0.25.0
+pytest-cov~=6.1.0
