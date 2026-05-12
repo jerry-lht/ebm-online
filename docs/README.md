@@ -14,7 +14,11 @@ docs/
 ├── data-pipeline-for-online-ebm.md  # [2] 功能描述与数据流
 ├── module1-detail-design.md         # [3] Module 1 详细设计
 ├── module2-detail-design.md         # [4] Module 2 详细设计
+├── module2-test-guide.md            # Module 2 简化版验收与手动测试
 ├── module3-detail-design.md         # [5] Module 3 详细设计
+├── module3-test-guide.md            # Module 3 简化版验收与手动测试
+├── phase5-api-test-guide.md         # Phase 5 Orchestrator/API 简化版验收
+├── phase6-gradio-demo-guide.md      # Phase 6 Gradio Demo 启动与调试
 └── shared-infrastructure-design.md  # [6] 共享基础设施详细设计
 ```
 
@@ -61,7 +65,7 @@ flowchart TD
 **核心内容：**
 - 系统定位与目标（端到端自动化、可追溯性、模块化）
 - 整体架构图（Frontend / Backend / Storage 三层）
-- 技术选型（Streamlit + FastAPI + Celery + ES + gpt-5.2）
+- 技术选型（当前 Gradio demo + FastAPI + Celery + ES + gpt-5.2；Streamlit 保留为占位扩展）
 - 三大模块的职责划分和依赖关系
 - Pipeline Orchestrator 的状态模型和 DAG 调度
 - LLM 调用策略和成本估算
@@ -93,12 +97,17 @@ flowchart TD
 **核心内容：**
 - Step 1 OA RCT Retrieval（已完成，记录现状）
 - Step 2 RCT Classification（已完成，记录现状）
-- Step 3 PI Extraction — LLM prompt 设计、输入输出 schema、Batch API 策略
+- Step 3 PI Extraction — LLM prompt 设计、输入输出 schema、当前逐篇执行策略与 Batch API 扩展路径
 - Step 4 PI Normalization — 5 个子步骤（Cleaning → Concept Extraction → MeSH Mapping → Synonym Expansion → Aggregation）
-- Step 5 Index Building — ES mapping、analyzer、写入策略、部署配置
+- Step 5 Index Building — 本地轻量索引 / ES mapping、写入策略、部署配置
 - 批量处理策略、断点续跑、测试方案
 
 **数据规模：** 初期 26,163 篇（2023~2026），后续可扩展至 PMC 全量。
+
+**当前实现状态：**
+- 已完成：`data_demo/` 100 篇样本集、`data_demo_with_mesh/` PI-first derived 输出、本地 JSONL 检索索引、`index-derived` 索引重建入口、`search-local` 自定义 query 检索入口、单篇真实 LLM demo smoke 入口、PI 抽取/归一化、span/MeSH 去重、NLM MeSH 在线查询与本地兜底映射、索引文档结构、PostgreSQL 状态表、Module 1 batch runner、`module1_batches` / `module1_studies` 状态回写、断点恢复与已完成 study 跳过逻辑、单元测试
+- 当前状态：Module 1 简化版闭环已完成；100 个 derived 可全部入本地索引，固定 query 检索验证 5/5 通过，详见 `phase2-demo-test-guide.md`
+- 后续扩展：真实 OpenAI-compatible Batch API 验收、失败重提策略、真实 ES bulk 写入与端到端验证
 
 ---
 
@@ -127,6 +136,48 @@ flowchart TD
 - Step 6 GRADE Assessment — 五域判断逻辑和规则
 - 并行策略（Extraction 和 RoB 可并行）、LLM 调用量估算、测试方案
 
+**当前实现状态：**
+- 已完成：Module 3 简化版闭环骨架；screening / analysis planning / data extraction / RoB / GRADE 使用 `LLMGateway` structured output 且统一 `cacheable=False`；aggregation 使用现有 `StatsEngine`
+- 已完成：`EvidenceContextBuilder` 可从 `article_path` 指向的 derived article JSON 抽取 abstract / methods / results / tables，无全文时回退 title/abstract
+- 已完成：`Module3AnalysisRunner` 与 `python -m ebm_backend.online_pipeline.interfaces.cli.evidence_analysis --mock` smoke 入口
+- 已完成：mock LLM 单元测试覆盖完整 runner、screening 分流、planning、extraction→aggregation、RoB selective reporting、GRADE certainty、CLI mock 输出
+- 后续扩展：真实 LLM CLI smoke、真实 extraction 质量评估、数据库 run 状态、缓存、usage tracking、protocol/registry 检索
+
+**测试文档：**
+- 详见 `docs/module3-test-guide.md`
+
+---
+
+### Phase 5 — Pipeline Orchestrator & API
+
+**定位：** 后端编排层，把 Module 2 和 Module 3 串成一次可观察的 pipeline run，并通过 FastAPI 暴露状态、trace 和结果。
+
+**当前实现状态：**
+- 已完成：1000 篇索引真实简化闭环、同步 orchestrator、进程内 run store、Phase 5 mock gateway、FastAPI app、`/pipeline/runs` 创建/查询、`/trace` 中间过程查询、`/results` 精简结果查询
+- 已完成：默认 `use_mock=false`，使用 `data/data_for_test/data_demo_1000/index/local_rct_index.jsonl`；`use_mock=true` 可在无 API key 时稳定跑 smoke
+- 已完成：trace 能查看 question expansion、PI extraction、Boolean query、local search candidates、matched fields、fallback search、Module 3 screening/extraction/risk of bias/aggregation/GRADE
+- 已完成：`/results` 返回 `risk_of_bias` 和 `grade`
+- 当前限制：不支持后台任务、WebSocket、断点续跑、usage tracking；服务重启后 run 状态丢失
+
+**测试文档：**
+- 详见 `docs/phase5-api-test-guide.md`
+
+---
+
+### Phase 6 — Gradio Demo
+
+**定位：** 当前轻量前端 demo。页面直接调用 `PipelineOrchestrator`，不强制依赖 FastAPI 服务，用于快速演示“输入问题 → 查看 pipeline 中间过程 → 查看结果”的完整链路。
+
+**当前实现状态：**
+- 已完成：`frontend/gradio_app.py` 单页 Gradio Blocks 入口
+- 已完成：问题输入、demo question、`top_k`、`use_mock`、本地索引路径控制
+- 已完成：主回答、run summary、pipeline timeline、PICO/eligibility/analysis plan、PI extraction、query/local search、candidate studies、screening、extraction、Risk of Bias、aggregation/GRADE、完整 trace JSON 下载
+- 已完成：默认 `use_mock=false`，直接走真实 LLM；`use_mock=true` 保留给无 API key smoke 和自动化测试
+- 当前限制：不做流式逐步刷新、历史持久化、登录、多用户隔离或复杂图表
+
+**测试文档：**
+- 详见 `docs/phase6-gradio-demo-guide.md`
+
 ---
 
 ### [6] shared-infrastructure-design.md — 共享基础设施
@@ -137,7 +188,7 @@ flowchart TD
 - LLM Gateway — 统一调用接口、接口定义、内部流程
 - Cache Layer — 只缓存 Module 3 的三个任务（Screening/Extraction/RoB），完整命中逻辑和失效条件
 - Token & Cost Tracker — 记录字段、费用计算、聚合查询
-- Rate Limiter & Retry — token bucket 限流、指数退避重试
+- Rate Limiter & Retry — 后续按需评估
 - Stats Engine — 接口定义、支持的 effect measures 和 pooling methods、数据结构、模型自动选择
 
 ---

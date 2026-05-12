@@ -1,0 +1,79 @@
+2026-05-10T18:57:35 start mode=mock top_k=1 index=/tmp/pytest-of-root/pytest-60/test_phase6_gradio_mock_callba0/local_rct_index.jsonl question='In patients undergoing surgery, do nerve blocks reduce postoperative pain compared with usual analgesia?'
+2026-05-10T18:57:35 finish status=completed elapsed=0.01s run_id=01b24f6b-80ae-4260-ae3a-02232ab993be trace=/tmp/ebm_pipeline_trace_01b24f6b-80ae-4260-ae3a-02232ab993be.json error=None
+2026-05-10T18:58:21 start mode=real LLM top_k=5 index=/F00120250029/lixiang_share/liuhongtao_share/EBM-Online/data/data_for_test/data_demo_1000/index/local_rct_index.jsonl question='In patients undergoing surgery, do nerve blocks reduce postoperative pain compared with usual analgesia?'
+2026-05-10T19:02:08 finish status=completed elapsed=226.36s run_id=f50ef590-c288-4939-83e6-5dc384d3a801 trace=/tmp/ebm_pipeline_trace_f50ef590-c288-4939-83e6-5dc384d3a801.json error=None
+2026-05-10T19:03:55 start mode=mock top_k=1 index=/tmp/pytest-of-root/pytest-61/test_phase6_gradio_mock_callba0/local_rct_index.jsonl question='In patients undergoing surgery, do nerve blocks reduce postoperative pain compared with usual analgesia?'
+2026-05-10T19:03:55 finish status=completed elapsed=0.50s run_id=8da77633-6ecb-4a72-bd56-5905ffc0ee18 trace=/tmp/ebm_pipeline_trace_8da77633-6ecb-4a72-bd56-5905ffc0ee18.json error=None
+2026-05-10T19:04:18 start mode=mock top_k=1 index=/tmp/pytest-of-root/pytest-62/test_phase6_gradio_mock_callba0/local_rct_index.jsonl question='In patients undergoing surgery, do nerve blocks reduce postoperative pain compared with usual analgesia?'
+2026-05-10T19:04:19 finish status=completed elapsed=0.50s run_id=29940e84-f990-48ef-be28-8a9b47dfade2 trace=/tmp/ebm_pipeline_trace_29940e84-f990-48ef-be28-8a9b47dfade2.json error=None
+2026-05-10T19:05:00 start mode=mock top_k=1 index=/tmp/pytest-of-root/pytest-63/test_phase6_gradio_mock_callba0/local_rct_index.jsonl question='In patients undergoing surgery, do nerve blocks reduce postoperative pain compared with usual analgesia?'
+2026-05-10T19:05:00 finish status=completed elapsed=0.50s run_id=0d085528-6cb0-41c5-b7dc-9b85cbdd4fe5 trace=/tmp/ebm_pipeline_trace_0d085528-6cb0-41c5-b7dc-9b85cbdd4fe5.json error=None
+2026-05-10T19:05:34 start mode=mock top_k=1 index=/tmp/gradio_smoke_index.jsonl question='In patients undergoing surgery, do nerve blocks reduce postoperative pain compared with usual analgesia?'
+2026-05-10T19:05:34 finish status=completed elapsed=0.50s run_id=73625364-1290-4ed6-8a0c-bc4b4d8251dc trace=/tmp/ebm_pipeline_trace_73625364-1290-4ed6-8a0c-bc4b4d8251dc.json error=None
+2026-05-10T19:06:25 start mode=mock top_k=1 index=/tmp/pytest-of-root/pytest-64/test_phase6_gradio_mock_callba0/local_rct_index.jsonl question='In patients undergoing surgery, do nerve blocks reduce postoperative pain compared with usual analgesia?'
+2026-05-10T19:06:26 finish status=completed elapsed=0.50s run_id=dcf16ee8-9a61-488e-90c8-104c8db61aee trace=/tmp/ebm_pipeline_trace_dcf16ee8-9a61-488e-90c8-104c8db61aee.json error=None
+2026-05-10T19:07:25 start mode=real LLM top_k=10 index=/F00120250029/lixiang_share/liuhongtao_share/EBM-Online/data/data_for_test/data_demo_1000/index/local_rct_index.jsonl question='In patients undergoing surgery, do nerve blocks reduce postoperative pain compared with usual analgesia?'
+2026-05-10T19:07:25 update run_id=5c1b9316-301c-46d9-a805-793a07eba527 status=pending
+2026-05-10T19:07:26 update run_id=5c1b9316-301c-46d9-a805-793a07eba527 status=running question_expansion=running
+2026-05-10T19:08:06 update run_id=5c1b9316-301c-46d9-a805-793a07eba527 status=running question_expansion=completed question_pi_extraction=running
+2026-05-10T19:08:07 update run_id=5c1b9316-301c-46d9-a805-793a07eba527 status=running question_expansion=completed question_pi_extraction=completed query_generation=running
+2026-05-10T19:08:18 update run_id=5c1b9316-301c-46d9-a805-793a07eba527 status=running question_expansion=completed question_pi_extraction=completed query_generation=completed local_search=running
+2026-05-10T19:08:19 update run_id=5c1b9316-301c-46d9-a805-793a07eba527 status=running question_expansion=completed question_pi_extraction=completed query_generation=completed local_search=completed module3_analysis=running
+2026-05-10T19:19:25 finish status=completed elapsed=719.88s run_id=5c1b9316-301c-46d9-a805-793a07eba527 trace=/tmp/ebm_pipeline_trace_5c1b9316-301c-46d9-a805-793a07eba527.json error=None
+2026-05-11T04:55:55 start mode=real LLM top_k=6 index=/F00120250029/lixiang_share/liuhongtao_share/EBM-Online/data/data_for_test/data_demo_1000/index/local_rct_index.jsonl question='In orthopedic surgery patients, does tranexamic acid reduce transfusion compared with no tranexamic acid?'
+2026-05-11T04:55:55 update run_id=5a76e289-8622-4711-9acf-a3e07b4c62f4 status=pending
+2026-05-11T04:55:56 update run_id=5a76e289-8622-4711-9acf-a3e07b4c62f4 status=running question_expansion=running
+2026-05-11T04:56:18 update run_id=5a76e289-8622-4711-9acf-a3e07b4c62f4 status=running question_expansion=completed question_pi_extraction=running
+2026-05-11T04:56:19 update run_id=5a76e289-8622-4711-9acf-a3e07b4c62f4 status=running question_expansion=completed question_pi_extraction=completed query_generation=running
+2026-05-11T04:56:22 update run_id=5a76e289-8622-4711-9acf-a3e07b4c62f4 status=running question_expansion=completed question_pi_extraction=completed query_generation=completed local_search=running
+2026-05-11T04:56:23 update run_id=5a76e289-8622-4711-9acf-a3e07b4c62f4 status=running question_expansion=completed question_pi_extraction=completed query_generation=completed local_search=completed module3_analysis=running
+2026-05-11T05:02:26 finish status=completed elapsed=391.39s run_id=5a76e289-8622-4711-9acf-a3e07b4c62f4 trace=/tmp/ebm_pipeline_trace_5a76e289-8622-4711-9acf-a3e07b4c62f4.json error=None
+2026-05-11T05:02:26 start mode=real LLM top_k=5 index=/F00120250029/lixiang_share/liuhongtao_share/EBM-Online/data/data_for_test/data_demo_1000/index/local_rct_index.jsonl question='In patients with COVID-19 or respiratory disease, does rehabilitation improve functional outcomes?'
+2026-05-11T05:02:26 update run_id=bfe1defb-e7eb-4a83-b362-f1d8ca73f7cc status=pending
+2026-05-11T05:02:27 update run_id=bfe1defb-e7eb-4a83-b362-f1d8ca73f7cc status=running question_expansion=running
+2026-05-11T05:05:17 update run_id=bfe1defb-e7eb-4a83-b362-f1d8ca73f7cc status=running question_expansion=completed question_pi_extraction=running
+2026-05-11T05:05:37 update run_id=bfe1defb-e7eb-4a83-b362-f1d8ca73f7cc status=running question_expansion=completed question_pi_extraction=completed query_generation=running
+2026-05-11T05:05:43 update run_id=bfe1defb-e7eb-4a83-b362-f1d8ca73f7cc status=running question_expansion=completed question_pi_extraction=completed query_generation=completed local_search=running
+2026-05-11T05:05:44 update run_id=bfe1defb-e7eb-4a83-b362-f1d8ca73f7cc status=running question_expansion=completed question_pi_extraction=completed query_generation=completed local_search=completed module3_analysis=running
+2026-05-11T05:12:44 finish status=completed elapsed=617.80s run_id=bfe1defb-e7eb-4a83-b362-f1d8ca73f7cc trace=/tmp/ebm_pipeline_trace_bfe1defb-e7eb-4a83-b362-f1d8ca73f7cc.json error=None
+2026-05-11T05:27:58 start mode=real LLM top_k=5 index=/F00120250029/lixiang_share/liuhongtao_share/EBM-Online/data/data_for_test/data_demo_1000/index/local_rct_index.jsonl question='In patients with COVID-19 or respiratory disease, does rehabilitation improve functional outcomes?'
+2026-05-11T05:27:58 update run_id=04f1a76a-437a-49bd-8653-08e152601eab status=pending
+2026-05-11T05:27:58 update run_id=04f1a76a-437a-49bd-8653-08e152601eab status=running question_expansion=running
+2026-05-11T05:29:22 update run_id=04f1a76a-437a-49bd-8653-08e152601eab status=running question_expansion=completed question_pi_extraction=running
+2026-05-11T05:29:23 update run_id=04f1a76a-437a-49bd-8653-08e152601eab status=running question_expansion=completed question_pi_extraction=completed query_generation=running
+2026-05-11T05:30:20 update run_id=04f1a76a-437a-49bd-8653-08e152601eab status=running question_expansion=completed question_pi_extraction=completed query_generation=completed local_search=running
+2026-05-11T05:30:21 update run_id=04f1a76a-437a-49bd-8653-08e152601eab status=running question_expansion=completed question_pi_extraction=completed query_generation=completed local_search=completed module3_analysis=running
+2026-05-11T05:41:24 update run_id=04f1a76a-437a-49bd-8653-08e152601eab status=running question_expansion=completed question_pi_extraction=completed query_generation=completed local_search=completed module3_analysis=completed
+2026-05-11T05:41:25 finish status=completed elapsed=807.05s run_id=04f1a76a-437a-49bd-8653-08e152601eab trace=/tmp/ebm_pipeline_trace_04f1a76a-437a-49bd-8653-08e152601eab.json error=None
+2026-05-11T05:55:54 start mode=real LLM top_k=5 index=/F00120250029/lixiang_share/liuhongtao_share/EBM-Online/data/data_for_test/data_demo_1000/index/local_rct_index.jsonl question='In patients undergoing surgery, do nerve blocks reduce postoperative pain compared with usual analgesia?'
+2026-05-11T05:55:54 update run_id=21b8519c-c3ff-4558-a7f4-8184a2ccac46 status=pending
+2026-05-11T05:55:54 update run_id=21b8519c-c3ff-4558-a7f4-8184a2ccac46 status=running question_expansion=running
+2026-05-11T05:58:56 finish status=failed elapsed=182.21s run_id=21b8519c-c3ff-4558-a7f4-8184a2ccac46 trace=/tmp/ebm_pipeline_trace_21b8519c-c3ff-4558-a7f4-8184a2ccac46.json error='Request timed out.'
+2026-05-11T06:06:28 start mode=real LLM top_k=10 index=/F00120250029/lixiang_share/liuhongtao_share/EBM-Online/data/data_for_test/data_demo_1000/index/local_rct_index.jsonl question='In orthopedic surgery patients, does tranexamic acid reduce transfusion compared with no tranexamic acid?'
+2026-05-11T06:06:28 update run_id=dab2db57-9350-4703-a94d-485b0f182c1b status=pending
+2026-05-11T06:06:28 update run_id=dab2db57-9350-4703-a94d-485b0f182c1b status=running question_expansion=running
+2026-05-11T06:06:43 update run_id=dab2db57-9350-4703-a94d-485b0f182c1b status=running question_expansion=completed question_pi_extraction=running
+2026-05-11T06:06:44 update run_id=dab2db57-9350-4703-a94d-485b0f182c1b status=running question_expansion=completed question_pi_extraction=completed query_generation=running
+2026-05-11T06:06:49 update run_id=dab2db57-9350-4703-a94d-485b0f182c1b status=running question_expansion=completed question_pi_extraction=completed query_generation=completed local_search=running
+2026-05-11T06:06:50 update run_id=dab2db57-9350-4703-a94d-485b0f182c1b status=running question_expansion=completed question_pi_extraction=completed query_generation=completed local_search=completed module3_analysis=running
+2026-05-11T06:13:13 finish status=completed elapsed=404.99s run_id=dab2db57-9350-4703-a94d-485b0f182c1b trace=/tmp/ebm_pipeline_trace_dab2db57-9350-4703-a94d-485b0f182c1b.json error=None
+2026-05-11T06:14:56 start mode=real LLM top_k=5 index=/F00120250029/lixiang_share/liuhongtao_share/EBM-Online/data/data_for_test/data_demo_1000/index/local_rct_index.jsonl question='In patients undergoing surgery, do nerve blocks reduce postoperative pain compared with usual analgesia?'
+2026-05-11T06:14:56 update run_id=a0c0c16c-cec9-4e87-b6b1-3987167223c7 status=pending
+2026-05-11T06:14:56 update run_id=a0c0c16c-cec9-4e87-b6b1-3987167223c7 status=running question_expansion=running
+2026-05-11T06:17:04 update run_id=a0c0c16c-cec9-4e87-b6b1-3987167223c7 status=running question_expansion=completed question_pi_extraction=running
+2026-05-11T06:17:11 update run_id=a0c0c16c-cec9-4e87-b6b1-3987167223c7 status=running question_expansion=completed question_pi_extraction=completed query_generation=running
+2026-05-11T06:17:38 update run_id=a0c0c16c-cec9-4e87-b6b1-3987167223c7 status=running question_expansion=completed question_pi_extraction=completed query_generation=completed local_search=running
+2026-05-11T06:17:39 update run_id=a0c0c16c-cec9-4e87-b6b1-3987167223c7 status=running question_expansion=completed question_pi_extraction=completed query_generation=completed local_search=completed module3_analysis=running
+2026-05-11T06:25:25 finish status=completed elapsed=628.85s run_id=a0c0c16c-cec9-4e87-b6b1-3987167223c7 trace=/tmp/ebm_pipeline_trace_a0c0c16c-cec9-4e87-b6b1-3987167223c7.json error=None
+2026-05-11T06:43:16 start mode=real LLM top_k=5 index=/F00120250029/lixiang_share/liuhongtao_share/EBM-Online/data/data_for_test/data_demo_1000/index/local_rct_index.jsonl question='In patients with diabetes, does exercise training improve glycemic control compared with usual care?'
+2026-05-11T06:43:16 update run_id=d5b2c17d-21c5-49e2-a500-c622626b2cdc status=pending
+2026-05-11T06:43:16 update run_id=d5b2c17d-21c5-49e2-a500-c622626b2cdc status=running question_expansion=running
+2026-05-11T06:44:22 update run_id=d5b2c17d-21c5-49e2-a500-c622626b2cdc status=running question_expansion=completed question_pi_extraction=running
+2026-05-11T06:44:37 update run_id=d5b2c17d-21c5-49e2-a500-c622626b2cdc status=running question_expansion=completed question_pi_extraction=completed query_generation=running
+2026-05-11T06:47:19 update run_id=d5b2c17d-21c5-49e2-a500-c622626b2cdc status=running question_expansion=completed question_pi_extraction=completed query_generation=completed local_search=running
+2026-05-11T06:47:20 update run_id=d5b2c17d-21c5-49e2-a500-c622626b2cdc status=running question_expansion=completed question_pi_extraction=completed query_generation=completed local_search=completed module3_analysis=running
+2026-05-11T06:54:52 finish status=completed elapsed=696.87s run_id=d5b2c17d-21c5-49e2-a500-c622626b2cdc trace=/tmp/ebm_pipeline_trace_d5b2c17d-21c5-49e2-a500-c622626b2cdc.json error=None
+2026-05-12T13:14:52 start mode=mock top_k=1 index=/tmp/pytest-of-root/pytest-72/test_phase6_gradio_mock_callba0/local_rct_index.jsonl question='In patients undergoing surgery, do nerve blocks reduce postoperative pain compared with usual analgesia?'
+2026-05-12T13:14:53 finish status=completed elapsed=0.26s run_id=c1846b81-83b3-4bce-9a44-6b45aa597954 trace=/tmp/ebm_pipeline_trace_c1846b81-83b3-4bce-9a44-6b45aa597954.json error=None
+2026-05-12T13:52:18 start mode=mock top_k=1 index=/tmp/pytest-of-root/pytest-73/test_phase6_gradio_mock_callba0/local_rct_index.jsonl question='In patients undergoing surgery, do nerve blocks reduce postoperative pain compared with usual analgesia?'
+2026-05-12T13:52:18 finish status=completed elapsed=0.06s run_id=ffbf6a27-8a16-46e0-9d5a-5c1b38495608 trace=/tmp/ebm_pipeline_trace_ffbf6a27-8a16-46e0-9d5a-5c1b38495608.json error=None

@@ -81,7 +81,7 @@ graph TD
 | 关系存储 | SQLite (初期) → PostgreSQL (扩展) | 存储 pipeline 运行状态、中间结果、审计日志 |
 | 文献全文 | 本地文件系统 | PMC XML / PubMed JSON 直接存储 |
 | 统计引擎 | 自研 Python 模块 (numpy + scipy) | 实现 IV/MH/Peto 方法，避免 rpy2 依赖 |
-| 配置管理 | Pydantic Settings + .env | 类型安全的配置，环境变量覆盖 |
+| 配置管理 | Pydantic Settings + 根目录 `.env` | 类型安全的配置，环境变量覆盖 |
 
 ## 4 模块划分与职责
 
@@ -421,7 +421,7 @@ def calculate_cost(model: str, prompt_tokens: int, completion_tokens: int) -> fl
 ebm-online/
 ├── config/
 │   ├── settings.py          # Pydantic Settings
-│   └── .env.example         # 环境变量模板
+│   └── settings.py          # 配置代码；环境变量放根目录 .env
 ├── src/
 │   ├── orchestrator/
 │   │   ├── pipeline.py      # Pipeline DAG 定义和调度
@@ -519,8 +519,8 @@ ebm-online/
 ### 初期（单机研究工具）
 ```
 docker-compose up  →  ES(9200) + Redis(6379)
-uvicorn src.api.main:app  →  Backend(8000)
-celery -A src.orchestrator.tasks worker  →  Worker
+uvicorn ebm_backend.online_pipeline.interfaces.api.main:app  →  Backend(8000)
+celery -A ebm_backend.online_pipeline.interfaces.api.tasks worker  →  Worker
 streamlit run frontend/app.py  →  Frontend(8501)
 ```
 

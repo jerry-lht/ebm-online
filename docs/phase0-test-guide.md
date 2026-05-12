@@ -27,8 +27,7 @@ python3 -m pip install --target=.venv/lib/python3.10/site-packages pip
 ### 创建 .env 文件
 
 ```bash
-cp config/.env.example .env
-# 编辑 .env，将 sk-your-key-here 替换为真实的 OPENAI_API_KEY
+# 编辑根目录 .env，将 sk-your-key-here 替换为真实的 OPENAI_API_KEY
 # 不创建 .env 会导致 "Field required" 报错（openai_api_key 为必填）
 ```
 
@@ -182,7 +181,7 @@ curl -s http://localhost:9200
 ### 步骤
 
 ```bash
-python3 -c "from config.settings import settings; print(settings.model_dump_json(indent=2))"
+python3 -c "from ebm_backend.shared.config.settings import settings; print(settings.model_dump_json(indent=2))"
 ```
 
 ### 期望结果
@@ -208,7 +207,7 @@ python3 -c "from config.settings import settings; print(settings.model_dump_json
 ### 步骤
 
 ```bash
-python3 -c "from src.storage.db import init_db; from config.settings import settings; init_db(settings.database_url); print('OK')"
+python3 -c "from ebm_backend.shared.persistence.db import init_db; from ebm_backend.shared.config.settings import settings; init_db(settings.database_url); print('OK')"
 ```
 
 ### 验证表已创建
@@ -243,38 +242,38 @@ PGPASSWORD=ebm123 psql -h localhost -U ebm -d ebm_online -c "\d llm_usage"
 
 ```bash
 python3 -c "
-import src.orchestrator.pipeline
-import src.orchestrator.state
-import src.orchestrator.tasks
-import src.modules.index.retrieval
-import src.modules.index.classification
-import src.modules.index.extraction
-import src.modules.index.indexing
-import src.modules.question.expansion
-import src.modules.question.query_gen
-import src.modules.question.search
-import src.modules.analysis.screening
-import src.modules.analysis.planning
-import src.modules.analysis.extraction
-import src.modules.analysis.rob
-import src.modules.analysis.aggregation
-import src.modules.analysis.grade
-import src.llm.gateway
-import src.llm.tracker
-import src.llm.cache
-import src.llm.pricing
-import src.stats.engine
-import src.stats.effects
-import src.stats.pooling
-import src.stats.heterogeneity
-import src.stats.derivation
-import src.stats.corrections
-import src.storage.db
-import src.storage.models
-import src.storage.es_client
-import src.api.main
-import src.api.websocket
-import src.api.routes
+import ebm_backend.online_pipeline.application.run_pipeline
+import ebm_backend.online_pipeline.infrastructure.pipeline_repository
+import ebm_backend.online_pipeline.interfaces.api.tasks
+import ebm_backend.index_construction.application.retrieval
+import ebm_backend.index_construction.application.classification
+import ebm_backend.index_construction.application.extraction
+import ebm_backend.index_construction.application.indexing
+import ebm_backend.online_pipeline.application.question_study.expansion
+import ebm_backend.online_pipeline.application.question_study.query_gen
+import ebm_backend.online_pipeline.application.question_study.search
+import ebm_backend.online_pipeline.application.evidence_analysis.screening
+import ebm_backend.online_pipeline.application.evidence_analysis.planning
+import ebm_backend.online_pipeline.application.evidence_analysis.extraction
+import ebm_backend.online_pipeline.application.evidence_analysis.rob
+import ebm_backend.online_pipeline.application.evidence_analysis.aggregation
+import ebm_backend.online_pipeline.application.evidence_analysis.grade
+import ebm_backend.shared.llm.gateway
+import ebm_backend.shared.llm.tracker
+import ebm_backend.shared.llm.cache
+import ebm_backend.shared.llm.pricing
+import ebm_backend.shared.statistics.engine
+import ebm_backend.shared.statistics.effects
+import ebm_backend.shared.statistics.pooling
+import ebm_backend.shared.statistics.heterogeneity
+import ebm_backend.shared.statistics.derivation
+import ebm_backend.shared.statistics.corrections
+import ebm_backend.shared.persistence.db
+import ebm_backend.shared.persistence.models
+import ebm_backend.shared.persistence.es_client
+import ebm_backend.online_pipeline.interfaces.api.main
+import ebm_backend.online_pipeline.interfaces.api.websocket
+import ebm_backend.online_pipeline.interfaces.api
 print('All imports OK')
 "
 ```

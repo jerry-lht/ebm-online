@@ -38,8 +38,8 @@ flowchart TD
 ```
 
 共享基础设施包含两个核心组件：
-- **LLM Gateway**：统一的 LLM 调用接口，内嵌 Cache、Rate Limiting、Retry、Token Tracking
-- **Stats Engine**：自研 meta-analysis 统计库，供 Module 3 Aggregation 使用
+- **LLM Gateway**：统一的 LLM 调用接口，Phase 1 已实现 Cache、Token Tracking、OpenAI 调用链；Rate Limiting 与 Retry 后续按需补充
+- **Stats Engine**：自研 meta-analysis 统计库，Phase 1 已实现基础统计能力，供 Module 3 Aggregation 使用
 
 ---
 
@@ -47,7 +47,7 @@ flowchart TD
 
 ### 2.1 职责
 
-封装所有 LLM 调用，提供统一接口。调用方只需指定 task_type + inputs，Gateway 处理缓存、重试、限流、计费。
+封装所有 LLM 调用，提供统一接口。调用方只需指定 task_type + inputs，Gateway 处理缓存、计费与结果解析；Rate Limiting 和 Retry 后续按需补充。
 
 ### 2.2 接口定义
 
@@ -99,7 +99,6 @@ flowchart TD
 
     HIT["Return cached result<br/>(cost=0, latency=0)"]:::hit
 
-    RATE["Rate Limiter Check<br/>(wait if needed)"]:::logic
     CALL["OpenAI SDK call<br/>(gpt-5.2, structured output)"]:::miss
     PARSE["Parse & Validate JSON"]:::logic
     SAVE["Save to Cache"]:::logic
@@ -108,7 +107,7 @@ flowchart TD
 
     REQ --> KEY --> CHECK
     CHECK -->|Yes| HIT
-    CHECK -->|No| RATE --> CALL --> PARSE --> SAVE --> TRACK_CALL --> RET
+    CHECK -->|No| CALL --> PARSE --> SAVE --> TRACK_CALL --> RET
 ```
 
 ---
@@ -117,11 +116,12 @@ flowchart TD
 
 ### 3.1 设计思路
 
-**什么需要缓存：** Module 3 在线 pipeline 中，跨 run 可能重复的 LLM 调用。
+**什么需要缓存：** Phase 1 仅覆盖 `screening / extraction / rob` 三类任务的重复 LLM 调用。
 
 **什么不需要缓存：**
 - Module 1（PI Extraction、RCT Classification）— 离线批处理，结果直接持久化到 SQLite，不存在"重复调用"的场景
 - Question Expansion、Analysis Planning、GRADE — 依赖上下文组合，每次结果不同
+- Module 2 / Module 3 之外的其他任务，Phase 1 不纳入缓存范围
 
 **缓存命中的典型场景：**
 
@@ -267,7 +267,7 @@ flowchart TD
 class CacheManager:
     def invalidate_by_study(self, study_id: str):
         """清除某篇文献的所有缓存（用户手动修改后调用）"""
-        DELETE FROM llm_cache WHERE cache_key LIKE '%{study_id}%'
+        DELETE FROM llm_cache WHERE study_id = ?
 
     def invalidate_by_prompt_version(self, task_type: str, old_version: str):
         """清除某个 prompt 版本的所有缓存（prompt 升级后调用）"""
@@ -326,6 +326,7 @@ CREATE TABLE llm_usage (
     run_id TEXT,                    -- 所属 pipeline run（在线模块）
     module TEXT NOT NULL,           -- "module_1_pi_extraction", "module_3_screening" 等
     task_name TEXT NOT NULL,        -- "extraction_study_0001_analysis_001"
+    cache_key TEXT,                 -- 用于按 run 关联并失效缓存
     model TEXT NOT NULL DEFAULT 'gpt-5.2',
     prompt_tokens INTEGER NOT NULL,
     completion_tokens INTEGER NOT NULL,
@@ -339,6 +340,7 @@ CREATE TABLE llm_usage (
 
 CREATE INDEX idx_usage_run ON llm_usage(run_id);
 CREATE INDEX idx_usage_module ON llm_usage(module);
+CREATE INDEX idx_usage_cache_key ON llm_usage(cache_key);
 ```
 
 ### 4.2 费用计算
@@ -386,6 +388,8 @@ class UsageTracker:
 ---
 
 ## 5 Rate Limiter & Retry
+
+> Phase 1 不实现，后续按需评估是否补充。
 
 ### 5.1 Rate Limiter
 
@@ -638,8 +642,8 @@ src/
 │   ├── gateway.py          # LLMGateway 主类
 │   ├── cache.py            # Cache Layer
 │   ├── tracker.py          # Token & Cost Tracker
-│   ├── rate_limiter.py     # Rate Limiter
-│   ├── retry.py            # Retry Logic
+│   ├── rate_limiter.py     # Rate Limiter（后续按需）
+│   ├── retry.py            # Retry Logic（后续按需）
 │   ├── pricing.py          # 模型定价配置
 │   ├── prompts/            # Prompt 模板目录
 │   │   ├── pi_extraction.txt
@@ -664,6 +668,6 @@ src/
 │   ├── derivation.py       # 统计转换 (CI→SD 等)
 │   └── corrections.py     # Zero-cell correction 等
 └── storage/
-    ├── db.py               # SQLite 连接和 migration
+    ├── db.py               # SQLite/PostgreSQL 连接和 migration
     └── models.py           # 表结构定义
 ```

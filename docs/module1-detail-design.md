@@ -46,6 +46,13 @@ flowchart TD
 
 **当前数据规模（初期）：** 26,163 篇 (PubMed 2023~2026)，均为 primary RCT。后续可扩展至 PMC 全量 76,135 篇。
 
+**当前阶段目标：** 先交付一个可运行的“简化版 Module 1”闭环：`data_demo_with_mesh/` 100 篇样本 -> PI 抽取 -> PI 标准化/MeSH 映射 -> 本地轻量索引 -> 检索测试。该简化版闭环已完成；真实 Batch API 和真实 Elasticsearch 暂时不作为当前交付阻塞项。
+
+**实现状态：**
+- 已完成：Step 1 / Step 2 的数据接入与分类结果承接、`data_demo/` 100 篇样本集、`data_demo_with_mesh/` PI-first derived 输出、本地 JSONL 索引、`index-derived` 索引重建入口、`search-local` 自定义 query 检索入口、单篇 demo runner、真实 Chat Completions PI 抽取入口、PI 抽取 prompt/schema、PI 清洗/去重/拆分、NLM MeSH Lookup 在线查询、短语候选与本地兜底 MeSH 映射、同义词扩展、ES mapping 与 IndexDocument 组装、PostgreSQL 状态表、Module 1 Batch runner、`module1_batches` / `module1_studies` 状态回写、batch 断点恢复与跳过已完成 study 的逻辑、相关单元测试
+- 当前状态：简化版 Module 1 闭环已完成；100 个 derived 可全部重建到本地索引，固定 5 条 query 检索验证 5/5 通过
+- 后续扩展：提升 LLM PI 抽取质量、真实 Batch API 网络验收、失败项自动重提、真实 ES bulk 写入、全量增量更新
+
 ---
 
 ## 2 Step 1: OA RCT Retrieval（已完成）
@@ -185,7 +192,13 @@ flowchart TD
 - **temperature = 0**：确保抽取稳定性
 - **只用 title + abstract**：不使用全文。原因：(1) 批量处理 10 万篇，全文 token 成本过高；(2) abstract 中 P 和 I 的描述通常足够用于检索匹配；(3) EBM-NLP benchmark 也是基于 abstract
 - **可缓存**：cache key = `study_id + prompt_version`（同一文献的 PI 不会变）
-- **批量处理**：使用 OpenAI Batch API 降低成本（50% 折扣）
+- **当前执行策略**：简化版 Module 1 以逐篇处理为主，优先保证 100 篇样本的可运行闭环；Batch API 保留为后续扩展路径
+
+### 4.5.1 当前实现状态
+
+- 已完成：本地规则版 PI 抽取校验、真实单篇 Chat Completions demo smoke 入口、span 合法性检查、严格 JSON schema、prompt 文件、batch request 组装、Batch API 的请求创建/轮询/输出文件解析、`Module1BatchRunner` 闭环、`module1_studies` / `module1_batches` 回写、active batch 恢复、completed study 默认跳过
+- 当前简化路径：100 篇样本优先走逐篇 PI 抽取，避免真实 Batch API 集成成为当前阻塞
+- 后续扩展：真实 Batch API 网络验收、失败重提策略与批次级别告警
 
 ### 4.6 错误处理
 
@@ -196,6 +209,25 @@ flowchart TD
 | span 无法在原文中定位 | 保留抽取结果但标记 `span_mismatch` |
 | LLM 超时 | 重试 2 次（指数退避） |
 | 输出包含非原文内容 | 标记 `hallucination_suspected`，人工抽检 |
+
+### 4.7 Batch 扩展入口
+
+- 代码入口：`ebm_backend.index_construction.application.run_module1_batch_sync`
+- 默认语义：读取 `data_demo/manifest/files.jsonl` 中前 100 篇 `primary_rct`
+- Batch endpoint：`/v1/responses`
+- `custom_id`：`{study_id}:pi_extraction`
+- 回写规则：
+  - P/I 非空且 span 可定位：`module1_studies.extraction_status = completed`
+  - API item error、JSON 解析失败、P/I 为空、span mismatch：`module1_studies.extraction_status = failed`
+  - 已有 active batch：优先轮询并回收，不重复提交
+  - 已完成 study：默认跳过，只有 `force=True` 才重新提交
+
+### 4.8 简化版当前入口
+
+- 数据集：`data_demo_with_mesh/`
+- 执行方式：逐篇处理 100 篇 `primary_rct`
+- 输出：PI 抽取结果、标准化/MeSH 映射结果、本地可检索索引、固定 query 检索测试
+- 目标：先验证 Module 1 的完整业务闭环，再决定是否切回真实 Batch API 和真实 Elasticsearch
 
 ---
 
@@ -334,6 +366,12 @@ indexable_text = original_cleaned + " " + mesh_preferred_terms + " " + entry_ter
 - **保留原始 span**：标准化后仍保留原始文本，支持审计和 fallback
 - **批量处理 MeSH API**：对 10 万篇文献的 concept 做去重后再查询 MeSH，减少 API 调用次数
 
+### 5.7 当前实现状态
+
+- 已完成：清洗、span 去重、概念拆解、短语候选生成、缩写扩展、NLM MeSH Lookup API 在线查询、兜底 MeSH 字典、MeSH term 去重、indexable_text 生成
+- 部分完成：entry terms 抽取、批量 concept 去重缓存、复杂医学短语拆分质量
+- 未完成：更完整的失败告警、批量缓存持久化
+
 ### 5.6 错误处理
 
 | 错误类型 | 处理方式 |
@@ -349,7 +387,7 @@ indexable_text = original_cleaned + " " + mesh_preferred_terms + " " + entry_ter
 
 ### 6.1 职责
 
-将标准化后的 PI 数据和文献 metadata 写入 Elasticsearch，构建 RCT Retrieval Index，供 Module 2 在线检索使用。
+将标准化后的 PI 数据和文献 metadata 写入索引，构建 RCT Retrieval Index，供 Module 2 在线检索使用。当前简化版优先使用本地轻量索引；真实 Elasticsearch 作为后续扩展。
 
 ### 6.2 ES Index Mapping
 
@@ -427,6 +465,12 @@ indexable_text = original_cleaned + " " + mesh_preferred_terms + " " + entry_ter
 | 检索可用性 | 执行 5 条已知 query | 每条 query 返回 > 0 结果 |
 | 响应时间 | 执行 10 条 query 取平均 | < 100ms |
 
+### 6.8 当前实现状态
+
+- 已完成：索引字段设计、IndexDocument 字段、PI-first demo export 中的 `document` 结构
+- 简化版已完成：本地轻量索引和检索测试已覆盖 100 篇 `data_demo_with_mesh` 样本，可通过 `index-derived` 重建索引并通过 `search-local` 查看检索输出
+- 后续扩展：真实 ES bulk 写入、索引验证脚本、重跑与增量更新策略
+
 ### 6.6 部署方式
 
 - Docker 单节点（`docker-compose.yml` 中定义）
@@ -469,10 +513,10 @@ flowchart LR
 
 | Step | 处理单元 | 并发度 | 预估耗时（2.6万篇） |
 |------|----------|--------|---------------------|
-| Step 3 PI Extraction | per-study LLM 调用 | Batch API（异步） | ~1-2 小时（Batch API） |
+| Step 3 PI Extraction | per-study LLM 调用 | 逐篇执行（当前） | 取决于单篇 API 延迟 |
 | Step 4 Normalization | per-study 规则处理 | 多线程 | ~10 分钟 |
 | Step 4 MeSH Mapping | per-concept API 调用 | 并发 10 | ~30 分钟 |
-| Step 5 Index Building | bulk write 1000/batch | 单线程 | ~5 分钟 |
+| Step 5 Index Building | 本地轻量索引构建 | 单线程 | 分钟级 |
 
 ### 7.3 断点续跑
 
@@ -485,7 +529,7 @@ flowchart LR
 | Step | 调用次数 | 说明 |
 |------|----------|------|
 | Step 2 Classification | ~26,000 | 已完成 |
-| Step 3 PI Extraction | ~26,000 | 使用 Batch API（50% 折扣） |
+| Step 3 PI Extraction | ~26,000 | 当前简化版只验证 100 篇；全量时再评估 Batch API |
 | **总计** | **~26,000** | 一次性成本，后续增量更新仅处理新增文献 |
 
 ---
