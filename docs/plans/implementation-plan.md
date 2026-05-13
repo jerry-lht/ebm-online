@@ -27,7 +27,7 @@
 
 ### 任务清单
 
-1. **创建项目目录结构**（按 architecture-design.md §8 的定义）
+1. **创建项目目录结构**（按 architecture/architecture-design.md §8 的定义）
    ```
    ebm-online/
    ├── config/
@@ -48,7 +48,6 @@
    │   └── api/
    ├── frontend/
    ├── tests/
-   ├── docker-compose.yml
    └── requirements.txt
    ```
 
@@ -57,26 +56,20 @@
    - 环境变量：`OPENAI_API_KEY`, `OPENAI_BASE_URL`, `ES_HOST`, `REDIS_URL`, `DATABASE_URL`
    - 模型配置：model name, temperature, pricing
 
-3. **Docker Compose** (`docker-compose.yml`)
-   - Elasticsearch 单节点 (port 9200)
-   - Redis (port 6379)
-   - Volume 持久化
-
-4. **数据库初始化** (`src/storage/db.py`, `src/storage/models.py`)
+3. **数据库初始化** (`src/storage/db.py`, `src/storage/models.py`)
    - SQLite 连接管理
    - 表结构：`pipeline_runs`, `llm_cache`, `llm_usage`
    - Migration 脚本
 
-5. **requirements.txt**
-   - fastapi, uvicorn, celery, redis
+4. **requirements.txt**
+   - fastapi, uvicorn
    - openai, pydantic, pydantic-settings
    - elasticsearch, httpx
    - numpy, scipy
-   - streamlit
+   - gradio
    - pytest
 
 ### 验证方式
-- `docker-compose up` 能启动 ES + Redis
 - `python -c "from ebm_backend.shared.config.settings import settings; print(settings)"` 正常输出
 - SQLite 表创建成功
 
@@ -89,7 +82,7 @@
 ### 1.1 LLM Gateway (`src/llm/gateway.py`)
 
 **任务：**
-1. 实现 `LLMGateway` 类，接口如 shared-infrastructure-design.md §2.2
+1. 实现 `LLMGateway` 类，接口如 architecture/shared-infrastructure-design.md §2.2
 2. 使用 OpenAI SDK，支持 structured output (response_format)
 3. 内部流程：Cache check → API call → Parse → Cache save → Track usage
 
@@ -99,7 +92,7 @@
 1. 实现 `CacheManager` 类
 2. Cache key 生成：`hash(task_type + inputs + prompt_version)`
 3. 只缓存 screening / extraction / rob 三种任务
-4. SQLite 存储，表结构如 shared-infrastructure-design.md §3.5
+4. SQLite 存储，表结构如 architecture/shared-infrastructure-design.md §3.5
 5. 失效 API：按 study / prompt_version / run 失效
 
 ### 1.3 Rate Limiter & Retry（暂不实现）
@@ -179,7 +172,7 @@
 - 使用固定 query 与自定义 query 检查检索和检索后输出
 
 **测试文档：**
-- 详见 `docs/phase2-demo-test-guide.md`
+- 详见 `docs/guides/phase2-demo-test-guide.md`
 - 快速重建索引：
   ```bash
   python -m ebm_backend.index_construction.interfaces.cli index-derived --data-root data/data_for_test/data_demo_with_mesh
@@ -257,15 +250,15 @@
 
 **目标：** 实现从临床问题到候选文献的完整流程。
 
-### 3.1 Question Expansion (`src/modules/question/expansion.py`)
+### 3.1 Question Expansion (`backend/src/ebm_backend/online_pipeline/application/question_study/expansion.py`)
 
 **任务：**
-1. Prompt 模板 (`src/llm/prompts/question_expansion.txt`)
-2. JSON schema (`src/llm/schemas/question_expansion.json`)
+1. Prompt 模板 (`backend/src/ebm_backend/shared/llm/prompts/question_expansion.txt`)
+2. JSON schema (`backend/src/ebm_backend/shared/llm/schemas/question_expansion.json`)
 3. 输出：PICO + eligibility + preliminary analysis plan + confidence 标注
 4. 错误处理：JSON 解析失败重试、非医学问题检测
 
-### 3.2 Query Generation (`src/modules/question/query_gen.py`)
+### 3.2 Query Generation (`backend/src/ebm_backend/online_pipeline/application/question_study/query_gen.py`)
 
 **任务：**
 1. MeSH API 调用封装
@@ -273,7 +266,7 @@
 3. Boolean 组装：`(P_block) AND (I_block)`
 4. Fallback：MeSH 未命中时使用原始术语
 
-### 3.3 Index Search (`src/modules/question/search.py`)
+### 3.3 Index Search (`backend/src/ebm_backend/online_pipeline/application/question_study/search.py`)
 
 **任务：**
 1. ES Query DSL 构建（多字段加权）
@@ -295,7 +288,7 @@
 ### 当前实现状态
 
 **已完成简化版：**
-- `src/modules/analysis/models.py`：补齐 Module 3 数据结构，包括 screening、planning、evidence context、extraction row、RoB、aggregation、GRADE、runner 总结果
+- `backend/src/ebm_backend/online_pipeline/application/evidence_analysis/models.py`：补齐 Module 3 数据结构，包括 screening、planning、evidence context、extraction row、RoB、aggregation、GRADE、runner 总结果
 - `StudyScreener`：逐篇候选文献调用 `LLMGateway` structured output；失败时默认纳入并记录 warning
 - `AnalysisPlanner`：一次性调用 LLM 生成 `AnalysisSpec`；失败时基于 PICO / preliminary plan 生成 fallback
 - `EvidenceContextBuilder`：读取 `article_path` 对应 derived article JSON，抽取 abstract / methods / results / tables；无全文时使用 candidate title/abstract
@@ -316,45 +309,45 @@
 - CLI 目前只开放 `--mock`，避免手动测试误打真实 API
 
 **测试文档：**
-- 详见 `docs/module3-test-guide.md`
+- 详见 `docs/guides/module3-test-guide.md`
 
-### 4.1 Study Screening (`src/modules/analysis/screening.py`)
+### 4.1 Study Screening (`backend/src/ebm_backend/online_pipeline/application/evidence_analysis/screening.py`)
 
 **任务：**
-1. Prompt 模板 (`src/llm/prompts/study_screening.txt`)
-2. JSON schema (`src/llm/schemas/study_screening.json`)
+1. Prompt 模板 (`backend/src/ebm_backend/shared/llm/prompts/study_screening.txt`)
+2. JSON schema (`backend/src/ebm_backend/shared/llm/schemas/study_screening.json`)
 3. 逐篇调用，输出 include/exclude + rationale
 4. 简化版不缓存，统一 `cacheable=False`
 
-### 4.2 Analysis Planning (`src/modules/analysis/planning.py`)
+### 4.2 Analysis Planning (`backend/src/ebm_backend/online_pipeline/application/evidence_analysis/planning.py`)
 
 **任务：**
-1. Prompt 模板 (`src/llm/prompts/analysis_planning.txt`)
+1. Prompt 模板 (`backend/src/ebm_backend/shared/llm/prompts/analysis_planning.txt`)
 2. 输入：preliminary plan + included studies summaries
 3. 输出：confirmed_analysis_list（含 analysis_id 生成逻辑）
 4. Validation：outcome_type 与 effect_measure 一致性
 
-### 4.3 Data Extraction (`src/modules/analysis/extraction.py`)
+### 4.3 Data Extraction (`backend/src/ebm_backend/online_pipeline/application/evidence_analysis/extraction.py`)
 
 **任务：**
 1. Evidence Localization：从全文提取 abstract + results + tables
-2. Prompt 模板 (`src/llm/prompts/data_extraction.txt`)
-3. JSON schema (`src/llm/schemas/data_extraction.json`)
+2. Prompt 模板 (`backend/src/ebm_backend/shared/llm/prompts/data_extraction.txt`)
+3. JSON schema (`backend/src/ebm_backend/shared/llm/schemas/data_extraction.json`)
 4. Per-study × per-analysis 调用
 5. 数值合理性校验
 6. 简化版不缓存，统一 `cacheable=False`
 
-### 4.4 Risk of Bias (`src/modules/analysis/rob.py`)
+### 4.4 Risk of Bias (`backend/src/ebm_backend/online_pipeline/application/evidence_analysis/rob.py`)
 
 **任务：**
 1. Evidence Localization：从全文提取 abstract + methods
-2. Prompt 模板 (`src/llm/prompts/risk_of_bias.txt`)
-3. JSON schema (`src/llm/schemas/risk_of_bias.json`)
+2. Prompt 模板 (`backend/src/ebm_backend/shared/llm/prompts/risk_of_bias.txt`)
+3. JSON schema (`backend/src/ebm_backend/shared/llm/schemas/risk_of_bias.json`)
 4. 5 域 LLM 评估 + Selective reporting 系统填充
 5. overall_rob 规则计算
 6. 简化版不缓存，统一 `cacheable=False`
 
-### 4.5 Meta-analysis Aggregation (`src/modules/analysis/aggregation.py`)
+### 4.5 Meta-analysis Aggregation (`backend/src/ebm_backend/online_pipeline/application/evidence_analysis/aggregation.py`)
 
 **任务：**
 1. Row Alignment：comparison/outcome/direction/unit 一致性检查
@@ -364,11 +357,11 @@
 5. Heterogeneity 计算
 6. 输出 AggregationResult
 
-### 4.6 GRADE Assessment (`src/modules/analysis/grade.py`)
+### 4.6 GRADE Assessment (`backend/src/ebm_backend/online_pipeline/application/evidence_analysis/grade.py`)
 
 **任务：**
-1. Prompt 模板 (`src/llm/prompts/grade_assessment.txt`)
-2. JSON schema (`src/llm/schemas/grade_assessment.json`)
+1. Prompt 模板 (`backend/src/ebm_backend/shared/llm/prompts/grade_assessment.txt`)
+2. JSON schema (`backend/src/ebm_backend/shared/llm/schemas/grade_assessment.json`)
 3. 五域判断：
    - Risk of bias：规则（high-RoB 占比）
    - Inconsistency：规则（I², Q p-value）
@@ -404,12 +397,12 @@
 ### 当前实现状态
 
 **已完成 1000 篇索引真实简化闭环：**
-- `src/orchestrator/state.py`：进程内 `InMemoryPipelineStore`、`PipelineRunState`、`PipelineStepTrace`，状态支持 `pending -> running -> completed/failed`
-- `src/orchestrator/pipeline.py`：同步 `PipelineOrchestrator`，按 `question_expansion -> question_pi_extraction -> query_generation -> local_search -> module3_analysis` 执行
+- `backend/src/ebm_backend/online_pipeline/infrastructure/pipeline_repository.py`：进程内 `InMemoryPipelineStore`、`PipelineRunState`、`PipelineStepTrace`，状态支持 `pending -> running -> completed/failed`
+- `backend/src/ebm_backend/online_pipeline/application/run_pipeline.py`：同步 `PipelineOrchestrator`，按 `question_expansion -> question_pi_extraction -> query_generation -> local_search -> module3_analysis` 执行
 - 默认 `use_mock=false`：真实 LLM 执行 question expansion、PI extraction、query generation、screening、planning、extraction、RoB、GRADE
 - `SimplifiedPipelineMockGateway`：覆盖 Module 2 / Module 3 所需 structured-output task，保留给 `use_mock=true` smoke test
-- `src/api/main.py`：FastAPI app 初始化与 `/health`
-- `src/api/routes/pipeline.py`：`POST /pipeline/runs`、`GET /pipeline/runs`、`GET /pipeline/runs/{run_id}`、`GET /pipeline/runs/{run_id}/trace`、`GET /pipeline/runs/{run_id}/results`
+- `backend/src/ebm_backend/online_pipeline/interfaces/api/main.py`：FastAPI app 初始化与 `/health`
+- `backend/src/ebm_backend/online_pipeline/interfaces/api/routes_pipeline.py`：`POST /pipeline/runs`、`GET /pipeline/runs`、`GET /pipeline/runs/{run_id}`、`GET /pipeline/runs/{run_id}/trace`、`GET /pipeline/runs/{run_id}/results`
 - Trace payload 可查看 PICO、PI、Boolean query、本地检索 candidates、matched fields、score、article path、fallback search、screening、planning、extraction rows、risk of bias、aggregation、GRADE
 - 默认本地索引路径统一为 `data/data_for_test/data_demo_1000/index/local_rct_index.jsonl`
 - 真实模式下无检索结果时不注入 synthetic candidate；mock 模式保留 synthetic candidate smoke 兜底
@@ -417,21 +410,21 @@
 - 新增单元测试：`tests/unit/test_phase5_orchestrator.py`、`tests/unit/test_phase5_api.py`
 
 **当前约束：**
-- API 创建 run 为同步阻塞执行，不是后台任务
+- API 创建 run 立即返回 `pending run_id`，后台任务在同进程内继续执行
 - run 状态仅保存在进程内，服务重启后丢失
 - 不接数据库、不使用 Redis/Celery、不实现 cache/usage tracking
 - 不实现 WebSocket、暂停、断点续跑或 step-level rerun
 - 真实模式需要可用 OpenAI-compatible API key；默认只分析 top 5 candidates 控制调用量
 
 **测试文档：**
-- 详见 `docs/phase5-api-test-guide.md`
+- 详见 `docs/guides/phase5-api-test-guide.md`
 
 ### 5.1 Pipeline Orchestrator (`src/orchestrator/`)
 
 **任务：**
 1. `pipeline.py` — DAG 定义（模块间依赖关系）✅ 简化版完成
 2. `state.py` — 状态管理（pending → running → completed/failed）✅ 简化版完成
-3. `tasks.py` — Celery task 定义（后续扩展）
+3. 后台任务队列接入（后续扩展）
 4. 断点续跑：从失败模块重新开始（后续扩展）
 5. WebSocket 进度推送（后续扩展）
 
@@ -442,7 +435,7 @@
 2. `routes/pipeline.py` — Pipeline 创建/查询/trace/results API ✅ 简化版完成
 3. `routes/results.py` — 独立结果查询 API（当前合并在 `routes/pipeline.py` 的 `/results`）
 4. `routes/usage.py` — Token/Cost 查询 API（后续扩展）
-5. `websocket.py` — 实时进度推送（后续扩展）
+5. 实时进度推送接口（后续扩展）
 
 ### 验证方式
 - API：启动 uvicorn，通过 Swagger UI 或 curl 测试各端点
@@ -461,7 +454,7 @@
 
 ## Phase 6: Frontend (Gradio Demo)
 
-**目标：** 先实现一个轻量 Gradio demo，用户像使用模型对话界面一样输入 clinical question，并在同一页查看 Phase 5 pipeline 的中间过程和结果。原 4 页 Streamlit 方案暂时保留为后续扩展，不作为当前 demo 的首要交付。
+**目标：** 先实现一个轻量 Gradio demo，用户像使用模型对话界面一样输入 clinical question，并在同一页查看 Phase 5 pipeline 的中间过程和结果。复杂多页前端作为后续扩展，不作为当前 demo 的首要交付。
 
 ### 任务清单
 
@@ -471,7 +464,7 @@
 4. Pipeline timeline：展示 `question_expansion -> question_pi_extraction -> query_generation -> local_search -> module3_analysis` ✅
 5. 结构化详情：PICO、eligibility、analysis plan、PI extraction、Boolean query、local retrieval query_text、candidate studies、screening、extraction、RoB、aggregation/GRADE ✅
 6. Trace：完整 JSON 查看和下载 ✅
-7. 后续扩展：流式逐步刷新、历史持久化、登录、多用户隔离、复杂图表、完整 Streamlit/React 前端
+7. 后续扩展：流式逐步刷新、历史持久化、登录、多用户隔离、复杂图表、更完整的前端形态
 
 ### 验证方式
 - `python frontend/gradio_app.py --host 127.0.0.1 --port 7860` 启动成功
@@ -520,7 +513,7 @@ Phase 0 → Phase 1.5 (Stats Engine) → Phase 1.1-1.4 (LLM Gateway 简化版)
 3. 完成后运行验证步骤确认正确性
 
 示例 prompt：
-> "请执行 Phase 1.5 Stats Engine 的实现。参考 docs/shared-infrastructure-design.md §6 和 docs/implementation-plan.md。完成后用 Cochrane data-rows 做 regression test。"
+> "请执行 Phase 1.5 Stats Engine 的实现。参考 docs/architecture/shared-infrastructure-design.md §6 和 docs/plans/implementation-plan.md。完成后用 Cochrane data-rows 做 regression test。"
 
 ---
 
@@ -541,15 +534,15 @@ Phase 0 → Phase 1.5 (Stats Engine) → Phase 1.1-1.4 (LLM Gateway 简化版)
 | 2026-05-10 | Phase 2 路线简化 | 当前交付目标改为“简化版 Module 1”：`data_demo_with_mesh/` 100 篇样本、逐篇 PI 抽取与映射、本地轻量索引和检索测试；真实 Batch API 与真实 Elasticsearch 降级为后续扩展项。 |
 | 2026-05-10 | Phase 2 简化 runner 调通入口 | `Module1SimplifiedRunner` 增加 `pi_mode=llm|local`，新增 `python -m ebm_backend.index_construction.interfaces.cli simplified` 命令入口；确认 `data_demo` 中 PMID 回填的 `metadata.mesh_term` 会写入本地索引的 `mesh_terms` 字段。 |
 | 2026-05-10 | Phase 2 本地索引验证 | 新增 `index-derived` 快速入口，可跳过 LLM/数据库，直接从 `data_demo_with_mesh/derived` 重建 `local_rct_index.jsonl`；当前 100 个 derived 全部入索引，5 条固定 query 检索验证 5/5 通过。 |
-| 2026-05-10 | Phase 2 检索输出验收 | 新增 `search-local` 自定义 query 检索入口；`docs/phase2-demo-test-guide.md` 已记录 6 条基于现有文章的测试 query、预期 top hit 与检索输出字段。至此 Module 1 简化版闭环完成，后续进入 Phase 3 前可继续优化 PI 质量和排序策略。 |
+| 2026-05-10 | Phase 2 检索输出验收 | 新增 `search-local` 自定义 query 检索入口；`docs/guides/phase2-demo-test-guide.md` 已记录 6 条基于现有文章的测试 query、预期 top hit 与检索输出字段。至此 Module 1 简化版闭环完成，后续进入 Phase 3 前可继续优化 PI 质量和排序策略。 |
 | 2026-05-10 | Phase 2 1000 篇 demo 验收 | demo 数据统一移动到 `data/data_for_test/`；新增 `select-demo` 主题簇选样入口并生成 `data/data_for_test/data_demo_1000`；已完成 1000 篇 PI 抽取、离线 MeSH fallback 映射、本地索引构建和检索 smoke test。`postoperative pain nerve block surgery` Top1=`pmid:37360747`。 |
-| 2026-05-10 | Phase 3: Module 2 简化实现 | 已完成 `src/modules/question` 下 `expansion/query_gen/search` 的最小闭环实现：PICO 结构化骨架、离线 MeSH fallback 的 P/I 查询组装、基于 `LocalRCTIndex` 的候选文献检索，并新增 `tests/unit/test_module2_question.py`（3/3 通过）。曾发现 `test_index_document_contains_core_fields` 将 PI 归一化 MeSH 误期望在 `mesh_terms`；已改为合并 `mesh_terms` + `mesh_population` + `mesh_intervention` 断言。 |
+| 2026-05-10 | Phase 3: Module 2 简化实现 | 已完成 `backend/src/ebm_backend/online_pipeline/application/question_study` 下 `expansion/query_gen/search` 的最小闭环实现：PICO 结构化骨架、离线 MeSH fallback 的 P/I 查询组装、基于 `LocalRCTIndex` 的候选文献检索，并新增 `tests/unit/test_module2_question.py`（3/3 通过）。曾发现 `test_index_document_contains_core_fields` 将 PI 归一化 MeSH 误期望在 `mesh_terms`；已改为合并 `mesh_terms` + `mesh_population` + `mesh_intervention` 断言。 |
 | 2026-05-10 | Phase 3: Module 2 接 LLM | `LLMGateway` 支持 `conn=None`，在线链路不再依赖 SQL；`QuestionExpander.expand_with_llm`、`QuestionPIExtractor.extract_with_llm`、`QueryGenerator.generate_with_llm` 分别实现问题扩展、PI 提取、MeSH-like preferred/entry terms 扩展与 Boolean 组装；新增 `Module2LLMRunner` 返回可传给下游的 `Module2LLMResult`；`LLMGateway` 支持 Responses API，并在兼容端点缺少 `/responses` 时降级到 Chat Completions；Mock 单测见 `tests/unit/test_module2_llm.py`。 |
-| 2026-05-10 | Phase 3 简化版验收与测试文档更新 | 已补充 `docs/module2-test-guide.md`：无 SQL 运行方式（`LLMGateway(conn=None)`）、端到端 `Module2LLMRunner` 可执行示例、与当前 100 篇索引匹配的示范问题；新增稳定检索回归用例 `test_clinical_question_retrieval_ranks_duloxetine_catheter_trial_first`（Top1=`pmid:37877838`）；`pytest tests/unit/test_llm_infra.py tests/unit/test_module2_llm.py tests/unit/test_module2_question.py -q` 通过（12/12）。 |
-| 2026-05-10 | Phase 4: Module 3 简化闭环 | 已完成 `src/modules/analysis` 下 screening、planning、evidence context、extraction、RoB、aggregation、GRADE、runner 与 mock CLI；所有 LLM 调用统一 `cacheable=False`，不接数据库/缓存/usage；新增 prompts/schemas 和 `tests/unit/test_module3_analysis.py`；`pytest tests/unit/test_module3_analysis.py -q` 与 Module2+Stats+Module3 联合回归通过。 |
-| 2026-05-10 | Phase 4 测试文档更新 | 新增 `docs/module3-test-guide.md`，记录 Module 3 简化版自动化测试、mock CLI 手动测试、Python runner 联调、预期输出字段和常见问题；README 与 docs 索引已补充 Module 3 测试入口。 |
+| 2026-05-10 | Phase 3 简化版验收与测试文档更新 | 已补充 `docs/guides/module2-test-guide.md`：无 SQL 运行方式（`LLMGateway(conn=None)`）、端到端 `Module2LLMRunner` 可执行示例、与当前 100 篇索引匹配的示范问题；新增稳定检索回归用例 `test_clinical_question_retrieval_ranks_duloxetine_catheter_trial_first`（Top1=`pmid:37877838`）；`pytest tests/unit/test_llm_infra.py tests/unit/test_module2_llm.py tests/unit/test_module2_question.py -q` 通过（12/12）。 |
+| 2026-05-10 | Phase 4: Module 3 简化闭环 | 已完成 `backend/src/ebm_backend/online_pipeline/application/evidence_analysis` 下 screening、planning、evidence context、extraction、RoB、aggregation、GRADE、runner 与 mock CLI；所有 LLM 调用统一 `cacheable=False`，不接数据库/缓存/usage；新增 prompts/schemas 和 `tests/unit/test_module3_analysis.py`；`pytest tests/unit/test_module3_analysis.py -q` 与 Module2+Stats+Module3 联合回归通过。 |
+| 2026-05-10 | Phase 4 测试文档更新 | 新增 `docs/guides/module3-test-guide.md`，记录 Module 3 简化版自动化测试、mock CLI 手动测试、Python runner 联调、预期输出字段和常见问题；README 与 docs 索引已补充 Module 3 测试入口。 |
 | 2026-05-10 | Phase 5: Orchestrator/API 简化闭环 | 已完成同步 `PipelineOrchestrator`、进程内 run/step state、Phase 5 mock gateway、FastAPI `/pipeline/runs`、`/trace`、`/results`；默认 `use_mock=true`，不依赖数据库/Redis/Celery/cache/usage。`pytest tests/unit/test_phase5_orchestrator.py tests/unit/test_phase5_api.py -q` 通过（3/3），Module2+Module3+Phase5 联合回归通过（21/21）。 |
-| 2026-05-10 | Phase 5 测试文档更新 | 新增 `docs/phase5-api-test-guide.md`，记录 API 启动、curl 示例、trace 字段、自动化测试、真实 LLM 使用方式和当前限制；README 与 docs 索引已补充 Phase 5 测试入口。 |
+| 2026-05-10 | Phase 5 测试文档更新 | 新增 `docs/guides/phase5-api-test-guide.md`，记录 API 启动、curl 示例、trace 字段、自动化测试、真实 LLM 使用方式和当前限制；README 与 docs 索引已补充 Phase 5 测试入口。 |
 | 2026-05-10 | Phase 5: 1000 篇索引真实简化闭环 | 默认索引切换到 `data/data_for_test/data_demo_1000/index/local_rct_index.jsonl`，API 默认 `use_mock=false`；真实模式无命中不再注入 synthetic candidate；trace/results 增加 matched fields、fallback search、risk_of_bias 和 demo-aware 推荐问题说明。`pytest tests/unit/test_module2_question.py tests/unit/test_module2_llm.py tests/unit/test_module3_analysis.py tests/unit/test_phase5_orchestrator.py tests/unit/test_phase5_api.py -q` 通过（24/24）。 |
 | 2026-05-10 | Phase 5: staged 真实 LLM 全流程验收 | 新增 `RUN_REAL_LLM_FULL=1` opt-in integration test，可实时打印 question expansion、PI、query、local search、screening、planning、extraction、RoB、aggregation、GRADE，并保存 `/tmp/phase5_pain_block_staged_module3.json`。当前 pain-block 问题 1000 索引返回 6 篇，screening 纳入 1 篇、排除 5 篇，完整流程跑通；aggregation 为单研究效应，不是多篇合并 meta-analysis。 |
-| 2026-05-10 | Phase 6: Gradio demo | 新增 `frontend/gradio_app.py`，直接调用 `PipelineOrchestrator`，默认 `use_mock=false` 跑真实 LLM，`use_mock=true` 保留给无 API key smoke；同页展示主回答、summary、timeline、PICO/eligibility/plan、PI、query/local search、candidate studies、screening、extraction、RoB、aggregation/GRADE 和 trace JSON 下载；新增 `tests/unit/test_phase6_gradio_app.py` 与 `docs/phase6-gradio-demo-guide.md`。 |
+| 2026-05-10 | Phase 6: Gradio demo | 新增 `frontend/gradio_app.py`，真实模式通过 FastAPI 创建 run 并轮询 `/trace`，默认 `use_mock=false` 跑真实 LLM，`use_mock=true` 用本地 `TestClient` 做 smoke；同页展示主回答、summary、timeline、PICO/eligibility/plan、PI、query/local search、candidate studies、screening、extraction、RoB、aggregation/GRADE 和 trace JSON 下载；新增 `tests/unit/test_phase6_gradio_app.py` 与 `docs/guides/phase6-gradio-demo-guide.md`。 |

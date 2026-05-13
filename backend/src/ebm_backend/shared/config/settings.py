@@ -24,7 +24,7 @@ class Settings(BaseSettings):
         return init_settings, dotenv_settings, env_settings, file_secret_settings
 
     # LLM
-    openai_api_key: str = Field(..., description="OpenAI API key")
+    openai_api_key: str = Field("", description="OpenAI API key")
     openai_base_url: str = Field(
         "https://api.openai.com/v1", description="OpenAI-compatible base URL"
     )

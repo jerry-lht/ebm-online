@@ -20,7 +20,7 @@ graph TD
     classDef infra fill:#F3E5F5,stroke:#9C27B0,stroke-width:2px
     classDef storage fill:#ECEFF1,stroke:#607D8B,stroke-width:2px
 
-    subgraph FE["Streamlit Frontend"]
+    subgraph FE["Gradio Frontend"]
         F1["Question Input"]:::frontend
         F2["Pipeline Overview"]:::frontend
         F3["Module Detail"]:::frontend
@@ -38,7 +38,7 @@ graph TD
 
         subgraph INFRA["Shared Infrastructure"]
             LLM["LLM Gateway<br/>(gpt-5.2, retry, rate limit)"]:::infra
-            TQ["Task Queue<br/>(Celery + Redis)"]:::infra
+            TQ["Background Execution<br/>(in-process now, queue later)"]:::infra
             STATS["Stats Engine<br/>(meta-analysis)"]:::infra
             TRACKER["Token & Cost Tracker<br/>(per-call recording, aggregation)"]:::infra
             CACHE["LLM Result Cache<br/>(avoid duplicate calls)"]:::infra
@@ -51,7 +51,7 @@ graph TD
         FS["File System<br/>(full text XML/JSON)"]:::storage
     end
 
-    FE -->|"HTTP / WebSocket"| ORCH
+    FE -->|"HTTP / polling"| ORCH
     ORCH --> M1
     ORCH --> M2
     ORCH --> M3
@@ -73,9 +73,9 @@ graph TD
 
 | 层级 | 选型 | 理由 |
 |------|------|------|
-| 前端 | Streamlit | 多页面支持好，Python 原生，适合展示 pipeline 流程和中间结果 |
+| 前端 | Gradio | 单页 demo 足够覆盖当前 pipeline 展示与调试需求 |
 | 后端 API | FastAPI | 异步支持、自动文档、类型安全 |
-| 任务调度 | Celery + Redis | LLM 调用耗时长（10-60s），需要异步执行和进度追踪 |
+| 任务调度 | 进程内后台执行（当前） | 当前简化版优先保证闭环可跑通，后续再接任务队列 |
 | LLM 调用 | OpenAI SDK (gpt-5.2, configurable base_url) | 统一模型，通过 api_key + base_url 配置 |
 | 检索索引 | Elasticsearch (单节点 Docker) | Boolean query + 字段匹配是 ES 强项，10 万级单节点足够 |
 | 关系存储 | SQLite (初期) → PostgreSQL (扩展) | 存储 pipeline 运行状态、中间结果、审计日志 |
@@ -92,7 +92,7 @@ graph TD
 - 管理 pipeline 运行状态（pending → running → success/failed）
 - 处理模块间数据传递
 - 支持断点续跑（某个模块失败后可从该模块重新开始）
-- 提供 WebSocket 实时进度推送
+- 提供轮询式进度查询；实时推送留作后续扩展
 
 状态模型：
 
@@ -426,7 +426,7 @@ ebm-online/
 │   ├── orchestrator/
 │   │   ├── pipeline.py      # Pipeline DAG 定义和调度
 │   │   ├── state.py         # 状态管理
-│   │   └── tasks.py         # Celery task 定义
+│   │   └── runner.py        # 后台执行入口（当前进程内）
 │   ├── modules/
 │   │   ├── index/           # Module 1
 │   │   │   ├── retrieval.py
@@ -464,16 +464,9 @@ ebm-online/
 │   │   └── models.py        # ORM 模型
 │   └── api/
 │       ├── main.py          # FastAPI app
-│       ├── routes/          # API 路由
-│       └── websocket.py     # WebSocket 进度推送
+│       └── routes/          # API 路由
 ├── frontend/
-│   ├── app.py              # Streamlit 主入口
-│   ├── pages/
-│   │   ├── 1_question.py   # 问题输入页
-│   │   ├── 2_pipeline.py   # Pipeline 总览页
-│   │   ├── 3_modules.py    # 模块详情页
-│   │   └── 4_results.py    # 结果展示页
-│   └── components/         # 可复用 UI 组件
+│   └── gradio_app.py       # Gradio 单页入口
 ├── data/
 │   ├── file/               # Cochrane dataPackage (已有)
 │   ├── pmc/                # PMC 全文 XML
@@ -483,8 +476,7 @@ ebm-online/
 │   ├── integration/
 │   └── benchmarks/         # EBM-NLP, Q2CRBench 等验证
 ├── docs/
-│   └── architecture-design.md  # 本文档
-├── docker-compose.yml      # ES + Redis 容器编排
+│   └── architecture/architecture-design.md  # 本文档
 ├── requirements.txt
 └── README.md
 ```
@@ -501,7 +493,7 @@ ebm-online/
 **Page 2: Pipeline 总览**
 - 流程图展示当前 pipeline 进度（哪个模块在跑、哪些已完成）
 - 每个模块节点显示状态（pending/running/done/error）
-- 实时更新（WebSocket 或轮询）
+- 轮询式更新
 
 **Page 3: 模块详情**
 - 点击任意模块查看该模块的输入、输出、中间过程
@@ -518,15 +510,14 @@ ebm-online/
 
 ### 初期（单机研究工具）
 ```
-docker-compose up  →  ES(9200) + Redis(6379)
+Elasticsearch（按需单独启动）  →  ES(9200)
 uvicorn ebm_backend.online_pipeline.interfaces.api.main:app  →  Backend(8000)
-celery -A ebm_backend.online_pipeline.interfaces.api.tasks worker  →  Worker
-streamlit run frontend/app.py  →  Frontend(8501)
+python frontend/gradio_app.py  →  Frontend(7860)
 ```
 
 ### 扩展期（多用户 Web Service）
 - Backend 部署多实例 + Nginx 负载均衡
-- Celery worker 水平扩展
+- 后台任务队列 worker 水平扩展
 - SQLite → PostgreSQL
 - 加入用户认证（JWT）
 - ES 集群化（如需要）

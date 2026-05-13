@@ -67,6 +67,8 @@ class LLMGateway:
         self.conn = conn
         self.cache = CacheManager(conn) if conn is not None else None
         self.tracker = UsageTracker(conn) if conn is not None else None
+        if client is None and not settings.openai_api_key:
+            raise RuntimeError("OPENAI_API_KEY is required for real LLM execution.")
         self.client = client or AsyncOpenAI(
             api_key=settings.openai_api_key,
             base_url=settings.openai_base_url,

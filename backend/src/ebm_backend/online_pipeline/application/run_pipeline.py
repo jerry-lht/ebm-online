@@ -61,6 +61,27 @@ class PipelineOrchestrator:
         self.store = store or DEFAULT_PIPELINE_STORE
         self.index_path = Path(index_path)
 
+    def create_pending_run(
+        self,
+        *,
+        question: str,
+        top_k: int = 5,
+        use_mock: bool = False,
+        index_path: str | Path | None = None,
+    ) -> PipelineRunState:
+        resolved_index_path = Path(index_path) if index_path is not None else self.index_path
+        run = PipelineRunState(
+            run_id=str(uuid.uuid4()),
+            question=question,
+            top_k=top_k,
+            use_mock=use_mock,
+            index_path=str(resolved_index_path),
+        )
+        return self.store.create(run)
+
+    async def run_existing(self, run: PipelineRunState) -> PipelineRunState:
+        return await self._execute_run(run)
+
     async def run_question(
         self,
         *,
@@ -69,16 +90,20 @@ class PipelineOrchestrator:
         use_mock: bool = False,
         index_path: str | Path | None = None,
     ) -> PipelineRunState:
-        run_id = str(uuid.uuid4())
-        resolved_index_path = Path(index_path) if index_path is not None else self.index_path
-        run = PipelineRunState(
-            run_id=run_id,
+        run = self.create_pending_run(
             question=question,
             top_k=top_k,
             use_mock=use_mock,
-            index_path=str(resolved_index_path),
+            index_path=index_path,
         )
-        self.store.create(run)
+        return await self._execute_run(run)
+
+    async def _execute_run(self, run: PipelineRunState) -> PipelineRunState:
+        question = run.question
+        top_k = run.top_k
+        use_mock = run.use_mock
+        resolved_index_path = Path(run.index_path or self.index_path)
+        run_id = run.run_id
         gateway: Any = SimplifiedPipelineMockGateway() if use_mock else self._real_gateway()
 
         try:
@@ -208,6 +233,8 @@ class PipelineOrchestrator:
     def _real_gateway() -> LLMGateway:
         if AsyncOpenAI is None:  # pragma: no cover
             raise RuntimeError("openai package is required for real LLM execution")
+        if not settings.openai_api_key:
+            raise RuntimeError("OPENAI_API_KEY is required for real LLM execution.")
         return LLMGateway(
             conn=None,
             client=AsyncOpenAI(

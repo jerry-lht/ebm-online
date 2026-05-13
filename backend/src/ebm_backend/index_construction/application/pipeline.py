@@ -230,7 +230,7 @@ class Module1SimplifiedResult:
     queries_total: int = 0
 
 
-# Fixed retrieval smoke queries for Phase 2 (see docs/implementation-plan.md).
+# Fixed retrieval smoke queries for Phase 2 (see docs/plans/implementation-plan.md).
 # Optional expected_study_id checks recall for the 100-demo subset titles.
 MODULE1_FIXED_QUERIES: tuple[tuple[str, str | None], ...] = (
     ("zinc-carbonate hydroxyapatite dental caries", "pmid:36908720"),

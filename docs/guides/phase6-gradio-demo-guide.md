@@ -1,8 +1,8 @@
 # Phase 6 Gradio Demo 测试与调试指南
 
-本文档用于验证 **Phase 6 Gradio Demo**：用户像使用模型对话界面一样输入 clinical question，页面直接调用 `PipelineOrchestrator`，并在同一页展示 Phase 5 trace、Module 2 中间过程、Module 3 分析结果和完整 JSON trace。
+本文档用于验证 **Phase 6 Gradio Demo**：用户像使用模型对话界面一样输入 clinical question，页面通过 FastAPI 创建 pipeline run 并轮询 trace，在同一页展示 Phase 5 trace、Module 2 中间过程、Module 3 分析结果和完整 JSON trace。
 
-> 说明：当前 Phase 6 是轻量 demo，不依赖 FastAPI、数据库、Redis、Elasticsearch 或 WebSocket。页面默认 `use_mock=false`，会直接使用真实 LLM；`use_mock=true` 只保留给无 API key smoke、UI 调试和自动化测试。
+> 说明：当前 Phase 6 是轻量 demo。真实模式依赖 FastAPI 服务；`use_mock=true` 时不依赖外部 uvicorn，而是走本地 `TestClient` 做 smoke、UI 调试和自动化测试。
 
 ## 当前实现范围
 
@@ -19,10 +19,10 @@
 ## 相关代码路径
 
 - `frontend/gradio_app.py` — Gradio demo 入口和 UI callback
-- `src/orchestrator/pipeline.py` — Phase 5 pipeline 编排
-- `src/orchestrator/state.py` — run / step trace 状态结构
+- `backend/src/ebm_backend/online_pipeline/interfaces/api/routes_pipeline.py` — Phase 5 run 创建与 trace API
+- `backend/src/ebm_backend/online_pipeline/infrastructure/pipeline_repository.py` — run / step trace 状态结构
 - `tests/unit/test_phase6_gradio_app.py` — Gradio callback 和 Blocks 构建 smoke test
-- `docs/phase5-api-test-guide.md` — 后端 API 与 orchestrator 调试指南
+- `docs/guides/phase5-api-test-guide.md` — 后端 API 与 orchestrator 调试指南
 
 ## 安装依赖
 
@@ -44,7 +44,8 @@ PY
 启动 Gradio demo：
 
 ```bash
-python frontend/gradio_app.py --host 127.0.0.1 --port 7860
+PYTHONPATH=backend/src uvicorn ebm_backend.online_pipeline.interfaces.api.main:app --host 127.0.0.1 --port 8000 --log-level debug
+PYTHONPATH=backend/src python frontend/gradio_app.py --host 127.0.0.1 --port 7860
 ```
 
 打开：
@@ -85,7 +86,7 @@ python frontend/gradio_app.py --host 0.0.0.0 --port 7860
 
 ### Real LLM 模式
 
-默认不勾选 `Use mock LLM`。运行前确认 `.env` 或环境变量包含：
+默认不勾选 `Use mock LLM`。运行前确认项目 `.env` 包含：
 
 ```bash
 OPENAI_API_KEY=...
@@ -112,7 +113,7 @@ In patients undergoing surgery, do nerve blocks reduce postoperative pain compar
 只跑 Phase 6 Gradio demo：
 
 ```bash
-pytest tests/unit/test_phase6_gradio_app.py -q
+PYTHONPATH=backend/src pytest tests/unit/test_phase6_gradio_app.py -q
 ```
 
 覆盖内容：
@@ -127,7 +128,7 @@ pytest tests/unit/test_phase6_gradio_app.py -q
 Phase 5 + Phase 6 联合回归：
 
 ```bash
-pytest \
+PYTHONPATH=backend/src pytest \
   tests/unit/test_phase5_orchestrator.py \
   tests/unit/test_phase5_api.py \
   tests/unit/test_phase6_gradio_app.py \
@@ -137,7 +138,7 @@ pytest \
 更完整的 Module 2/3/5/6 回归：
 
 ```bash
-pytest \
+PYTHONPATH=backend/src pytest \
   tests/unit/test_module2_question.py \
   tests/unit/test_module2_llm.py \
   tests/unit/test_module3_analysis.py \
@@ -152,8 +153,8 @@ pytest \
 ### 1. 先确认不是依赖问题
 
 ```bash
-python -m py_compile frontend/gradio_app.py
-python - <<'PY'
+PYTHONPATH=backend/src python -m py_compile frontend/gradio_app.py
+PYTHONPATH=backend/src python - <<'PY'
 from frontend.gradio_app import build_app
 app = build_app()
 print(type(app).__name__, len(app.blocks))
@@ -163,13 +164,14 @@ PY
 ### 2. 不开浏览器，直接跑 callback
 
 ```bash
-python - <<'PY'
+PYTHONPATH=backend/src python - <<'PY'
 from frontend.gradio_app import DEFAULT_INDEX_PATH, DEFAULT_QUESTION, run_pipeline
 
 outputs = run_pipeline(DEFAULT_QUESTION, DEFAULT_QUESTION, 1, True, DEFAULT_INDEX_PATH)
-print(outputs[0])
-print(outputs[14]["status"])
-print(outputs[15])
+staged = list(outputs)
+print(staged[-1][0])
+print(staged[-1][14]["status"])
+print(staged[-1][15])
 PY
 ```
 
@@ -242,7 +244,7 @@ python frontend/gradio_app.py --port 7861
 
 ## 当前限制
 
-- 没有逐步流式刷新；当前是在一次 run 完成后统一展示结果。
+- 真实模式通过轮询 `/pipeline/runs/{run_id}/trace` 逐步刷新，但不是 WebSocket 推送。
 - 不保存历史记录；刷新页面后只能看当前浏览器状态和下载的 trace JSON。
 - 不做登录、多用户隔离、数据库持久化或复杂图表。
 - 表格当前用 HTML 渲染，避免 Gradio Dataframe 在部分 NumPy/pyarrow 环境中触发 ABI 问题。

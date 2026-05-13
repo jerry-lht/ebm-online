@@ -157,4 +157,3 @@ Module 2 会把 Boolean 串中的引号内短语抽出后交给 `LocalRCTIndex.s
 - `src/modules/question/search.py` — `QuestionStudySearcher`、`CandidateStudy`
 - `tests/unit/test_module2_question.py` — 离线路径单测
 - `tests/unit/test_module2_llm.py` — LLM 路径单测（Mock Responses）
-

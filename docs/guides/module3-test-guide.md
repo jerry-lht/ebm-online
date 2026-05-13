@@ -20,25 +20,25 @@
 
 ## 相关代码路径
 
-- `src/modules/analysis/models.py` — Module 3 数据结构
-- `src/modules/analysis/screening.py` — Study screening
-- `src/modules/analysis/planning.py` — Analysis planning
-- `src/modules/analysis/extraction.py` — Evidence context + data extraction
-- `src/modules/analysis/rob.py` — Risk of Bias
-- `src/modules/analysis/aggregation.py` — StatsEngine aggregation
-- `src/modules/analysis/grade.py` — GRADE
-- `src/modules/analysis/runner.py` — 端到端 runner
-- `src/modules/analysis/cli.py` — mock CLI smoke 入口
-- `src/llm/prompts/study_screening.txt`
-- `src/llm/prompts/analysis_planning.txt`
-- `src/llm/prompts/data_extraction.txt`
-- `src/llm/prompts/risk_of_bias.txt`
-- `src/llm/prompts/grade_assessment.txt`
-- `src/llm/schemas/study_screening.json`
-- `src/llm/schemas/analysis_planning.json`
-- `src/llm/schemas/data_extraction.json`
-- `src/llm/schemas/risk_of_bias.json`
-- `src/llm/schemas/grade_assessment.json`
+- `backend/src/ebm_backend/online_pipeline/application/evidence_analysis/models.py` — Module 3 数据结构
+- `backend/src/ebm_backend/online_pipeline/application/evidence_analysis/screening.py` — Study screening
+- `backend/src/ebm_backend/online_pipeline/application/evidence_analysis/planning.py` — Analysis planning
+- `backend/src/ebm_backend/online_pipeline/application/evidence_analysis/extraction.py` — Evidence context + data extraction
+- `backend/src/ebm_backend/online_pipeline/application/evidence_analysis/rob.py` — Risk of Bias
+- `backend/src/ebm_backend/online_pipeline/application/evidence_analysis/aggregation.py` — StatsEngine aggregation
+- `backend/src/ebm_backend/online_pipeline/application/evidence_analysis/grade.py` — GRADE
+- `backend/src/ebm_backend/online_pipeline/application/evidence_analysis/runner.py` — 端到端 runner
+- `backend/src/ebm_backend/online_pipeline/interfaces/cli/evidence_analysis.py` — mock CLI smoke 入口
+- `backend/src/ebm_backend/shared/llm/prompts/study_screening.txt`
+- `backend/src/ebm_backend/shared/llm/prompts/analysis_planning.txt`
+- `backend/src/ebm_backend/shared/llm/prompts/data_extraction.txt`
+- `backend/src/ebm_backend/shared/llm/prompts/risk_of_bias.txt`
+- `backend/src/ebm_backend/shared/llm/prompts/grade_assessment.txt`
+- `backend/src/ebm_backend/shared/llm/schemas/study_screening.json`
+- `backend/src/ebm_backend/shared/llm/schemas/analysis_planning.json`
+- `backend/src/ebm_backend/shared/llm/schemas/data_extraction.json`
+- `backend/src/ebm_backend/shared/llm/schemas/risk_of_bias.json`
+- `backend/src/ebm_backend/shared/llm/schemas/grade_assessment.json`
 - `tests/unit/test_module3_analysis.py`
 
 ## 依赖与前置条件
@@ -52,13 +52,13 @@
 2. 推荐先确认 Module 1 本地索引存在：
 
    ```bash
-   test -f data_demo_with_mesh/index/local_rct_index.jsonl
+   test -f data/data_for_test/data_demo_with_mesh/index/local_rct_index.jsonl
    ```
 
    若不存在，先重建：
 
    ```bash
-   python -m ebm_backend.index_construction.interfaces.cli index-derived --data-root data_demo_with_mesh
+   PYTHONPATH=backend/src python -m ebm_backend.index_construction.interfaces.cli index-derived --data-root data/data_for_test/data_demo_with_mesh
    ```
 
 3. Module 3 mock 测试不需要真实 OpenAI API，不需要数据库。
@@ -107,12 +107,12 @@ OPENAI_BASE_URL="https://api.siliconflow.cn/v1"
 LLM_MODEL="deepseek-ai/DeepSeek-V4-Flash"
 ```
 
-如果你的 `.env` 已经配置好，只需要设置 `RUN_REAL_LLM=1`。如果你想临时指定 key，不改 `.env`，就在单条命令前加 `OPENAI_API_KEY="..."`。
+如果你的 `.env` 已经配置好，只需要设置 `RUN_REAL_LLM=1`。不再推荐在命令前临时覆盖 `OPENAI_API_KEY`，避免把 shell 旧值和项目 `.env` 混用。
 
 先确认当前运行时读到的配置，不会打印完整 key：
 
 ```bash
-python - <<'PY'
+PYTHONPATH=backend/src python - <<'PY'
 from ebm_backend.shared.config.settings import settings
 
 key = settings.openai_api_key or ""
@@ -136,18 +136,7 @@ PY
 | `real-rct-3` | `4 / 80` | `12 / 80` |
 
 ```bash
-RUN_REAL_LLM=1 pytest \
-  tests/integration/test_module3_real_llm_smoke.py::test_module3_real_llm_extraction_only_synthetic_rcts \
-  -q -s
-```
-
-如果需要临时覆盖 key：
-
-```bash
-OPENAI_API_KEY="你的 key" \
-OPENAI_BASE_URL="https://api.siliconflow.cn/v1" \
-LLM_MODEL="deepseek-ai/DeepSeek-V4-Flash" \
-RUN_REAL_LLM=1 pytest \
+RUN_REAL_LLM=1 PYTHONPATH=backend/src pytest \
   tests/integration/test_module3_real_llm_smoke.py::test_module3_real_llm_extraction_only_synthetic_rcts \
   -q -s
 ```
@@ -178,18 +167,7 @@ RUN_REAL_LLM=1 pytest \
 命令：
 
 ```bash
-RUN_REAL_LLM=1 pytest tests/integration/test_module3_real_llm_smoke.py::test_module3_real_llm_extracts_synthetic_rct_counts -q -s
-```
-
-临时覆盖 SiliconFlow/DeepSeek 配置：
-
-```bash
-OPENAI_API_KEY="你的 key" \
-OPENAI_BASE_URL="https://api.siliconflow.cn/v1" \
-LLM_MODEL="deepseek-ai/DeepSeek-V4-Flash" \
-RUN_REAL_LLM=1 pytest \
-  tests/integration/test_module3_real_llm_smoke.py::test_module3_real_llm_extracts_synthetic_rct_counts \
-  -q -s
+RUN_REAL_LLM=1 PYTHONPATH=backend/src pytest tests/integration/test_module3_real_llm_smoke.py::test_module3_real_llm_extracts_synthetic_rct_counts -q -s
 ```
 
 当前验证记录：
@@ -206,7 +184,7 @@ RUN_REAL_LLM=1 pytest \
 只跑 synthetic RCT + LLMGateway 全流程测试：
 
 ```bash
-pytest tests/unit/test_module3_analysis.py::test_module3_synthetic_rcts_full_flow_through_llm_gateway -q
+PYTHONPATH=backend/src pytest tests/unit/test_module3_analysis.py::test_module3_synthetic_rcts_full_flow_through_llm_gateway -q
 ```
 
 该测试会临时生成 3 篇 RCT article JSON：
@@ -232,7 +210,7 @@ pytest tests/unit/test_module3_analysis.py::test_module3_synthetic_rcts_full_flo
 推荐用当前 100 篇索引中真实存在的度洛西汀问题：
 
 ```bash
-python -m ebm_backend.online_pipeline.interfaces.cli.evidence_analysis \
+PYTHONPATH=backend/src python -m ebm_backend.online_pipeline.interfaces.cli.evidence_analysis \
   --mock \
   --question "Does duloxetine reduce catheter-related bladder discomfort?" \
   --population "catheter-related bladder discomfort" \

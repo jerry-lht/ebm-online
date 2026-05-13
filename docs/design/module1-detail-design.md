@@ -473,7 +473,7 @@ indexable_text = original_cleaned + " " + mesh_preferred_terms + " " + entry_ter
 
 ### 6.6 部署方式
 
-- Docker 单节点（`docker-compose.yml` 中定义）
+- 单节点 Elasticsearch（按需独立部署）
 - 数据持久化到 Docker volume
 - 内存配置：`ES_JAVA_OPTS=-Xms2g -Xmx2g`（10 万级文档足够）
 - 单 shard，0 replica（单机部署）

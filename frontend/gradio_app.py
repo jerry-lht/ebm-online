@@ -21,41 +21,20 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-_DOTENV_OPENAI_API_KEY = None
-_DOTENV_OPENAI_BASE_URL = None
-_DOTENV_LLM_MODEL = None
-for raw_line in (PROJECT_ROOT / ".env").read_text(encoding="utf-8").splitlines() if (PROJECT_ROOT / ".env").exists() else []:
-    line = raw_line.strip()
-    if not line or line.startswith("#") or "=" not in line:
-        continue
-    key, value = line.split("=", 1)
-    value = value.strip().strip("'\"")
-    if key == "OPENAI_API_KEY":
-        _DOTENV_OPENAI_API_KEY = value
-    elif key == "OPENAI_BASE_URL":
-        _DOTENV_OPENAI_BASE_URL = value
-    elif key == "LLM_MODEL":
-        _DOTENV_LLM_MODEL = value
-
-_REAL_API_KEY_AVAILABLE = bool(os.getenv("OPENAI_API_KEY") or _DOTENV_OPENAI_API_KEY)
-os.environ.setdefault("OPENAI_API_KEY", _DOTENV_OPENAI_API_KEY or "mock-key-for-gradio-demo")
-if _DOTENV_OPENAI_BASE_URL:
-    os.environ.setdefault("OPENAI_BASE_URL", _DOTENV_OPENAI_BASE_URL)
-if _DOTENV_LLM_MODEL:
-    os.environ.setdefault("LLM_MODEL", _DOTENV_LLM_MODEL)
-
 BACKEND_SRC = PROJECT_ROOT / "backend" / "src"
 if str(BACKEND_SRC) not in sys.path:
     sys.path.insert(0, str(BACKEND_SRC))
 
 from ebm_backend.online_pipeline.application.question_study import DEFAULT_LOCAL_INDEX_PATH
 from ebm_backend.online_pipeline.application.run_pipeline import DEMO_1000_QUESTION_PRESETS
+from ebm_backend.shared.config.settings import settings
 
 
 DEFAULT_QUESTION = DEMO_1000_QUESTION_PRESETS[0]
 DEFAULT_INDEX_PATH = str(PROJECT_ROOT / DEFAULT_LOCAL_INDEX_PATH)
 LOG_PATH = PROJECT_ROOT / "logs" / "gradio_pipeline.log"
 BACKEND_BASE_URL = os.getenv("BACKEND_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
+_REAL_API_KEY_AVAILABLE = bool(settings.openai_api_key)
 TIMELINE_STEPS = [
     ("question_expansion", "Question expansion"),
     ("question_pi_extraction", "PI extraction"),
@@ -110,12 +89,21 @@ def run_pipeline(
 
     start = time.perf_counter()
     try:
-        trace = _run_pipeline_via_backend(
+        final_trace: dict[str, Any] | None = None
+        for trace in _iter_pipeline_via_backend(
             question=question,
             top_k=int(top_k),
             use_mock=bool(use_mock),
             index_path=resolved_index_path,
-        )
+        ):
+            final_trace = trace
+            elapsed = time.perf_counter() - start
+            trace["elapsed_seconds"] = round(elapsed, 3)
+            run = _run_view_from_trace(trace)
+            _log_event(f"update {_step_status_summary(run)}")
+            yield _outputs_from_run(run, elapsed, trace_path=None)
+        if final_trace is None:
+            raise RuntimeError("Pipeline did not return a trace.")
     except Exception as exc:
         elapsed = time.perf_counter() - start
         _log_event(f"finish status=failed elapsed={elapsed:.2f}s error={exc!r}")
@@ -123,6 +111,7 @@ def run_pipeline(
         return
 
     elapsed = time.perf_counter() - start
+    trace = final_trace
     trace["elapsed_seconds"] = round(elapsed, 3)
     run = _run_view_from_trace(trace)
     trace_path = _write_trace_file(trace)
@@ -134,24 +123,63 @@ def run_pipeline(
 
 
 def _run_pipeline_via_backend(*, question: str, top_k: int, use_mock: bool, index_path: str) -> dict[str, Any]:
+    if use_mock:
+        payload = {
+            "question": question,
+            "top_k": top_k,
+            "use_mock": use_mock,
+            "index_path": index_path,
+        }
+        return _run_pipeline_with_local_test_client(payload)
+    trace: dict[str, Any] | None = None
+    for trace in _iter_pipeline_via_backend(
+        question=question,
+        top_k=top_k,
+        use_mock=use_mock,
+        index_path=index_path,
+    ):
+        pass
+    if trace is None:
+        raise RuntimeError("Pipeline did not return a trace.")
+    return trace
+
+
+def _iter_pipeline_via_backend(*, question: str, top_k: int, use_mock: bool, index_path: str):
     payload = {
         "question": question,
         "top_k": top_k,
         "use_mock": use_mock,
         "index_path": index_path,
     }
+    if use_mock:
+        yield _run_pipeline_with_local_test_client(payload)
+        return
     try:
         with httpx.Client(base_url=BACKEND_BASE_URL, timeout=300.0) as client:
             created = client.post("/pipeline/runs", json=payload)
             created.raise_for_status()
             run_id = created.json()["run_id"]
-            trace = client.get(f"/pipeline/runs/{run_id}/trace")
-            trace.raise_for_status()
-            return _trace_payload_from_api(trace.json())
+            deadline = time.monotonic() + float(os.getenv("GRADIO_PIPELINE_TIMEOUT_SECONDS", "1800"))
+            last_signature = ""
+            while True:
+                trace = client.get(f"/pipeline/runs/{run_id}/trace")
+                trace.raise_for_status()
+                payload = _trace_payload_from_api(trace.json())
+                run = _run_view_from_trace(payload)
+                signature = _run_signature(run)
+                if signature != last_signature:
+                    last_signature = signature
+                    yield payload
+                status = _status_value(run.status)
+                if status in {"completed", "failed"}:
+                    return
+                if time.monotonic() >= deadline:
+                    raise TimeoutError(f"Pipeline run timed out while waiting for {run_id}.")
+                time.sleep(float(os.getenv("GRADIO_POLL_SECONDS", "2")))
     except Exception:
         if not use_mock:
             raise
-        return _run_pipeline_with_local_test_client(payload)
+        yield _run_pipeline_with_local_test_client(payload)
 
 
 def _run_pipeline_with_local_test_client(payload: dict[str, Any]) -> dict[str, Any]:

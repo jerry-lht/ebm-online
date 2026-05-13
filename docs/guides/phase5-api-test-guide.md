@@ -1,6 +1,6 @@
 # Phase 5 API 测试指南：1000 篇索引真实闭环
 
-本文档用于验证 **Phase 5 Pipeline Orchestrator & API**：提交一个 clinical question 后，后端同步串起 Module 2 与 Module 3，并把中间过程保存到进程内 trace，方便查看问题拆解、检索式生成、1000 篇本地索引检索、screening、extraction、risk of bias、aggregation 和 GRADE。
+本文档用于验证 **Phase 5 Pipeline Orchestrator & API**：提交一个 clinical question 后，后端立即返回 `pending run_id`，后台执行 Module 2 与 Module 3，并把中间过程保存到进程内 trace，方便查看问题拆解、检索式生成、1000 篇本地索引检索、screening、extraction、risk of bias、aggregation 和 GRADE。
 
 > 说明：当前 Phase 5 不接数据库、不使用 Redis/Celery、不实现 cache/usage tracking，也不提供 WebSocket。默认 `use_mock=false`，走真实 LLM + `data_demo_1000` 索引；`use_mock=true` 保留给无 API key 的 smoke test。
 
@@ -18,10 +18,10 @@
 
 ## 相关代码路径
 
-- `src/orchestrator/state.py` — pipeline run / step 状态和内存 store
-- `src/orchestrator/pipeline.py` — 同步 orchestrator 与 mock gateway
-- `src/api/main.py` — FastAPI app 入口
-- `src/api/routes/pipeline.py` — Phase 5 API routes
+- `backend/src/ebm_backend/online_pipeline/infrastructure/pipeline_repository.py` — pipeline run / step 状态和内存 store
+- `backend/src/ebm_backend/online_pipeline/application/run_pipeline.py` — orchestrator 与 mock gateway
+- `backend/src/ebm_backend/online_pipeline/interfaces/api/main.py` — FastAPI app 入口
+- `backend/src/ebm_backend/online_pipeline/interfaces/api/routes_pipeline.py` — Phase 5 API routes
 - `tests/unit/test_phase5_orchestrator.py` — orchestrator trace 单元测试
 - `tests/unit/test_phase5_api.py` — FastAPI route 单元测试
 
@@ -65,7 +65,7 @@
 只跑 Phase 5：
 
 ```bash
-pytest tests/unit/test_phase5_orchestrator.py tests/unit/test_phase5_api.py -q
+PYTHONPATH=backend/src pytest tests/unit/test_phase5_orchestrator.py tests/unit/test_phase5_api.py -q
 ```
 
 预期：所有测试通过。
@@ -81,7 +81,7 @@ pytest tests/unit/test_phase5_orchestrator.py tests/unit/test_phase5_api.py -q
 与 Module 2 / Module 3 一起回归：
 
 ```bash
-pytest \
+PYTHONPATH=backend/src pytest \
   tests/unit/test_module2_question.py \
   tests/unit/test_module2_llm.py \
   tests/unit/test_module3_analysis.py \
@@ -195,7 +195,7 @@ RUN_REAL_LLM_FULL=1 PHASE5_FULL_TOP_K=6 .venv/bin/python -m pytest \
 ## 启动 API
 
 ```bash
-uvicorn ebm_backend.online_pipeline.interfaces.api.main:app --reload --host 0.0.0.0 --port 8000
+PYTHONPATH=backend/src uvicorn ebm_backend.online_pipeline.interfaces.api.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 健康检查：
@@ -235,17 +235,17 @@ curl -s -X POST http://127.0.0.1:8000/pipeline/runs \
 ```json
 {
   "run_id": "...",
-  "status": "completed",
+  "status": "pending",
   "question": "...",
   "top_k": 5,
   "use_mock": false,
   "index_path": "data/data_for_test/data_demo_1000/index/local_rct_index.jsonl",
-  "step_count": 5,
+  "step_count": 0,
   "error": null
 }
 ```
 
-真实模式如果本地检索无命中，不会注入 synthetic candidate；Module 3 会记录空候选下的 screening/planning/extraction/grade 结果。需要无 API key smoke 时，把 `use_mock` 改为 `true`。
+真实模式如果本地检索无命中，不会注入 synthetic candidate；Module 3 会记录空候选下的 screening/planning/extraction/grade 结果。需要无 API key smoke 时，把 `use_mock` 改为 `true`。提交后继续轮询 `GET /pipeline/runs/<run_id>` 或 `/trace`，直到 `status` 变成 `completed` 或 `failed`。
 
 ### 2. 查看状态摘要
 

@@ -244,7 +244,6 @@ PGPASSWORD=ebm123 psql -h localhost -U ebm -d ebm_online -c "\d llm_usage"
 python3 -c "
 import ebm_backend.online_pipeline.application.run_pipeline
 import ebm_backend.online_pipeline.infrastructure.pipeline_repository
-import ebm_backend.online_pipeline.interfaces.api.tasks
 import ebm_backend.index_construction.application.retrieval
 import ebm_backend.index_construction.application.classification
 import ebm_backend.index_construction.application.extraction
@@ -272,7 +271,6 @@ import ebm_backend.shared.persistence.db
 import ebm_backend.shared.persistence.models
 import ebm_backend.shared.persistence.es_client
 import ebm_backend.online_pipeline.interfaces.api.main
-import ebm_backend.online_pipeline.interfaces.api.websocket
 import ebm_backend.online_pipeline.interfaces.api
 print('All imports OK')
 "

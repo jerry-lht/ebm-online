@@ -3,10 +3,6 @@ fastapi~=0.115.0
 uvicorn[standard]~=0.32.0
 httpx~=0.28.0
 
-# Task Queue
-celery~=5.4.0
-redis~=5.2.0
-
 # LLM
 openai~=1.82.0
 
@@ -22,7 +18,6 @@ numpy~=2.2.0
 scipy~=1.15.0
 
 # Frontend
-streamlit~=1.45.0
 gradio~=5.29.0
 
 # Database

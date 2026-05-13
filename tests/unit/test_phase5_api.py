@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 
 from fastapi.testclient import TestClient
 
@@ -24,13 +25,20 @@ def test_phase5_api_creates_run_and_exposes_trace(tmp_path):
 
     assert response.status_code == 200
     created = response.json()
-    assert created["status"] == "completed"
-    assert created["step_count"] == 5
+    assert created["status"] in {"pending", "running", "completed"}
     run_id = created["run_id"]
 
-    trace = client.get(f"/pipeline/runs/{run_id}/trace")
-    assert trace.status_code == 200
-    body = trace.json()
+    body = None
+    for _ in range(20):
+        trace = client.get(f"/pipeline/runs/{run_id}/trace")
+        assert trace.status_code == 200
+        body = trace.json()
+        if body["run"]["status"] == "completed":
+            break
+        time.sleep(0.05)
+    assert body is not None
+    assert body["run"]["status"] == "completed"
+
     assert [step["name"] for step in body["steps"]] == [
         "question_expansion",
         "question_pi_extraction",

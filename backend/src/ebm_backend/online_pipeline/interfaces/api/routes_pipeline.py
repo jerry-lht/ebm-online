@@ -6,7 +6,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
 
 from ebm_backend.online_pipeline.application.run_pipeline import DEFAULT_LOCAL_INDEX_PATH, PipelineOrchestrator
@@ -35,17 +35,18 @@ class PipelineRunSummary(BaseModel):
 
 
 @router.post("/runs", response_model=PipelineRunSummary)
-async def create_pipeline_run(request: PipelineRunCreate) -> PipelineRunSummary:
+async def create_pipeline_run(request: PipelineRunCreate, background_tasks: BackgroundTasks) -> PipelineRunSummary:
     orchestrator = PipelineOrchestrator(
         store=DEFAULT_PIPELINE_STORE,
         index_path=Path(request.index_path or DEFAULT_LOCAL_INDEX_PATH),
     )
-    run = await orchestrator.run_question(
+    run = orchestrator.create_pending_run(
         question=request.question,
         top_k=request.top_k,
         use_mock=request.use_mock,
         index_path=request.index_path,
     )
+    background_tasks.add_task(_run_pipeline_background, orchestrator, run)
     return _summary(run)
 
 
@@ -110,6 +111,12 @@ def _get_run_or_404(run_id: str) -> PipelineRunState:
     if run is None:
         raise HTTPException(status_code=404, detail=f"Pipeline run not found: {run_id}")
     return run
+
+
+def _run_pipeline_background(orchestrator: PipelineOrchestrator, run: PipelineRunState) -> None:
+    import asyncio
+
+    asyncio.run(orchestrator.run_existing(run))
 
 
 def _summary(run: PipelineRunState) -> PipelineRunSummary:

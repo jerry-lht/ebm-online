@@ -1,6 +1,7 @@
 # Python
 __pycache__/
 *.py[cod]
+*.pyc
 *.egg-info/
 dist/
 build/
@@ -16,6 +17,7 @@ venv/
 # IDE
 .vscode/
 .idea/
+.claude/
 
 # Database
 *.db
@@ -33,6 +35,9 @@ pg_data/
 .pytest_cache/
 htmlcov/
 .coverage
+
+# Runtime artifacts
+logs/*.log
 
 # Data (too large for git)
 data/
