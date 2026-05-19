@@ -1,0 +1,46 @@
+{
+  "study_id": "Banerjee 2010",
+  "pmid": "20478960",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Using the random number generator in the statistical package Stata (version 9), and after stratification by geographical block (the administrative unit above the village), one author (ED) randomly selected 30 of the 134 study villages to receive intervention A and 30 to receive intervention B.\" Comment: The allocation sequence was generated with a computer random number generator (Stata) and therefore meets criteria for a truly random sequence. Although stratification was used, the random generation method is explicitly described.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The paper states that villages were randomly selected by one author using a computer random number generator and stratified by geographical block, but it does not describe any mechanism used to conceal the upcoming village assignment from the person enrolling participants or recruiting villages. The mention that allocation was not blind confirms lack of blinding, not allocation concealment. Comment: Random sequence generation is reported, but no explicit concealment method such as central allocation, SNOSE, or identical containers is described, so foreknowledge of assignment cannot be ruled out.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Naturally, given the context and the intervention, the allocation of villages to treatment or control was not blind.\" and \"The study was not blind from the point of view of the villagers, who might have been motivated to attend the camp to ensure that Seva Mandir would not cancel the programme.\" Comment: Participants and personnel were aware of village allocation, and the intervention involved visible service delivery plus incentives; knowledge of assignment could plausibly change immunisation uptake and related outcomes, so performance bias is high across the study outcomes overall.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Both surveys were blind: interviewers did not know which villages belonged to which intervention (or control) group.\" Comment: The main outcome assessment was done by blinded interviewers during household surveys, and the primary outcome (immunisation status) was ascertained from interviews plus BCG scar examination and vaccination cards/records. Although some outcomes relied on mother self-report, the surveyors who collected and verified these data were blinded, and the objective components (BCG scar, cards, logbooks) reduce susceptibility to detection bias.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The final sample in the household surveys included 2188 children aged 1-3 years at the end point from 2898 households...\" and \"The same households were surveyed again at the end point.\" Comment: The paper indicates follow-up of the originally sampled households with a final endpoint sample reported, and it explicitly states that the same households were resurveyed. Although it does not provide a detailed per-arm attrition breakdown or reasons for loss to follow-up, the report gives no signal of substantial or imbalanced missing outcome data, and the analysis was intention-to-treat. Overall, the attrition picture appears sufficiently complete and balanced to judge risk of attrition bias as low.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

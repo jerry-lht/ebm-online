@@ -1,0 +1,46 @@
+{
+  "study_id": "Litt 2010",
+  "pmid": "20655662",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Those who agreed to participate were randomized to either the Standard Treatment group (STD; n=49) or to the Standard Treatment + Cognitive-Behavioral Treatment group (STD+CBT; n=52) using a computerized urn randomization procedure [28]. The two conditions were balanced on gender, age, ethnic background, pain level recorded at baseline, and RDC axis I diagnoses.\" Comment: A computerized urn randomization procedure is a random allocation method and was used to generate the sequence, so this meets low-risk criteria for random sequence generation.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Those who agreed to participate were randomized to either the Standard Treatment group (STD; n=49) or to the Standard Treatment + Cognitive-Behavioral Treatment group (STD+CBT; n=52) using a computerized urn randomization procedure [28]. ... The Project Coordinator entered the urn data during the intake session and informed the participants of their treatment assignments.\" Comment: The study explicitly states a computerized urn randomization procedure with assignments entered during the intake session by the Project Coordinator. This indicates an interactive allocation process that would prevent the recruiter from foreseeing the next assignment before enrollment, so allocation concealment is judged low risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"The Project Coordinator entered the urn data during the intake session and informed the participants of their treatment assignments.\" Comment: Participants were explicitly informed of assignment, and the report does not state that participants or treating personnel were blinded; although the STD group received weekly 'progress checks' to match attention, the CBT condition involved clearly different active treatment content. Because the paper does not report successful blinding of participants/personnel, and outcomes such as pain, depression, and interference could plausibly be influenced by knowledge of allocation, risk of performance bias is uncertain but cannot be judged low.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "High risk",
+        "support_text": "Summary: A trained M.A.-level research associate, who was not blinded to treatment condition, conducted the pretreatment and follow-up research assessments. The main outcomes were patient-reported pain, depressive symptoms, and pain-related interference collected by interview/questionnaire, so knowledge of allocation could plausibly influence outcome measurement. Comment: Outcome assessment was explicitly unblinded and the outcomes included subjective self-reports, so detection bias is likely.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"At posttreatment 88% of patients provided data, and 73% provided data at 52 weeks. Losses to follow-up were equivalent across treatment conditions.\" Comment: Attrition was moderate overall but described as equivalent across groups, and the analysis used an ITT mixed-model approach that \"takes advantage of all available data\". This makes important attrition bias unlikely despite some missing follow-up data.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "Unclear risk",
+    "blinding_outcome": "High risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

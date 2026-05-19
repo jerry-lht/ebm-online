@@ -1,0 +1,46 @@
+{
+  "study_id": "Gurevich 2009",
+  "pmid": "19624813",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"we randomly sampled the blood of 100 patients (94 microarrays passed quality control criteria).\" Comment: The paper states that patients were randomly sampled, but it does not describe how the allocation/selection sequence was generated for the study groups or any randomization method (e.g., computer-generated numbers, random table, or other truly random process). This is insufficient to judge whether sequence generation was truly random.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The paper describes a prospective collection of blood samples and says patients were \"randomly sampled,\" but this refers to sampling/analysis rather than assignment to intervention groups. There is no description of any allocation mechanism for enrolling participants into groups, and no explicit concealment method such as central allocation or sequentially numbered opaque sealed envelopes. Therefore, foreknowledge of upcoming group assignment cannot be ruled out or confirmed.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The paper describes a prospective blood-sampling and microarray study, but it does not state whether participants or personnel delivering any intervention were blinded, and there is no clear intervention to blind in the usual sense. Because the report gives insufficient information about who knew the group assignment, a confident low- or high-risk judgement cannot be made for this domain. Comment: In this observational/prediction study, performance bias from blinding is not clearly applicable, but the paper does not explicitly describe blinding procedures.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The outcome appears to have been assessed through neurological examinations and EDSS scoring, with relapse defined as \"new objective neurological symptoms/signs\" and \"objective change of at least 0.5 in the EDSS score.\" The paper does not state whether the outcome assessors were blinded to allocation, and this was not a randomized allocation study. Comment: Although the outcome is partly objective and the microarray measurement was automated, the clinical relapse/EDSS assessment involved examiner judgement, and there is no explicit information on blinded outcome assessment. This is therefore unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"we randomly sampled the blood of 100 patients (94 microarrays passed quality control criteria).\" Comment: The only missing data explicitly reported were 6 samples excluded because they failed microarray quality control, which is a small proportion (6%) and does not suggest differential attrition between groups. The results otherwise describe follow-up of the analyzed cohort with no indication of additional withdrawals or outcome-related missingness, so attrition is unlikely to have biased the result.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "Unclear risk",
+    "blinding_outcome": "Unclear risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

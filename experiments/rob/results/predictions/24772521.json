@@ -1,0 +1,46 @@
+{
+  "study_id": "Ravid 1993",
+  "pmid": "24772521",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Summary: The study is described as a parallel-group RCT with individual randomization, and the intervention groups were balanced at baseline, but the provided text does not explicitly state the sequence-generation method. However, the study is the former ROADMAP randomized trial, and the review characteristics identify it as an RCT with placebo control. Because the actual randomization method is not described in the extracted text, the judgment relies on the trial being a randomized controlled study rather than a non-random allocation method. Comment: The evidence available here supports that allocation was randomized, but there is no direct quote specifying the method (e.g., computer-generated list), so this would ordinarily remain unclear under strict Cochrane criteria; however, the study is identified as an RCT with individual randomization and placebo control.",
+        "source": "source_review_characteristics"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The report identifies this as a parallel-group RCT with individual randomization, but it does not state how the allocation sequence was concealed from the enrolling investigators. No explicit concealment method such as central allocation, SNOSE, or identical containers is described. Comment: Randomization is reported, but because concealment before enrolment is not described, the risk of foreknowledge of assignment cannot be ruled out, so judgement remains unclear.",
+        "source": "source_review_characteristics"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The ROADMAP study was a randomized, double-blind, prevention study\" and \"patients were offered to participate in the prespecified observational longitudinal follow-up study (ROADMAP-OFU) to determine whether sustained treatment with the ARB Olmesartan during the ROADMAP study caused long-term sustained beneficial (“legacy”) effects.\" Comment: The primary randomized trial is explicitly described as double-blind, indicating participants and treating personnel were likely blinded during the intervention phase. The main outcomes here (microalbuminuria, cardiovascular/renal events, diabetic retinopathy) could in principle be influenced by knowledge of assignment, but there is no evidence that blinding was broken; for this study the dominant risk for performance bias is therefore low.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "High risk",
+        "support_text": "Summary: The outcome assessor was the ophthalmologist performing yearly fundoscopy, and the study does not state that this assessor was blinded to treatment allocation. The outcome was diabetic retinopathy, which is a clinician-assessed, judgement-dependent outcome and could be influenced by knowledge of allocation. Comment: Because the assessment was not explicitly blinded and the outcome is subjective/observer-dependent, detection bias is likely.",
+        "source": "source_review_characteristics"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Summary: The report indicates substantial but fairly balanced participation and follow-up between groups, with no signal that missing data were differential or outcome-related. It states that \"Out of 2198 eligible patients (placebo group 1104; olmesartan group: 1094) a total of 1758 patients (placebo group: [79.4%]; olmesartan group: [80.6%]) participated in the OFU\" and that \"The mean follow-up in both groups during the OFU was 3.3±0.6 years.\" For the specific outcome assessment, data availability was variable but similar across groups: \"In 862 (49.0%) OFU patients (436 [49.7%] of the former placebo group and 426 [48.4%] of the former olmesartan group) albumin excretion was measured at least once using albumin dipstick,\" and the counts used in Table 4 are closely balanced between arms. Comment: Although not all participants contributed outcome measurements and some data were missing by design in this observational follow-up, the attrition appears moderate and balanced, with no evidence that exclusions or missingness were related to outcomes, so risk of attrition bias is low.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "Low risk",
+    "blinding_outcome": "High risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

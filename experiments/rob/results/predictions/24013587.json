@@ -1,0 +1,46 @@
+{
+  "study_id": "Coatsworth 2010",
+  "pmid": "24013587",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Families were stratified by school district and randomly assigned to one of three conditions... Because of the small sample size, we used an urn randomization procedure to balance the groups on variables that might influence intervention outcomes\" Comment: Urn randomization is a truly random allocation method, and the paper explicitly states that families were randomly assigned using this procedure (with stratification by school district). This is sufficient to judge the sequence generation as low risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The paper states that families were \"stratified by school district and randomly assigned\" and that an \"urn randomization procedure\" was used to balance groups, but it gives no explicit description of how the allocation was concealed from the recruiters/enrollers before assignment. No central allocation, sealed opaque envelopes, sequentially numbered containers, or other concealment mechanism is reported. Comment: Random assignment alone and the urn procedure describe sequence generation/balancing, not concealment, so foreknowledge cannot be ruled out.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Families in the SFP and MSFP conditions were told that one condition included more activities to help parents cope with the stress of having an adolescent, but they did not know whether they were assigned to that condition or not.\" Comment: Participants were not fully blinded to the fact that different intervention versions existed, and the intervention content was clearly different between MSFP and SFP (mindfulness activities infused into parent sessions only). Personnel delivering the programs also could not realistically be blinded to which manual/version they were delivering. The main outcomes were parent and youth reports of parenting and relationship quality, which could plausibly be influenced by knowledge of allocation and expectations, so performance bias is high.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Pre and post-intervention surveys were mailed to the homes of all families that agreed to participate in the study. Youth and parent surveys were mailed separately\" and \"there was an opportunity for parents to report how their practice at home was progressing.\" Comment: The outcomes were assessed by patient self-report from mothers and youths, so the participants themselves were the outcome assessors. The paper does not state that participants/self-report assessors were blinded to allocation; in fact, families were aware they were in one of the parenting programs or delayed intervention. Because the outcomes were subjective Likert-scale reports of parenting and relationship quality, knowledge of assignment could readily influence outcome measurement, so detection bias is high.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Five of the 65 families in our sample did not complete assessments prior to the beginning of the intervention, and 24 families did not complete assessments after the end of the intervention.\" Comment: Although post-intervention missingness was not trivial, the paper explicitly addresses it by using multiple imputation to reduce bias and conduct analyses based on all families: \"To reduce any bias ... multiple imputation procedures were used\" and \"We generated 50 complete datasets...\" This is a plausible and appropriate missing-data approach for this RCT, so attrition is unlikely to have biased the result.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "High risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

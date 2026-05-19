@@ -1,0 +1,46 @@
+{
+  "study_id": "Scribante 2011",
+  "pmid": "22114597",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Patients were randomly assigned to one of two groups.\" Comment: The paper states that assignment was random, but it does not describe the method used to generate the allocation sequence (e.g., computer random number generator, random table, coin toss, shuffled envelopes, blocked randomization with sequence generation method). Therefore, the adequacy of random sequence generation cannot be confirmed.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Patients were randomly assigned to one of two groups.\" Comment: The study reports random assignment, but it does not describe any allocation concealment mechanism (e.g., central allocation, sequentially numbered opaque sealed envelopes, or identical containers), so the recruiter’s ability to foresee the next assignment is unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Summary: The study does not describe any blinding of participants or the clinicians placing/following the retainers, and the interventions were visibly different (multistranded stainless steel wire vs polyethylene fiber-reinforced resin composite). Because one of the reported outcomes was patient satisfaction/esthetic VAS, knowledge of allocation could plausibly influence the outcome; therefore performance bias is likely. Comment: No evidence of successful blinding was reported, and the outcome profile includes a subjective measure susceptible to awareness of treatment assignment.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The study reports that patients were followed with periodic monitoring visits to evaluate detachments and that \"Each patient was asked to express an opinion about the esthetic result such as visibility of the retainer while talking and smiling by means of VAS.\" Comment: Outcome assessment appears to have been done partly by patient self-report for the VAS outcome (the patient is the assessor), and it is not stated whether outcome assessors were blinded. The detachment outcome was based on monitoring visits, but no explicit blinding of the clinician/assessor is described. Because blinding is not reported and the outcomes include both objective detachment and subjective patient-rated satisfaction, risk of detection bias is unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"34 patients were enroled: 17 with a multistrand wire retainer ... while 15 with a polyethylene fiber-reinforced resin composite\" and \"At the end of the followup the percentage of total detachment of the two different retainers were 22,54% for multistrand stainless steel wire and 14,45% for polyethylene ribbon-reinforced resin retainer\" Comment: The report gives follow-up results for both randomized groups through 12 months and does not describe participant dropout, exclusions, or missing outcome data. The attrition described is retainer detachment events, not loss of participants to follow-up. With no signal of differential missing data or outcome-related withdrawal, incomplete outcome data is unlikely to bias the result.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Unclear risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

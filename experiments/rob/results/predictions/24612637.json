@@ -1,0 +1,46 @@
+{
+  "study_id": "Power 2014",
+  "pmid": "24612637",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"cluster‐randomised trial\"; \"All invited hospitals participated in the collaborative, but they did so in two phases for purposes of detecting the effect of the collaborative on improvement. Once the first phase - which lasted 12 months - was over, all hospitals entered the collaborative. During the first phase, the hospitals that were awaiting entry acted as a control group for those already in the QIC.\" Comment: The study is explicitly described as a cluster-randomised trial with allocation by hospital, and the phased entry design indicates randomized assignment of hospitals to first-phase versus delayed-entry conditions rather than a predictable non-random rule. Although the exact randomization method is not spelled out in the excerpt, the structured study characteristics identify it as cluster-randomised, which is sufficient here to judge random sequence generation as low risk.",
+        "source": "source_review_characteristics"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The study is described as a cluster-randomised trial with allocation by hospital, but the text provided does not describe any mechanism used to conceal the upcoming cluster assignment from those recruiting/enrolling participants. It reports the intervention was introduced in two phases and that hospitals awaiting entry acted as controls, but this does not establish concealment from recruiters. Comment: Because no explicit concealment method such as central allocation or sealed opaque envelopes is reported, allocation concealment cannot be judged as low risk.",
+        "source": "source_review_characteristics"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Stroke 90:10 was a quality improvement collaborative...\" and \"Data collected through chart audit by unblinded data collectors - project staff for control sites, intervention hospitals for their own sites\". Comment: This was a hospital-level quality improvement intervention with no indication that participants or staff delivering the intervention were blinded; indeed, the intervention required active participation by local teams and leaders. Because the primary outcomes were process-of-care measures (e.g. scans, aspirin, swallow screen, weight assessment) that could plausibly be influenced by staff behavior and awareness of allocation, lack of blinding creates a credible risk of performance bias.",
+        "source": "source_review_characteristics"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Data collected through chart audit by unblinded data collectors ‐ project staff for control sites, intervention hospitals for their own sites\". Comment: The outcome assessor was explicitly unblinded, and the outcomes were process-of-care measures based on chart audit (e.g. brain scan, aspirin, swallow screen, weight assessment), which can be influenced by knowledge of allocation or by differential interpretation/recording between intervention and control sites.",
+        "source": "source_review_characteristics"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Two hospitals withdrew from the first phase and one did not submit sufficient data for analysis, leaving nine hospitals. Similarly, sufficient data were available from nine hospitals in the second phase.\" Comment: Although there was some cluster attrition, the study reports the extent of missing data clearly and the analysed groups were balanced (nine hospitals in each phase). The attrition appears limited and not obviously related to the outcome, so a risk of bias from incomplete outcome data is unlikely.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "High risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

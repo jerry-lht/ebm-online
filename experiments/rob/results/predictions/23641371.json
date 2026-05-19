@@ -1,0 +1,46 @@
+{
+  "study_id": "Gondhalekar 2013",
+  "pmid": "23641371",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"The subjects were randomly allocated to either of the two treatment groups.\" Comment: The paper states that allocation was random, but it does not describe the method used to generate the sequence (e.g., random numbers, coin toss, computer-generated list, blocked randomization method). Under Cochrane criteria, \"randomized\" alone is insufficient to judge low risk, so the sequence generation cannot be confirmed as truly random.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"The subjects were randomly allocated to either of the two treatment groups.\" Comment: The report states that participants were randomly allocated, but it gives no explicit information about how the allocation was concealed from the person enrolling participants. There is no description of central allocation, SNOSE, identical containers, or any other mechanism preventing foreknowledge, so concealment cannot be judged and remains unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The report describes random allocation to two active physiotherapy/exercise groups, but it does not state that participants or treating personnel were blinded, nor does it describe any sham/placebo or masking procedure. Comment: Because the study outcomes included patient-reported pain (VAS) and WOMAC function, lack of clear blinding information leaves it impossible to determine whether knowledge of allocation could have influenced outcomes.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"The two patient reported outcomes were taken before treatment, after 1 week of treatment and after 3 weeks of treatment\" and \"A 10 cm visual analogue scale (VAS)... The patient was asked to mark his/her pain\" and \"Western Ontario and McMaster Universities Arthritis Index (WOMAC) of OA, a patient reported scale\". Comment: The primary outcomes were patient self-reported, so the patient was effectively the outcome assessor. The report does not describe participant blinding, and knowledge of treatment allocation could easily influence self-rated pain and WOMAC function scores; therefore detection bias is at high risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Thirty three patients fulfilling the inclusion criteria were screened and included in study after obtaining their consent. Three patients were lost to follow-up. The study population thus had 30 adults... Scores were analyzed pre intervention, at the end of 1 week and at the end of 3 weeks in both the groups\" Comment: Attrition was small overall (3/33, about 9%) and the report suggests both groups were analyzed over follow-up with no indication that losses were imbalanced or related to lack of efficacy/adverse events. This is consistent with low risk of bias for incomplete outcome data.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "Unclear risk",
+    "blinding_outcome": "High risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

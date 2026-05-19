@@ -1,0 +1,46 @@
+{
+  "study_id": "APPAC 2015",
+  "pmid": "23394263",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The 610 opaque, sealed, and sequentially numbered randomization envelopes are mixed and distributed to research hospitals by the main research center according to each hospital district population. To randomize a patient, an independent surgeon on duty will open the next consecutively numbered envelope.\" Comment: The study clearly describes a closed-envelope randomization procedure with sequentially numbered opaque sealed envelopes, which indicates a pre-generated random allocation sequence rather than a predictable rule. Although the exact sequence generation algorithm (e.g., computer random numbers) is not stated, the method is sufficient here to judge that allocation was randomized rather than alternated or otherwise non-random.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The 610 opaque, sealed, and sequentially numbered randomization envelopes are mixed and distributed to research hospitals by the main research center according to each hospital district population. To randomize a patient, an independent surgeon on duty will open the next consecutively numbered envelope.\" Comment: This explicitly describes sequentially numbered, opaque, sealed envelopes (SNOSE) with opening of the next consecutively numbered envelope by an independent surgeon, which prevents foreknowledge of the upcoming assignment.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"The APPAC trial has been designed as a prospective randomized controlled, open label, non-inferiority multicenter trial to compare antibiotic therapy (intravenous ertapenem) with emergency appendectomy\" and \"the concealment would not be possible and therefore a randomized open design was chosen.\" Comment: Participants and treating personnel were not blinded (open-label design). Knowledge of assignment could plausibly influence several subjective and care-dependent outcomes in this study, including pain scores, use of pain medication, sick leave, length of hospital stay, and decisions about crossover to surgery or evaluation of symptoms, so overall performance bias is high.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"The APPAC trial has been designed as a prospective randomized controlled, open label, non-inferiority multicenter trial\" and \"Patient outcome will be obtained during hospital stay ... and then by a phone interview\"; also \"pain scores (VAS 0–10)\" and \"recurrent AA will be diagnosed on a clinical basis.\" Comment: The study was explicitly open-label, so outcome assessors were not blinded. Several outcomes were subjective or judgement-dependent and could be influenced by knowledge of treatment allocation, including pain scores, sick leave, treatment success/recurrent appendicitis diagnosed clinically, and complications assessed by surgeons or staff. Although some elements (e.g. histopathology, CT) are more objective, the key outcomes for this trial include subjective and clinician-judged measures, so lack of blinding could bias outcome assessment.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The main analyses will be based on the intention-to-treat principle, but both intention-to-treat and per-protocol analyses will be performed.\" Comment: The protocol anticipates some loss to follow-up (\"With an estimated 10 percent of the trial patients lost to follow-up, a maximum of 610 patients will be enrolled\") but this is a modest amount and, with ITT as the main analysis, does not suggest serious attrition-related bias. The paper also describes scheduled follow-up contacts at 1 week, 2 months, and 1, 3, 5, and 10 years, indicating active follow-up. Overall, the expected attrition is reasonable and not obviously imbalanced or outcome-related.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "High risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

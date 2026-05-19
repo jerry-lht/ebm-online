@@ -1,0 +1,46 @@
+{
+  "study_id": "Dorresteijn 2016",
+  "pmid": "21933436",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"This randomisation was performed in blocks of two on the basis of one prognostic factor: the level of concern about falls (some, regular, often, and very often). Computerised alternative allocation was used in the randomisation process, which was performed by an external agency.\" Comment: The study reports computerised allocation by an external agency, which indicates a random allocation process; although \"alternative allocation\" could be ambiguous on its own, the explicit description of stratified block randomisation with computerised allocation by an external agency is sufficient here to judge the sequence generation as low risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Computerised alternative allocation was used in the randomisation process, which was performed by an external agency.\" Comment: Allocation was handled by an external agency rather than the recruiters, which indicates a mechanism that prevented the enrolling personnel from foreseeing the next assignment; this is sufficient for low risk despite no further envelope/centralization details.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Participants were assigned to the programme or the no-treatment control group\" and \"The AMB-Home programme was facilitated by eight trained nurses\"; also, \"Data for the effect evaluation is gathered by means of telephone interviews which are conducted by trained interviewers, who are blinded for group allocation.\" Comment: The outcome assessors were blinded, but the report does not describe blinding of participants or the nurses delivering the intervention. Given the no-treatment control and an interactive behavioural/home-visit intervention, participants and personnel were very likely aware of allocation, and the main outcomes (fear of falling, activity avoidance, disability, and falls) could plausibly be influenced by that knowledge.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Data for the effect evaluation is gathered by means of telephone interviews which are conducted by trained interviewers, who are blinded for group allocation.\" Comment: The main self-reported outcomes (FES-I, FES-IAB, GARS and other questionnaire outcomes) were collected by blinded interviewers, so knowledge of allocation was unlikely to influence measurement. The falls outcome was collected via participant fall calendars, which is also relatively objective/record-based in this context and not assessor-judged.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Non-compliant participants of the programme group are approached for all follow-up measurements, and participants with missing data are contacted to ensure completion of data, as recommended by Hollis and Campbell [52].\" Comment: The study explicitly describes an effort to minimize missing outcome data and indicates follow-up of non-compliant participants. In addition, the protocol expected about 20% dropout, suggesting attrition was anticipated rather than excessive. The methods do not report any clear signal of large or imbalanced missingness or outcome-related withdrawal that would suggest attrition bias, so a Low risk judgement is reasonable.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

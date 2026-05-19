@@ -1,0 +1,46 @@
+{
+  "study_id": "Jo 2010",
+  "pmid": "20740213",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The study is described as a randomized controlled trial with 40 patients (20 per group), but the methods section does not state how the allocation sequence was generated. It reports only that patients received either saline or milrinone and that the groups were similar at baseline, which is not sufficient to confirm a truly random sequence. Comment: Because the randomization method (e.g., computer-generated sequence, random numbers, permuted blocks with method specified) is not described, sequence generation cannot be judged low risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The report states that patients were randomized to receive saline or milrinone, but it gives no description of how the allocation sequence was concealed from the enrolling personnel. There is no explicit mention of central allocation, sealed opaque sequential envelopes, identical containers, or any other mechanism preventing foreknowledge of the next assignment. Comment: Because sequence generation is described only in general terms and concealment is not reported, allocation concealment cannot be judged low risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"All procedures were performed by the same cardiac surgeon and anesthesiologist blinded to the treatment groups.\" Comment: The study explicitly states that the key personnel delivering the intervention were blinded to treatment allocation. Although the paper does not directly state that participants were blinded, the intervention was an intraoperative infusion during anesthesia, making participant knowledge unlikely to affect the reported outcomes; therefore overall performance bias is low.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"All procedures were performed by the same cardiac surgeon and anesthesiologist blinded to the treatment groups.\" Comment: The main outcomes were hemodynamic variables and right ventricular ejection fraction measured by a computerized pulmonary artery catheter/monitoring system, plus 30-day complications recorded from clinical data. These are largely objective measurements, and the study explicitly states the surgeon/anesthesiologist were blinded to treatment groups; therefore knowledge of allocation was unlikely to influence outcome measurement.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Considering a dropout rate of 5% from the authors' other clinical experiences, the studies were conducted with 20 patients in each group, 40 in total.\" Comment: The study reports 40 randomized participants and 40 analysed, with no losses to follow-up or withdrawals reported (N lost to follow-up or withdrawn: 0; N analysed: 40). This indicates essentially complete follow-up and no evidence that missing data could have biased the results.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "Low risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

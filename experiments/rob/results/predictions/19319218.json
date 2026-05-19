@@ -1,0 +1,46 @@
+{
+  "study_id": "Chien 2008a",
+  "pmid": "19319218",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Those eligible were listed in alphabetical order by surname. They were then selected randomly from the patient list, using a computer-generated random numbers table.\" Comment: The study explicitly describes use of a computer-generated random numbers table to select participants, which is a truly random method. The later statement that participants were \"randomly assigned to one of the two groups\" is supported by this explicit random sequence generation method, so this domain is low risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"the participants were then asked by the principal researcher to draw a sealed opaque envelope, in which a number card indicated to which group they had been allocated (1 = psycho-education group and 2 = routine care group).\" Comment: This explicitly describes a sealed opaque envelope used at allocation, which is an allocation concealment mechanism that would prevent foreknowledge of the upcoming assignment by the recruiter.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"The group met on a bi-weekly basis for 18 sessions (over nine months)... A trained psychiatric nurse with expertise in psychiatric rehabilitation led the three caregiver subgroups...\" and \"Participants (n = 34) received a 36-week program of mutual support and the conventional psychiatric outpatient care.\" Comment: Participants and the personnel delivering the intervention were clearly not blinded to group assignment in this behavioral/group intervention. Because the main outcomes included caregiver burden (FBIS), family functioning (FAD), service use (FSSI), and patient functioning (SLOF), which could plausibly be influenced by awareness of allocation and by differential interaction with staff, performance bias is likely.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"An independent assessor (a research assistant) was trained to undertake measurements at Time 1, 2 and 3 using a set of questionnaires.\" Comment: Outcome assessment was performed by an independent assessor, and the study explicitly notes that all other clinic staff were blinded to allocation. The main outcomes were caregiver questionnaire scales (FBIS, FAD, FSSI) and patient functioning (SLOF), plus hospitalization data from records; these measurements are unlikely to be influenced by knowledge of group allocation when collected by an independent assessor, and record-based hospitalization outcomes are objective.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Analysis of data was on an intention-to-treat basis. All subjects, who completed the intervention or not, were followed up over a 12-month post-intervention period.\" Comment: The trial reports ITT analysis, follow-up of all subjects regardless of completion, and very low attrition overall (31/34 completed in the intervention group; the text also states that dropouts/discontinuations in the two groups were only 3 and 2, respectively, with reasons such as insufficient time, worsened patient mental state, and lack of interest). This level of missing data is small and does not suggest differential attrition likely to bias the results.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

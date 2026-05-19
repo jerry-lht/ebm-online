@@ -1,0 +1,46 @@
+{
+  "study_id": "Nidich 2009",
+  "pmid": "19798037",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Students were then randomized to experimental or control groups, using the random blocks method21 stratifying on gender (male/female) and self-reported attention deficit hyperactivity disorder status (yes, no), to either (a) immediate instruction in the TM program or (b) wait list/delayed start condition.\" Comment: The study explicitly states use of the random blocks method, which indicates a truly random allocation sequence; although the exact mechanism is not spelled out in this excerpt, blocked randomization is acceptable when presented as a random blocks method.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The treatment group allocations were concealed by the study statistician, with individual treatment group assignments revealed to the project manager only when study participants completed baseline testing.\" Comment: This explicitly describes a concealment mechanism that prevented the recruiter/project staff from knowing upcoming assignments before enrollment was complete, so allocation concealment is judged low risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"This was a single-blind RCT comparing stress reduction with the TM program to wait-list controls\" and \"All assessments were administered by research staff who were masked to treatment condition. Thus, this was a single-blind design.\" Comment: Participants were not blinded, and personnel delivering the intervention (TM instructional staff/instructors) necessarily knew allocation in an open-label TM versus wait-list design. Because the study outcomes included subjective outcomes such as anxiety, depression, coping ability, and psychological distress, knowledge of assignment could plausibly affect outcomes, so the dominant risk for this domain is high.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"All assessments were administered by research staff who were masked to treatment condition. Thus, this was a single-blind design.\" and \"BP was measured in a seated position, with an automated BP monitor...\" Comment: The outcome assessors (research staff) were explicitly masked to treatment allocation, and the key outcomes included automated blood pressure readings plus self-report psychological scales. Because the assessors were blinded and the objective BP measurement was obtained with an automated monitor, knowledge of allocation was unlikely to influence outcome measurement.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"A limitation is that about 30% of the pretest sample was unavailable for post-testing. This concern is mitigated by the fact that across groups completers did not differ from non-completers on any baseline entry characteristics. Also there were no differences between groups on baseline primary and secondary outcomes in noncompleters.\" Comment: Although attrition was around 30%, the report states that completers and non-completers were similar at baseline and that there was no baseline imbalance between groups among non-completers, which reduces concern that missing data biased the outcome comparison. The paper also reports analyses on participants with baseline and post-test data, and the attrition does not appear clearly differential or outcome-related.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

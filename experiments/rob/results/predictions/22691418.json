@@ -1,0 +1,46 @@
+{
+  "study_id": "Kim 2012",
+  "pmid": "22691418",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The paper says the “after the insertion, auscultation, pH testing of the tube aspirate, and ultrasonography ... were conducted in random order,” but it does not describe how the allocation/order sequence was generated. There is no statement of a random number table, computer-generated sequence, or any other truly random method, so random sequence generation cannot be confirmed.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The paper reports that after NGT insertion, the verification tests were performed in random order, but it does not describe any method for concealing group assignment from the person enrolling participants. There is no explicit central allocation, sealed envelopes, identical containers, or other concealment mechanism described, so foreknowledge of assignment cannot be ruled out.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Low risk",
+        "support_text": "Summary: This was a diagnostic/procedural study of nasogastric tube placement verification, not an intervention trial where participant/personnel awareness would likely change outcomes. The methods describe that \"NGT insertion was performed bedside by a emergency room resident physician\" and that after insertion, \"auscultation, pH testing of the tube aspirate, and ultrasonography ... were conducted in random order,\" with chest X-ray as reference standard. Because the outcomes were objective test results (sensitivity/specificity against chest X-ray), knowledge of allocation would be unlikely to influence them in a meaningful way.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Chest X-rays were interpreted by an emergency medicine specialist who did not perform the ultrasound examinations.\" Comment: The outcome assessors were explicit independent clinicians for radiology confirmation, and the measured outcomes (NGT placement verified by chest X-ray, pH strip reading, and ultrasound visualization) are largely objective/standardized technical assessments rather than subjective patient-reported outcomes. Knowledge of allocation would be unlikely to influence the chest X-ray reference standard, and the paper indicates separation between the ultrasound operators and the radiologist interpreting the reference test.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"A total of 74 patients were screened for the study. Seventeen patients with normal levels of consciousness were excluded. Ten more patients were excluded because they did not undergo a radiological examination after tube insertion. Thus, a total of 47 patients composed the study sample.\" Comment: Although 27/74 screened patients were excluded before the final analysis, the study reports complete analysis of the 47 included participants with chest X-ray confirmation and does not describe post-enrolment loss to follow-up, differential dropout, or missing outcome data among the analyzed sample. The attrition picture is clear and not suggestive of bias for the reported outcomes.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "Low risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

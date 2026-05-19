@@ -1,0 +1,46 @@
+{
+  "study_id": "Shah 2014",
+  "pmid": "24550581",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Patients were randomly assigned according to the medical record numbers to receive a preoperative dose of levosimendan ... in group L or a placebo ... in group C.\" Comment: The paper says patients were \"randomly assigned\" but describes allocation by medical record numbers, which does not clearly indicate a truly random sequence generation method and may imply a non-random or predictable process. No random number table, computer-generated sequence, or other explicit randomization method is reported.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Patients were randomly assigned according to the medical record numbers to receive a preoperative dose of levosimendan ... or a placebo\" Comment: Allocation by medical record number is a predictable assignment procedure, so the recruiter could foresee the upcoming group assignment before enrollment. This is not an explicit concealment mechanism and indicates inadequate allocation concealment.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The patients were randomly assigned ... to receive ... levosimendan ... or a placebo ... dissolved in NS to mimic the color of levosimendan in group C. The method of administration was similar in both groups.\" Comment: The study explicitly states it was a randomized, double blind trial and describes a placebo designed to mimic levosimendan with similar administration, which is sufficient to judge that participants and personnel were likely blinded. Because the intervention and control were administered in a matched infusion and outcomes were mainly hemodynamic/clinical perioperative outcomes that could be influenced by knowledge of allocation, successful blinding supports low risk of performance bias.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The patients were randomly assigned ... to receive ... levosimendan ... or a placebo ... to mimic the color of levosimendan ... The method of administration was similar in both groups.\" and \"All patients underwent continuous monitoring of HR, ABP, pulse oximetry, cardiac index (CI), and pulmonary capillary wedge pressure (PCWP). Central venous pressure (CVP), urine output, capnography, nasal temperature, and arterial blood gases (ABG) were also monitored.\" Comment: The study is described as double blind and the infusion was masked with placebo. The key outcomes for this domain were largely objective physiological measurements from monitoring/ABG and clinical endpoints such as mortality, CPB/IABP use, renal failure, and arrhythmia, which are unlikely to be influenced by knowledge of allocation. Although the paper does not explicitly state who performed outcome assessment, the nature of the outcomes and blinded treatment administration make detection bias unlikely.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The data from these 50 patients were included in statistical analysis.\" Comment: The report indicates all 50 randomized patients were analyzed, and the review characteristics also note \"N lost to follow-up or withdrawn:0\" and \"N analysed:50,\" with no evidence of differential dropout or exclusions after randomization. This supports a low risk of attrition bias.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "High risk",
+    "blinding_participants": "Low risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "study_id": "HCSF 1 2007",
+  "pmid": "22956296",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Within each stratum, half of the families were randomly assigned to the intervention condition and half to the control condition. Furthermore, within each stratum, a blocked randomization strategy was used to ensure that there was an equal number of families in the intervention and control groups.\" Comment: The paper says families were randomly assigned and used blocked/stratified randomization, but it does not describe how the random sequence itself was generated (e.g., computer random numbers, random number table, coin toss). Under Cochrane criteria, this is insufficient to confirm a truly random sequence, so the risk of bias remains unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Randomization at the family level was done after obtaining consent from and completing baseline measurements on participating families. Families were stratified at each tribal community... Within each stratum, half of the families were randomly assigned to the intervention condition and half to the control condition. Furthermore, within each stratum, a blocked randomization strategy was used...\" Comment: The paper reports stratified/blocked randomization but does not describe any concealment mechanism (e.g., central allocation, sequentially numbered opaque sealed envelopes, or identical containers) that would prevent recruiters from foreseeing the next assignment. Therefore allocation concealment cannot be judged as low risk and is unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"During Year 1, intervention families were also invited with their extended family to three mentor-led group sessions\" and \"control families received educational tool kits and incentives sent home on the same cycle as intervention families, but they did not receive any mentoring.\" Comment: Participants and personnel were clearly aware of allocation because the intervention involved obvious mentor-led home visits and group sessions versus mailed materials only. The main outcomes included BMI, behaviors, and psychosocial measures, all of which could plausibly be influenced by knowledge of group assignment and differential support, so performance bias is at high risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Summary: Outcome assessment was largely performed using objective or standardized measures by study personnel. The paper states that \"Height was measured with a portable stadiometer\" and \"Weight was measured with a calibrated electronic scale,\" and that biochemical measures were conducted in a laboratory subset. It also reports that physical activity was measured using \"Actical accelerometers\" worn for 7 days. These outcomes are unlikely to be influenced by lack of blinding, even though the paper does not explicitly state that outcome assessors were blinded. Comment: Because the main outcomes relevant here (BMI/anthropometrics, accelerometry, biochemical assays) are objective and measured with standardized methods, absence of explicit blinding information does not create a substantial risk of detection bias for these measures.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Summary: The article gives enough information to indicate that attrition was planned for and not obviously excessive, and it explicitly anticipated retaining 120 of 150 recruited families over the 2-year trial. It also notes efforts to maintain participation (rescheduling visits, mail delivery if home visits could not be completed), and there is no signal in the methods text of differential dropout, outcome-related exclusions, or inappropriate handling of missing data. Comment: Although exact per-arm attrition numbers are not provided in the excerpt, the study description suggests reasonable follow-up in a well-supported RCT, so attrition bias is unlikely.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "study_id": "Van der Ploeg 2010",
+  "pmid": "21543987",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Ninety patients were randomized 2:1 to the treatment arm using a minimization algorithm in an effort to balance the groups for disease severity. Groups were stratified according to baseline six minute walk test with a threshold of 300 meters and baseline upright forced vital capacity with a threshold of 55% of the predicted value.\" Comment: Minimization is listed as an acceptable random sequence generation method under this domain. The paper explicitly states a minimization algorithm was used, which supports a truly random allocation sequence; the added stratification details do not undermine this because the sequence generation method itself is described.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The paper describes the trial as randomized and says participants were assigned using a \"minimization algorithm\" to balance disease severity, but it does not state any allocation concealment mechanism (e.g., central allocation, opaque sealed envelopes, or sequentially numbered containers). Because minimization/randomization method is not the same as concealment and there is no explicit description preventing foreknowledge by recruiters, allocation concealment cannot be judged as low risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"This study was a post-hoc analysis of cardiovascular parameters in a double-blind, multi-center, randomized controlled trial\" and \"the control group received a volume matched placebo infusion.\" Comment: The trial explicitly states that it was double-blind and used volume-matched placebo infusions, indicating participants and personnel were intended to be blinded. For the cardiovascular outcomes analyzed here (ECG and echocardiographic parameters), knowledge of allocation is unlikely to have meaningfully influenced the outcomes because these are objective measures, and the paper also states that central readers were blinded to treatment arm/allocation.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"All ECG’s were interpreted at the central cardiology core lab by a cardiologist blinded to treatment arm.\" and \"All echocardiograms were interpreted at the central cardiology core lab by a cardiologist blinded to treatment allocation.\" Comment: The outcome assessor for the cardiovascular outcomes was an independent cardiologist at a central core lab, and the paper explicitly states that this assessor was blinded to allocation. The measured outcomes (ECG and echocardiographic parameters) are objective, instrument-based outcomes that are unlikely to be influenced by knowledge of treatment assignment.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Five (8%) patients in the enzyme replacement therapy group and four (14%) patients in the placebo group did not complete the study. Reasons for not completing the study in the treatment group included ... hypersensitivity reactions related to the study medication (2), death unrelated to treatment (1), and switch to commercial enzyme replacement therapy (2). In the control group, the reasons included ... adverse event not related to study medication (1), switch to commercial enzyme replacement therapy (1), and missed 78-week study appointments (2).\" Comment: Attrition was modest overall (9/90 randomized; 10%) and reasonably balanced between groups, with reasons not clearly related to the cardiovascular outcomes analyzed; the paper also reports that no discontinuations were related to the cardiovascular system. Although analyses were restricted to those with baseline and 78-week data, the amount and pattern of missingness do not suggest important attrition bias.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "Low risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

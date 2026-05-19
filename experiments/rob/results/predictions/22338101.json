@@ -1,0 +1,46 @@
+{
+  "study_id": "Kopf 2014",
+  "pmid": "22338101",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The study is described as a randomized controlled trial and reports that 53 patients were randomized to the intervention group and 57 to the control group, but no method for generating the allocation sequence is given. Comment: Because the paper does not state how the random sequence was generated (e.g., computer random numbers, random number table, coin toss, etc.), the adequacy of sequence generation cannot be judged.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The report states that this was a randomized controlled trial and that 110 patients \"were randomized to the control group\" or \"randomized to the intervention group,\" but it does not describe any method used to conceal the upcoming allocation from the person enrolling participants (e.g., central allocation, sealed opaque envelopes, identical containers). Because randomization method is reported without allocation concealment details, concealment cannot be judged.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Summary: The intervention was an 8-week group MBSR program led by a psychologist and a resident, while the control group received usual care; the report does not describe any blinding of participants or personnel. Because the outcomes included self-reported depression, stress, and health status, knowledge of allocation could plausibly influence these outcomes. Comment: With an unblinded behavioral intervention and subjective outcomes, performance bias is likely.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Psychiatric comorbidity and levels of depression and stress were assessed using the Patient Health Questionnaire (PHQ). Subjective health status was measured by the 12-item short-form health survey (SF-12)... Albuminuria was determined using 24-h urine on 3 consecutive days. All routine blood parameters were analyzed in the Clinical Laboratory of the University of Heidelberg using standardized and certified methods; blood pressure was examined with a 24-h measurement.\" Comment: The paper reports who measured outcomes only indirectly: patient self-report for depression, stress, and health status; laboratory/automated methods for albuminuria, blood parameters, and blood pressure. However, it does not state whether outcome assessors were blinded, and the outcomes are a mix of subjective self-reported measures and objective measures. Given the absence of explicit blinding information, detection bias is unclear overall.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"In a sensitivity analysis, all calculations were redone with missing data imputed (using multiple imputation).\" Comment: The paper explicitly addresses missing data with multiple imputation and reports an ITT analysis for 1-year follow-up with similar sensitivity results, which supports low risk of attrition bias. Although detailed per-arm attrition counts are not fully presented in the excerpt, the available report does not show evidence of substantial or imbalanced dropout affecting the outcome.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Unclear risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

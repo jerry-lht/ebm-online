@@ -1,0 +1,46 @@
+{
+  "study_id": "Deblinger 2011",
+  "pmid": "20830695",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The study reports that participants were “randomly assigned” / “randomly assigned to one of the four treatment conditions” after baseline assessment, but it does not describe the method used to generate the allocation sequence (e.g., computer random numbers, random tables, blocks, etc.). This is insufficient to judge whether the sequence was truly random.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The report states that children were “randomly assigned to one of the four treatment conditions” and that the project coordinator was blind to treatment assignment, but it gives no explicit description of how allocation was concealed from the person enrolling participants. There is no mention of central allocation, opaque sealed envelopes, identical containers, or any other mechanism preventing foreknowledge of the next assignment. Therefore concealment cannot be judged as low risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Because the project coordinator was blind to treatment assignment, participants were told of the treatment assignment by the therapist during the first treatment session.\" Comment: Participants were explicitly unblinded at the start of treatment, and the therapists necessarily knew which condition they were delivering (TN vs no TN; 8 vs 16 sessions). Because the study outcomes include subjective child/parent report measures and clinician-rated PTSD symptoms that could plausibly be influenced by awareness of assignment, the dominant risk for performance bias is high.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"the project coordinator was blind to treatment assignment\" and \"Randomly selected tapes from different stages of treatment were also reviewed by independent raters who were blind to the assigned treatment type\"; also, the main clinical outcome interview \"was administered independently to the child and the parent\" and several outcomes were explicitly self-report or parent-report measures. Comment: Outcome assessment for the principal interviewer-administered PTSD measure was conducted by a blind project coordinator, and the only other blinded assessors mentioned were independent raters for treatment adherence. The key outcomes here were a mix of independently administered interview data and patient/parent self-report; because the only explicit outcome assessor described was blind and the objective/structured nature of the K-SADS minimizes influence from allocation knowledge, this is judged low risk for detection bias.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"As Figure 1 displays, 16 (8%) children and their parents never returned after being assigned to treatment, and 15 (7%) children and their parents left after attending only one or two sessions. These 31 (15%) children and their parents were defined as dropouts. Therefore, 179 (85%) children attended at least three TF-CBT sessions.\" Comment: Attrition was moderate (15%) and the authors report that analyses using all randomized participants (ITT/multiple imputation and mixed models) gave results similar to the completer analyses. They also state that dropout rates were comparable across the four treatment groups and that dropout was not associated with baseline characteristics or outcomes, which makes attrition bias unlikely.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

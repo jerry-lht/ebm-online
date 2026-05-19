@@ -1,0 +1,46 @@
+{
+  "study_id": "Imoto 2012",
+  "pmid": "24453599",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"A statistician performed the allocation of the patients using a computer program. Aiming to avoid selection bias, a third person numbered and sealed the opaque envelopes.\" Comment: The use of a computer program for allocation indicates a truly random sequence generation method; although the envelope procedure is described for concealment, the key sequence-generation method is explicitly random.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"A statistician performed the allocation of the patients using a computer program. Aiming to avoid selection bias, a third person numbered and sealed the opaque envelopes.\" Comment: The report explicitly describes a concealment mechanism using sequentially numbered, opaque, sealed envelopes prepared by a third person, which would prevent the recruiter from foreseeing the next assignment before enrollment.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"The patients from the ExG group took part in group sessions lasting from 30 to 40 minutes, with a weekly frequency of twice a week.\" and \"The patients from the Orientation group received an explanation about the manual after the initial evaluation.\" Comment: This was an open, in-person exercise intervention versus an education/orientation control, and the methods do not describe any blinding of participants or treating personnel. Because the main outcomes included pain and function (NRS, TUG, SF-36 functional capacity), knowledge of assignment could plausibly influence reporting and delivery of care, so performance bias is likely high.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The pre and post-intervention assessments were carried out by a physiotherapist blinded to the patient's group.\" Comment: Outcome assessment was explicitly blinded. The main outcomes here were pain by NRS (patient self-report), TUG functional performance, and SF-36 questionnaire. Because the assessor was blinded for the performance-based assessment (TUG) and the SF-36/NRS are self-reported patient outcomes, the risk of detection bias from assessor knowledge is minimal for the measured outcomes, and the paper directly states blinded assessment.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Eighty-one patients (n = 43 in ExG and n = 38 in OG) finished the study. In the ExG group, one patient was excluded due to failure to attend the sessions, while two were instructed to stay at home for a week due to inflammation in the knee. However, the inflammatory state persisted, which made them unable to continue with the exercises of the protocol. Consequently, they did not terminate the protocol and were excluded from the study. One patient had a death in the family (spouse) and declared herself psychologically and socially incapable of continuing with the treatment, two began in a new job and one started treatment nearer his home. In OG, one patient fractured his ankle and 11 did not return for the final assessment even after being contacted by phone.\" Comment: Attrition was substantial overall (19/100 did not complete) and clearly imbalanced, with more loss in the OG (12/50) than ExG (7/50). Some exclusions were related to inability to continue treatment or non-return for final assessment, and the paper does not show an adequate per-protocol/ITT handling of the missing post-treatment outcomes; this level and pattern of missing data could bias the results.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "High risk"
+  }
+}

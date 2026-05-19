@@ -1,0 +1,46 @@
+{
+  "study_id": "Vodermaier 2009",
+  "pmid": "19209172",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Random assignment was performed by means of numbered cards in envelopes for the intervention and the control group, and was stratified by age group (<, ⩾60 years).\" Comment: The paper states that assignment used numbered cards in envelopes and stratification by age, but it does not describe how the allocation sequence itself was generated. Because \"randomized\" or stratified assignment alone is not enough to confirm a truly random sequence, the method of sequence generation remains insufficiently described.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Random assignment was performed by means of numbered cards in envelopes for the intervention and the control group\" Comment: This explicitly reports an envelope-based allocation procedure. Although the paper does not spell out \"opaque\" and \"sealed,\" the use of numbered cards in envelopes indicates a concealed assignment process intended to prevent foreknowledge of the next allocation before enrollment.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Blinding was not possible within the hospital procedures. Nonetheless, in most cases physicians did not know in which arm patients had been randomised.\" Comment: Participants were not blinded and the intervention itself was obvious (decision aid coaching vs standard care). Because the outcomes include patient-reported decisional conflict, perceived involvement, satisfaction, and treatment decision processes, knowledge of allocation could plausibly influence outcomes; the authors also explicitly state blinding was not possible.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Blinding was not possible within the hospital procedures.\" Comment: Outcome assessment was largely by patient self-report (e.g. decisional conflict, length of consultation, time point of decision making, perceived involvement in care, satisfaction), so the patient was effectively the assessor. Because participants were not blinded and the outcomes were subjective/judgement-dependent, knowledge of allocation could influence the measurement of these outcomes. The chart-based treatment uptake outcome was objective, but the domain concerns the study's outcome assessment overall and the main outcomes were self-reported.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The final sample was 111 patients, of whom 55 were randomly assigned to the intervention group and 56 to the control group. Here, 13 and 16 patients respectively were excluded from the analyses because of post hoc ascertainment of not having met the inclusion criteria...\" Comment: Although there was some post-randomisation exclusion, the numbers were small and reasonably balanced across groups (13 vs 16). The paper also reports outcome data for 111 participants with no signal of differential dropout or missing outcome data related to treatment arm or outcome. This is consistent with low risk of attrition bias.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "High risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

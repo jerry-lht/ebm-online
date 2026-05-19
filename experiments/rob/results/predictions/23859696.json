@@ -1,0 +1,46 @@
+{
+  "study_id": "Stapleton 2013",
+  "pmid": "23859696",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Randomization and packaging was organized by an independent statistician at the host site, using the SPSS software Rand function. The sites received batches of 90 envelopes as required throughout recruitment, each consisting of five blocks of 18 random assignments (seven NRT, seven bupropion, four NRT + bupropion).\" Comment: This explicitly describes a computer-generated random allocation sequence (SPSS Rand function). The use of blocks is also described, and the random generation method is stated, so the sequence generation appears truly random.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"To allow participants to be recruited at satellite centres without computer links, randomization was by sealed envelope. Numbered envelopes containing a random treatment allocation were provided to each site. On enrolment participants selected their envelope from a large batch and signed it before breaking the seal to reveal their allocation.\" Comment: The paper explicitly describes a sealed-envelope mechanism with numbered envelopes provided to sites and opened only after enrolment, which is sufficient to prevent foreknowledge of the next assignment.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"This was an open-label parallel-group trial\" and \"we could not include placebos to allow a no-treatment condition or to blind treatment allocation\". Comment: Participants and personnel were not blinded, and the paper explicitly states that blinding was not possible. Because the main outcomes included smoking cessation and self-reported unwanted symptoms/medication use, knowledge of treatment assignment could plausibly influence behavior and reporting, so the dominant risk for this domain is high.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Before each support session a therapist reviewed the responses and recorded an expired-air carbon monoxide measure (ECO). At 6-month follow-up participants completed a questionnaire detailing their smoking behaviour since the last support session and an ECO was taken.\" Comment: The key primary outcome was smoking cessation verified by carbon monoxide (<10 ppm), which is an objective measurement. Although the trial was open-label and \"Blind follow-ups were not considered feasible,\" the outcome assessment relied on ECO verification and standardized criteria, making knowledge of allocation unlikely to influence the measurement of the primary smoking-cessation outcome.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The two follow-ups for the primary outcome (session 7, 26 weeks) were completed by 659 (61.5%) participants and this rate did not differ significantly between treatment groups (χ2(2) = 3.33, P = 0.19). Of the 412 participants not completing both follow-ups, 241 (58.5%) reported smoking at one follow-up which they did complete... only for the remaining 171 (16.0% of all participants) ... was it necessary to assume continued smoking. This gave a primary outcome completion rate of 84%. Again, this rate did not differ between treatment groups.\" Comment: Although complete follow-up was not achieved, the paper reports balanced follow-up across groups, most non-completers were identified as smokers at another follow-up, and only 16% required an assumption of continued smoking. This is reasonable attrition with no sign of differential missingness or outcome-related dropout likely to bias the result. The ITT analysis also supports low risk.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

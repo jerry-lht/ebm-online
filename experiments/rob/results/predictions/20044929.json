@@ -1,0 +1,46 @@
+{
+  "study_id": "Hegarty 2013",
+  "pmid": "20044929",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"practitioners will be stratified according to whether they are urban or rural and block randomisation with random block sizes will be used within each stratum. The randomisation will be performed by a statistician not directly involved in the study\" Comment: This describes a genuinely random allocation sequence (block randomisation with random block sizes, stratified by urban/rural), which is consistent with low risk for random sequence generation. The use of a statistician to perform the randomisation further supports proper sequence generation.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The randomisation will be performed by a statistician not directly involved in the study and who is blinded to the identity of the practitioners. Allocation of clusters to intervention or comparison will done following collection of baseline data. In other words, at the time of screening and recruitment of women, the allocation of GPs (and therefore, of women) will be unknown.\" Comment: This explicitly indicates that assignment was handled by an independent statistician and that allocation was unknown during recruitment, which is sufficient to prevent foreknowledge by the recruiters.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Due to the nature of the intervention (professional training plus patient counselling) it is not possible to blind the GPs to their status as intervention or control. Similarly, ... women are not blinded ...\" Comment: Participants and key personnel (GPs and women) were explicitly not blinded, and the intervention included counseling/behavioral components where awareness of allocation could plausibly affect outcomes such as quality of life, safety planning, and reported mental health. This indicates a high risk of performance bias overall.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"There is no blinding as regards data collection ... as the women and GPs themselves complete the surveys (i.e. data were not collected by a research assistant blinded to the allocation).\" Comment: The outcome assessors were the participants themselves (patient self-report) and the GPs for some doctor-reported outcomes, and the paper explicitly states there was no blinding of data collection. Because the main patient outcomes were self-reported questionnaires (e.g. WHOQoL-Bref, SF-12, safety plan/behaviours, HADS), knowledge of allocation could influence how outcomes were reported, so detection bias is likely.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Analysis will be intention-to-treat\" and \"Following randomisation, approximately a third (88) will be lost to follow-up at 12 months ... leaving 89 women per group at 12 months.\" Comment: The paper anticipates attrition, but it is described as roughly balanced between groups and the planned analysis is ITT with mixed-effects/GEE methods. Although the expected loss to follow-up is not trivial, the report does not signal differential or outcome-related dropout, and the stated follow-up strategy makes attrition unlikely to bias the results materially.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "High risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

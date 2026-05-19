@@ -1,0 +1,46 @@
+{
+  "study_id": "Strowitzki 2012",
+  "pmid": "22454006",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Subjects were then randomised 1:1 using a computer-generated randomisation list using randomisation blocks of four. These blocks were assigned to study centres.\" Comment: A computer-generated randomisation list is a truly random method of sequence generation; the use of blocks of four is acceptable here because the random generation method is explicitly described.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Subjects were then randomised 1:1 using a computer-generated randomisation list using randomisation blocks of four. These blocks were assigned to study centres. Within each centre the allocation of a randomisation number was linked in a chronologically ascending manner to the sequence of arrival of the patients at the study centre.\" Comment: The report does not explicitly name a concealment method such as central allocation or sealed opaque envelopes. However, the use of pre-assigned randomisation blocks to centres and linkage of allocation numbers to the chronological order of arrival suggests the recruiter was not able to choose or foresee the next assignment. In the absence of an explicit concealment mechanism, this is a cautious Low risk judgment only because the text indicates allocation was determined by a pre-specified numbered list rather than by an open schedule available to recruiters.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"This was a Phase III, multicentre, open-label, randomised, active-controlled, parallel-group study\" Comment: The study was explicitly open-label, so participants and personnel were not blinded to allocation. Because the main outcomes were pain diaries, rescue medication use, interference with daily activities, and satisfaction/global improvement, knowledge of treatment assignment could plausibly influence reporting and management of symptoms, so performance bias is high.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"This was a Phase III, multicentre, open-label, randomised, active-controlled, parallel-group study\" and \"Pain severity was self-assessed on a daily basis using a verbal rating scale\"; \"Secondary efficacy variables included ... investigator-assessed global improvement in dysmenorrhoea\". Comment: The trial was explicitly open-label, so outcome assessment was not blinded. The primary and several secondary outcomes were patient self-reported pain/bleeding diaries, meaning the participant was the assessor and knowledge of treatment could influence reporting; additionally, investigator-assessed global improvement is subjective and also vulnerable to detection bias when unblinded.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"A total of 223 patients who received study medication were included in the FAS (flexibleMIB regimen, n=115; conventional regimen, n=108) and 210 patients (110 and 100, respectively) completed the study as planned.\" Comment: Attrition was moderate and fairly balanced across groups (5/115 vs 8/108 did not complete; about 4.3% vs 7.4%), well below the usual 20% concern threshold. The paper does not report an obvious imbalance in reasons for dropout or indicate that missing data were related to efficacy or adverse events, so incomplete outcome data are unlikely to have biased the result.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "High risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "study_id": "Kosten 2013",
+  "pmid": "23335901",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"This was a 12 week study in which individuals were assigned randomly to placebo or disulfiram groups (250 mg daily).\" Comment: The report states that participants were assigned randomly, but it does not describe how the allocation sequence was generated (e.g., computer random numbers, random permuted blocks, coin toss). Under Cochrane criteria, \"randomized\" alone is insufficient to judge low risk, so the sequence generation method remains unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The report states that participants \"were assigned randomly to placebo or disulfiram groups\" and the study was double blind, randomised, placebo-controlled, but it does not describe any mechanism used to conceal the allocation sequence from the person enrolling participants. There is no explicit mention of central allocation, sequentially numbered opaque sealed envelopes, identical containers, or any other concealment method. Randomization alone does not establish concealment, so the risk is unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"double blind, randomised, placebo-controlled study\" and \"individuals were assigned randomly to placebo or disulfiram groups (250 mg daily).\" Comment: The study explicitly reports double blinding in a placebo-controlled randomised design, which indicates that participants and personnel were intended to be blinded. The main outcomes were urine cocaine toxicology and treatment response, which are not easily influenced by knowledge of allocation; overall this suggests low risk of performance bias.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Summary: The main outcome assessor was the laboratory/urinalysis system rather than a clinician or patient self-report. The paper states, \"Supervised urine samples were obtained three times weekly and tested for the presence of a cocaine metabolite, benzoylecgonine, using an Olympus AU 640 Emit system.\" Comment: Cocaine use was measured by automated urine testing, an objective outcome unlikely to be influenced by knowledge of treatment allocation, so detection bias is low even though explicit blinding of the outcome assessor is not stated.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"We analyzed those individuals who had complete urine toxicology data (N = 56), and as a secondary analysis, included those individuals with incomplete urine toxicology data (N = 67).\" Comment: Although 74 were randomized, the report shows that 67 were genotyped and 56 had complete urine toxicology data for the main analysis, with 11 additional participants having incomplete urine toxicology data. The paper also states that there were no significant demographic differences between those included and excluded from the complete-data analysis, and it reports both complete-case and sensitivity analyses including incomplete-data participants. This suggests attrition/missing data were not obviously imbalanced or outcome-related enough to bias the result.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "Low risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

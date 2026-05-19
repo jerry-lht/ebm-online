@@ -1,0 +1,46 @@
+{
+  "study_id": "Davis 2014b",
+  "pmid": "24611852",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Consented individuals were asked to complete baseline assessment visit ... and then undergo randomization via random draws to either the Control Group ... or MTS ...\" Comment: The study explicitly states that allocation was done by \"random draws,\" which indicates a truly random sequence generation method consistent with low risk for this domain.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The paper states that participants were randomized \"via random draws\" after baseline assessment, but it gives no description of any concealment mechanism (e.g., central allocation, SNOSE, or identical containers). Therefore it is not possible to tell whether the recruiter could foresee the next assignment before enrollment.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Blinding was not used because many participants worked odd hours, had transportation issues or temporary housing, and it was necessary to allow them to decline participation prior to randomization if they could not make the MTS schedule.\" Comment: Participants and personnel were knowingly assigned to either MTS or Quit Line/NRT, so blinding was not attempted. Because the main outcomes included smoking abstinence and self-report measures, knowledge of assignment could plausibly influence behavior, reporting, and engagement with the interventions; therefore performance bias is high.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Smoking abstinence and questionnaire data were collected at three assessment visits: baseline, 4- and 24-weeks post-smoking cessation... The primary outcome in this study was 7-day point-prevalence abstinence ... confirmed by a Carbon Monoxide (CO) breath test and TLFB.\" Comment: The outcome assessor is not explicitly described as blinded, and although abstinence was confirmed by CO breath test (objective), the TLFB component and self-report-based abstinence at 24 weeks could be influenced by knowledge of allocation. The paper also explicitly states that \"Blinding was not used,\" but does not clarify whether this referred to participants only or also outcome assessment. Because outcome-assessment blinding is not reported and the outcome includes a mix of objective and self-report elements, risk of detection bias is unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Pre-intervention attrition rates (dropout immediately after randomization) were 43% for MTS and 37.2% for Controls (p = .22).\" Comment: Attrition before intervention was very large in both arms (well over 20%), and although reasons were partly described and not statistically different, the paper also reports that dropout was related to baseline smoking dependence and education, with indicators of higher addiction predicting staying in MTS but dropping out of Controls. This creates a plausible risk that missing outcome data could bias the estimated treatment effect, especially since the main ITT analysis coded non-attenders as relapsed and the later treatment-initiator analysis involved substantial post-randomization exclusion.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Unclear risk",
+    "incomplete_outcome": "High risk"
+  }
+}

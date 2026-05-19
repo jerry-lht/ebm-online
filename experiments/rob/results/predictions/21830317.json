@@ -1,0 +1,46 @@
+{
+  "study_id": "Treggiari 2011",
+  "pmid": "21830317",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The study is described as an RCT and participants were “randomly assigned”/“randomized” to treatment groups, but the methods text does not state how the allocation sequence was generated (e.g., computer random numbers, random blocks, coin toss). Comment: Because the paper gives no explicit random sequence generation method, the allocation sequence cannot be verified as truly random.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The report states that children were randomized to treatment arms, but it does not describe how the allocation sequence was concealed from the recruiters/enrolling staff. Although the study was multicentre and double-blinding was used for the oral ciprofloxacin component, there is no explicit mention of central allocation, sealed opaque sequential envelopes, pharmacy-controlled randomization, or any other concealment mechanism preventing foreknowledge of assignment. Comment: Because the paper provides randomization information but nothing directly about concealment, allocation concealment remains unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"TNS was provided in an open-label fashion, while oral ciprofloxacin was provided in a double-blinded fashion.\" Comment: The key intervention (tobramycin inhalation solution) was open-label, so participants and personnel could know allocation during the main eradication/maintenance treatment. Because the study assessed clinical outcomes such as pulmonary exacerbation and antibiotic use, knowledge of treatment could plausibly influence care-seeking, treatment decisions, and outcome assessment, making performance bias likely overall.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Pa culture results at week 10... were used to define initial eradication success or failure. All cultures were processed at the Center for CF Microbiology at Seattle Children’s Hospital...\" and \"Assessment for a pulmonary exacerbation was done at all scheduled study visits as well as acute illness visits. An a priori, established definition of pulmonary exacerbation was used for the determination of these events.\" Comment: The paper reports centralized processing of cultures, which is objective and unlikely to be biased by assessor knowledge, but it does not explicitly state that outcome assessors were blinded. The outcomes here are mixed: microbiologic outcomes are objective, but pulmonary exacerbation assessment involves clinical judgement/symptom-based determination, and the report does not clarify whether those making exacerbation assessments were blinded to allocation. Because blinding of outcome assessment is not clearly reported and the outcome set includes subjective/judgement-dependent outcomes, risk of detection bias is unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"A total of 282/304 (93%) participants in the EPIC clinical trial were included in the study cohort, based on the availability of the initial eradication outcome at week 10. The 22 excluded children were similar to those included in the current analysis except for a slightly younger age and lower BMI.\" Comment: Attrition for the analyzed outcome was low overall (22/304 excluded, about 7%), and the paper reports no meaningful baseline differences aside from minor age/BMI differences. This suggests missing outcome data are unlikely to have biased the result.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Unclear risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

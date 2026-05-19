@@ -1,0 +1,46 @@
+{
+  "study_id": "Parswani 2013",
+  "pmid": "23930029",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Patients were randomly assigned to either groups – MBSR group or TAU group – using computer-generated random tables.\" Comment: This explicitly states that allocation used computer-generated random tables, which is a truly random method for sequence generation and meets the low-risk criterion.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Patients were randomly assigned to either groups – MBSR group or TAU group – using computer-generated random tables.\" Comment: The paper describes random sequence generation, but it does not state any method for concealing the allocation from the person enrolling participants (e.g., central allocation or sequentially numbered opaque sealed envelopes). Therefore, foreknowledge of the next assignment cannot be ruled out.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"A total of eight weekly sessions were held for the MBSR group... Patients in the TAU group did not receive any further sessions after the health education session.\" Comment: The intervention was behavioral and the control group received no comparable sham/placebo program, so participants and personnel delivering the intervention would have been aware of allocation. Several primary outcomes (anxiety, depression, perceived stress, blood pressure, BMI) could plausibly be influenced by this knowledge through expectancy, reporting, or behavior change, so performance bias is likely.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The study reports that anxiety, depression and perceived stress were assessed with self-report scales (HADS, PSS), while blood pressure was measured by a cardiologist or physician using a sphygmomanometer. It does not state whether the outcome assessors were blinded to allocation, and the self-reported outcomes could be influenced if participants knew their group. The objective BP measure is less susceptible, but because the paper gives no explicit blinding information and includes a mix of subjective and objective outcomes, the overall detection-bias judgement is unclear. Comment: No direct statement that outcome assessment was blinded.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Of the 30 patients, there were a total of 17 available at 3-month follow-up (12 in the MBSR and five in the TAU group).\" Comment: Attrition was substantial overall (13/30, 43%) and markedly imbalanced at follow-up, with more participants retained in the intervention group than in TAU. Although the authors state that baseline means of those available vs not available did not differ, the very uneven loss to follow-up and the small number retained in the control arm could bias the estimated follow-up effects.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Unclear risk",
+    "incomplete_outcome": "High risk"
+  }
+}

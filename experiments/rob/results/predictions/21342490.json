@@ -1,0 +1,46 @@
+{
+  "study_id": "Freeman 2011",
+  "pmid": "21342490",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The report states that participants \"were randomized to placebo or pravastatin\" and describes the trial as a \"randomized, double-blind, placebo-controlled trial,\" but it does not describe how the allocation sequence was generated. No mention is made of a random number table, computer-generated sequence, permuted blocks with a random method, or any other explicit sequence-generation method. Comment: Because \"randomized\" alone is insufficient to judge low risk, and there is no further detail on the sequence-generation process, the risk of bias for random sequence generation is unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The report states that participants were randomized to pravastatin or placebo and that the trial was double-blind, but it gives no explicit description of how allocation was concealed from the recruiters/enrolling staff before assignment. No central allocation, sealed opaque envelopes, or other concealment mechanism is described. Comment: Randomization and blinding alone do not establish allocation concealment, so the risk remains unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The PROSPER study was a multi-centre, randomized, double-blind, placebo-controlled trial of pravastatin in the prevention of vascular disease in the elderly\" Comment: This explicitly states that the trial was double-blind and placebo-controlled, which implies participants and personnel were blinded to allocation. The outcome here is incident VTE, which is unlikely to be influenced by knowledge of treatment assignment, so performance bias for the study’s overall outcomes is judged low risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The present study is an analysis of incident VTE in this population ... For the present study the full medical records were retrieved for all suspected VTE in the PROSPER database and examined by three clinicians in a pre-planned post hoc analysis. Events were categorized as definite VTE if death from VTE was confirmed on the death certificate or if there was recorded evidence from investigations such as ultrasound venography ventilation perfusion lung scans or computed tomography pulmonary angiography. ... A consensus of two clinical opinions was required to confirm the event categorization.\" Comment: Outcome assessment was performed by clinicians reviewing medical records and diagnostic evidence, not by patients, and the key outcomes were definite/probable VTE based on death certificates and objective investigations. Even if the reviewers were not explicitly described as blinded, the outcome measurement is unlikely to be influenced by knowledge of treatment allocation because the endpoint is largely objective and based on recorded tests/records.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Summary: The report gives outcome analyses on the large randomized cohort with denominators close to the randomized groups and does not describe any substantial loss to follow-up or differential missing outcome data. For the main VTE analysis it reports \"2834\" pravastatin and \"2865\" placebo participants, and in the discussion of the trial it refers to the PROSPER cohort with follow-up over 3.2 years/3.8 years and uses the full cohort for analyses, suggesting essentially complete outcome ascertainment for the endpoint of interest. Comment: With no signal of imbalanced or outcome-related attrition, and given the very small difference between randomized and analysed numbers, attrition bias is unlikely.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "Low risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

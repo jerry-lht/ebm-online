@@ -1,0 +1,46 @@
+{
+  "study_id": "Gusmao‐Flores 2011",
+  "pmid": "22086522",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The study does not describe any allocation process because it was a diagnostic validation study, not an intervention trial. The methods state that \"Non-consecutive patients\" were included and that \"This convenience sample was obtained with two evaluations every week according to the availability of participating neurologists and psychiatrists,\" which indicates consecutive randomization was not used and there was no random allocation sequence to assess. Comment: Because no random sequence generation method is reported, and the study design does not involve randomized allocation, the domain cannot be judged as low risk; the appropriate judgement is unclear risk due to insufficient information for a random-sequence assessment.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: This study evaluated diagnostic accuracy of delirium instruments in ICU patients and does not describe any participant randomization or a mechanism for concealing upcoming group assignment from the person enrolling patients. The methods mention a convenience sample and note that patients were included based on availability, but there is no allocation process to assess and no explicit concealment method such as central allocation or sealed opaque envelopes. Comment: Because the paper provides no explicit allocation concealment information, and the design is not an intervention trial with randomized group assignment, the risk for this domain cannot be judged as low or high from the report.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The intensivists who performed the CAM-ICU and ICDSC were kept unaware of the clinical diagnoses made by the psychiatrist or neurologist.\" Comment: This indicates the outcome assessors for the diagnostic instruments were blinded to the reference diagnosis, and the study is a diagnostic accuracy study rather than an intervention trial with participant/personnel treatment knowledge likely to influence the outcome. The main outcome was delirium classification by structured scales, which is unlikely to be affected by participants' or personnel's awareness of group allocation; no intervention allocation or unblinded treatment delivery that could bias delirium assessment is described.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The intensivists who performed the CAM-ICU and ICDSC were kept unaware of the clinical diagnoses made by the psychiatrist or neurologist.\" Comment: The outcome assessments for the diagnostic tools were performed by intensivists, and they were explicitly kept unaware of the reference-standard clinical diagnosis. Because the main outcome here is delirium diagnosis using structured tools/DSM-IV comparison, and the assessors were blinded to the other diagnosis, knowledge of allocation/other assessment would be unlikely to influence measurement.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Summary: The study reports results for 119 patients who met inclusion criteria, and the paper does not describe any loss to follow-up, withdrawals, or exclusions after enrolment for the main diagnostic accuracy analyses. The outcomes were assessed during the ICU evaluation period and the results tables analyze the full cohort of 119 patients. Comment: With no indication of missing outcome data or differential attrition, and only a single assessment per patient for the diagnostic comparison, attrition is unlikely to have biased the result.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "Low risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

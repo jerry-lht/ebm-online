@@ -1,0 +1,46 @@
+{
+  "study_id": "Ibrahim 2013",
+  "pmid": "23613362",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"We used permuted block randomization at the level of the patient. Once eligibility was determined, written consent obtained, and the baseline interview completed, the study coordinator opened a sealed envelope containing a computer generated random assignment.\" Comment: The study explicitly states that allocation used a computer-generated random assignment within permuted blocks, which is an acceptable truly random sequence generation method.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Once eligibility was determined, written consent obtained, and the baseline interview completed, the study coordinator opened a sealed envelope containing a computer generated random assignment.\" Comment: The paper explicitly states that assignment was placed in a sealed envelope opened only after eligibility/consent/baseline, which indicates a concealment mechanism preventing foreknowledge at enrollment. Although the report does not specify opaque or sequential numbering, the explicit use of sealed envelopes at the point of assignment is the clearest stated concealment method available here.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Clinical and study staff and study participants were all blinded to assignment until after the baseline interview. The nature of the intervention meant that participants were not blind to the condition after participation in the intervention.\" Comment: Although there was blinding before the intervention, participants necessarily became aware of their allocated intervention once they viewed the decision aid and/or received motivational interviewing, and personnel delivering the intervention could also not be fully blinded during delivery. Because the main outcomes (willingness, knowledge, discussion with PCP, referral, orthopedic visit) could plausibly be influenced by knowing the intervention received, the dominant risk for performance bias is high.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Participants randomized to receive both DA+MI first viewed the DA videotape in the presence of the interventionist.\" \"The nature of the intervention meant that participants were not blind to the condition after participation in the intervention.\" \"Participant interviews were completed at baseline and at 1, 3 & 12 months following the intervention...\" \"Referral to orthopedic clinic, seeing an orthopedic surgeon, and the receipt of TKR were all assessed only at 12 months after the intervention. This was done by telephone survey and validated by chart review.\" Comment: The main outcomes were patient self-report measures collected by telephone interview, so the patient was effectively the assessor for willingness, expectations, and reported discussion with PCP. Although the paper states clinical and study staff were blinded until after the baseline interview, it does not explicitly state that outcome assessors/interviewers were blinded at follow-up. Because participant blinding was broken after intervention and the outcomes were largely self-reported and subjective/judgement-dependent, there is potential for detection bias, but the report does not clearly describe outcome-assessor blinding.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"There were 24 patients who received the baseline assessment but never received the intervention and were not included in the final analysis. There were no losses to follow-up except for one patient in the MI arm and one patient in DA/MI arm. Over the course of the study 93% of the subjects completed at least 2 of the 3 follow-up interviews with no differences among the 4 intervention groups (p=0.62).\" Comment: Attrition was small and balanced across groups, with only two follow-up losses reported and no differential loss to follow-up; the main exclusions were pre-intervention non-receipt of the intervention rather than outcome missingness. This level of missing outcome data is unlikely to have biased the results.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Unclear risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

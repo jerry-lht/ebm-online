@@ -1,0 +1,46 @@
+{
+  "study_id": "Schneider 2012",
+  "pmid": "23149426",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Subjects were randomly assigned to either the TM or health education (HE) arms using a stratified block design... Random allocation was performed by the study biostatistician who concealed the allocation schedule\" Comment: Although the exact random number method is not stated, the use of a stratified block design with random allocation by a biostatistician indicates a genuinely random sequence rather than a predictable rule; this is sufficient for low risk in this domain.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Random allocation was performed by the study biostatistician who concealed the allocation schedule and conveyed the assignments to the study coordinator.\" Comment: This explicitly states that the allocation schedule was concealed from those enrolling participants, which is sufficient for low risk of allocation concealment bias.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Since double blinding in behavioral trials is generally not feasible, this was a single-blinded trial.\" Comment: Participants and the personnel delivering the interventions were not blinded; although investigators/data staff were blinded, the study explicitly states it was single-blinded. Because the intervention was a behavioral/mind-body program and the study included outcomes such as blood pressure, psychosocial measures, and adherence, knowledge of allocation could plausibly influence outcomes, so performance bias is high overall.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Investigators, data collectors and data management staff were blinded to group assignment. ... All clinical end points were adjudicated by a blinded, independent reviewer who applied standardized and validated criteria.\" Comment: Outcome assessment was explicitly blinded for the clinical endpoints, and those endpoints were adjudicated by an independent blinded reviewer. For objective outcomes such as mortality, MI, and stroke, detection bias is unlikely. The intermediate outcomes (e.g., BP, BMI, questionnaires) were measured in the trial, but the domain-specific question is addressed by the clearly blinded adjudication of the primary/secondary clinical events, which are the main outcomes reported here.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The rate of nonparticipation in the treatment groups was 19/99 or 19% in the TM group and 10/102 or 10% in the HE group, a nonsignificant difference (p=.07, Fishers’s exact test). At the beginning of phase 2, 143 subjects were re-enrolled in the second phase. Fifty-eight subjects from phase 1 did not participate in phase 2 because of death, attrition or lack of informed consent. Of these, 25 or nearly half, had primary outcome events during phase 1.\" Comment: Attrition/nonparticipation was moderate overall and only modestly imbalanced at phase 1, with no statistically significant difference reported. For the main survival analysis, deaths were still captured from public records even for non-reenrolled participants, and the authors state that analyses used intention-to-treat and mixed models over all available data. The paper also notes that \"there was no evidence of selective attrition,\" making a bias from missing data unlikely.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

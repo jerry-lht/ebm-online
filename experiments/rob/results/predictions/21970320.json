@@ -1,0 +1,46 @@
+{
+  "study_id": "Zemel 2009",
+  "pmid": "21970320",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The paper states that subjects were \"randomized\" to three dietary regimens and that there was a parallel-group 1:1 randomized controlled trial, but it does not describe how the allocation sequence was generated (e.g., computer random numbers, random blocks, coin toss). The phrase \"despite randomizing subjects into treatment groups\" confirms randomization occurred, but the method remains insufficiently reported for judging the sequence as truly random.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The report states that subjects were randomized after a 2-week lead-in period, but it gives no explicit information about how the upcoming assignment was concealed from the person enrolling participants. It mentions that the arms were randomized and that the study was placebo-controlled/blinded, but does not describe a central allocation system, sealed opaque sequential envelopes, identical containers, or any other mechanism preventing foreknowledge. Comment: Randomization is reported, but allocation concealment is not described, so the risk of selection bias from foreknowledge of assignment cannot be judged and remains unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"The calcium supplemented and placebo arms of the study were conducted in a placebo-controlled, blinded fashion, and the dairy product arm was unblinded by necessity.\" Comment: Participants and personnel were not blinded for the dairy arm, and this could plausibly affect the main outcomes (weight, body composition, dietary intake) because the intervention involved diet counseling/adherence and self-reported intake, all of which can be influenced by knowledge of allocation.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The calcium supplemented and placebo arms of the study were conducted in a placebo-controlled, blinded fashion, and the dairy product arm was unblinded by necessity.\" Comment: Outcome assessment included objective measurements such as body weight, waist circumference, DXA-derived body composition, and automated laboratory assays (e.g., \"Plasma glucose, TG, LDL cholesterol, and HDL cholesterol were measured at each site's clinical medical laboratory with a Beckman Lxi-725 auto-analyzer\"; \"Total fat and lean mass (LM) were assessed via dual energy X-ray absorptiometry\"). These outcomes are unlikely to be influenced by knowledge of allocation, so even though one arm was unblinded, detection bias is unlikely for the reported outcomes.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Seventy nine subjects completed the trial and 63 met the parent study's a priori weekly compliance criteria, however due to missing measurements, the majority of data are reported for 61 subjects. Intent-to-treat analysis was not conducted because there were only two time points: baseline and 12 weeks.\" Comment: Attrition was substantial (105 enrolled, 79 completed; only 61 contributed to most analyses) and the paper explicitly states that ITT analysis was not conducted. Missing data reduced the analysed sample further, and the report does not provide enough arm-by-arm detail on missingness/reasons for the primary outcomes to show that bias is unlikely. This raises a plausible risk that incomplete outcome data affected the results.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "High risk"
+  }
+}

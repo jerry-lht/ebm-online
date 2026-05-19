@@ -1,0 +1,46 @@
+{
+  "study_id": "Danielson 2012",
+  "pmid": "22686269",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Following consent, participants were randomly assigned to condition using a computerized blocked randomization method.\" Comment: This indicates a random allocation sequence was used, and the computerized method supports truly random sequence generation. Although the paper does not further specify the exact random number procedure, computerized blocked randomization is an acceptable random sequence generation approach for this domain.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Following consent, participants were randomly assigned to condition using a computerized blocked randomization method.\" Comment: The paper describes random assignment and block randomization, but gives no explicit information about how the allocation sequence was concealed from the recruiter/enroller (e.g., central allocation, SNOSE, or identical containers). Therefore, foreknowledge of upcoming assignments cannot be ruled out.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Following consent, participants were randomly assigned to condition using a computerized blocked randomization method.\" and \"RRFT was developed... administered through weekly, 60–90 minute sessions...\"; \"TAU was selected as the control condition... no one treatment emerged as being consistently delivered across youth and families assigned to this condition.\" Comment: The report does not describe any blinding of participants, caregivers, or therapists, and the interventions were clearly different and delivered in an open-label psychotherapy setting. Because outcomes included self-reported PTSD, depression, substance use, family functioning, and sexual behavior, knowledge of treatment assignment could plausibly influence reporting and behavior, so performance bias is high.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "High risk",
+        "support_text": "Summary: The outcome assessment was largely by patient/caregiver self-report (e.g., UCLA PTSD Index adolescent/caregiver versions, CDI, BASC-2 self-report, TLFB, FES, and items on sexual partners), with urine drug screens used only to validate self-reported substance use. The report does not state that outcome assessors were blinded. Because the main outcomes are subjective and the patient/caregiver is effectively the assessor for most measures, knowledge of treatment allocation could influence reporting and therefore outcome measurement. Comment: This creates a clear risk of detection bias despite the absence of explicit assessor-blinding information.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Assessment measures were re-administered at post-treatment, 3-, and 6-month follow-up\" and the analysis used \"four repeated measurements ... nested within 30 families\" with mixed-effects regression models. Comment: The paper does not describe substantial loss to follow-up or differential dropout, and the use of mixed-effects regression models over repeated measures suggests missing data were handled in a way that is compatible with incomplete follow-up. With only 30 randomized families and no signal of imbalanced attrition or dropout related to outcome, the attrition risk is unlikely to have biased results.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "High risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

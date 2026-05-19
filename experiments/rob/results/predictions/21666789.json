@@ -1,0 +1,46 @@
+{
+  "study_id": "Veenemans 2011",
+  "pmid": "21666789",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The paper describes the trial as \"randomized placebo-controlled\" and a \"2×2 factorial design,\" but it does not state how the allocation sequence was generated (e.g., computer random numbers, random table, blocks, etc.). Comment: Because the method used to create the random sequence is not reported, the study cannot be judged low risk for random sequence generation.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The report states that this was a randomized placebo-controlled trial and describes the intervention groups, but it does not describe how allocation was concealed from the person enrolling participants. There is no explicit mention of central allocation, sequentially numbered opaque sealed envelopes, identical containers, or any other mechanism preventing foreknowledge of assignment. Comment: Randomization is reported, but concealment is not, so allocation concealment remains unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The trial had a 2×2 factorial design with children receiving either multi-nutrients with zinc... zinc alone (10 mg), or placebo. Supplements were color-coded and administered daily by community volunteers.\" Comment: The study explicitly used placebo control and color-coding of supplements, indicating an attempt to blind participants and those administering the intervention. Although the text does not explicitly say \"participants and personnel were blinded,\" the use of placebo/color-coded supplements in this randomized trial makes successful masking of allocation likely. The main outcomes reported here (e.g. diarrhea, fever, malaria, mortality) were assessed in a way that is unlikely to be materially influenced by knowledge of group assignment, and the report does not suggest broken blinding.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The study reports that supplements were color-coded and administered daily by community volunteers, but it does not explicitly state that outcome assessors were blinded to allocation. Outcomes were assessed by a clinical officer using standardised forms for symptoms and physical examination, and parents/guardians reported diarrhoea, meaning the main morbidity outcomes were partly subjective and could be influenced by knowledge of allocation. Laboratory outcomes were measured on automated systems or assays, but the paper does not clearly specify blinded outcome assessment overall. Comment: Because assessor blinding is not reported and the key clinical outcomes include patient-/guardian-reported and clinician-recorded morbidity, detection bias cannot be ruled out; however, the report is insufficient to judge High risk for all outcomes, so the domain is Unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"We failed to obtain fresh stool samples for 54 children at baseline and for 50 children during the second survey, when 20 children (3%) were lost to follow-up (3 died; 2 were withdrawn by parents; 15 emigrated from the study area).\" Comment: Attrition was small overall and the only true follow-up loss was 3% (20/612), with reasons given and not suggesting differential, outcome-related dropout. The additional missing stool samples were at baseline and do not indicate post-randomization attrition. Follow-up was otherwise essentially complete until study end, so incomplete outcome data are unlikely to have biased the results.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "Low risk",
+    "blinding_outcome": "Unclear risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "study_id": "McCabe 2009",
+  "pmid": "22697448",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Following the pre-treatment assessment, families were randomly assigned using random permuted blocks of nine to GANA (n = 21), PCIT (n = 19); or TAU (n = 18). The first author generated the randomization sequence using a random number generator.\" Comment: The study explicitly states that allocation used random permuted blocks and that the sequence was generated with a random number generator, which is a truly random method and sufficient for low risk of selection bias in this domain.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Following the pre-treatment assessment, families were randomly assigned using random permuted blocks of nine to GANA (n = 21), PCIT (n = 19); or TAU (n = 18). The first author generated the randomization sequence using a random number generator.\" Comment: The paper describes the randomization sequence generation, but it does not state any concealment mechanism (e.g., central allocation, SNOSE, or sequentially numbered identical containers) to prevent recruiters from foreseeing the next assignment. Therefore allocation concealment cannot be judged as low risk and remains unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Summary: The study explicitly states that \"All research assistants conducting assessments were blind to treatment assignment, as were families,\" but it also describes the intervention as psychotherapy delivered by therapists in three different conditions, including tailored GANA vs standard PCIT vs TAU. Because the outcome set is dominated by parent-reported child behavior, parenting stress, and related subjective measures, knowledge of assignment by participants and personnel delivering therapy could plausibly influence outcomes. The review characteristics also note \"assumed parents and therapists not blinded,\" which aligns with high risk for performance bias.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Long-term follow-up assessments were collected by a bilingual research assistant blind to treatment condition via telephone interview... All research assistants conducting assessments were blind to treatment assignment, as were families.\" Comment: Outcome assessment was performed by a blind research assistant for the follow-up interview, and the key outcomes reported here were primarily parent-reported questionnaires/interview measures. Because the assessor collecting the outcomes was blinded, and the measures were not clinician-judgement based, detection bias is unlikely.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"All results reflect intent-to-treat analyses. Long-term follow-up rates did not differ across conditions χ2(2, N=58) = 3.89, p = .14.\" Comment: The paper explicitly states ITT analysis and reports that follow-up rates were not different between groups, which indicates attrition was not meaningfully imbalanced. The discussion also notes a \"relatively high follow-up rate (83%)\" for the sample, suggesting overall missing outcome data was moderate and likely not biased by treatment arm. No evidence is given of outcome-related exclusions or differential dropout by reason.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

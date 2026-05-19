@@ -1,0 +1,46 @@
+{
+  "study_id": "Sandhu 2013",
+  "pmid": "24297959",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The randomization schedule was prepared by using ralloc procedure (Stata/SE 10.0 software) to enrol 96 participants into superelastic nickel titanium and multistranded stainless steel groups using stratified block (size 4) randomization. A statistician generated the random allocation sequence\" Comment: The study explicitly states that a statistician generated the allocation sequence using Stata's ralloc procedure with stratified block randomization, which is a truly random method when sequence generation is described this way.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"A statistician generated the random allocation sequence, and the dental assistant helped enrol and conceal participant allocation using the opaque sealed envelope method.\" Comment: This explicitly describes a concealment mechanism intended to prevent foreknowledge of the upcoming assignment. Although the paper does not spell out sequential numbering, the stated opaque sealed envelope method is presented as the means of concealing allocation, so this domain is low risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"We conducted a single-centre, double-blind, parallel two-arm (1∶1 allocation ratio) stratified randomized controlled trial\" and \"The VAS score was measured by trained dental assistants (blinded to the study)\". Comment: The study explicitly states it was double-blind, indicating participants and personnel were intended to be blinded. The main outcome was self-reported pain after orthodontic wire placement, and the report provides no evidence that blinding was broken; therefore performance bias for this outcome is judged low risk overall.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The VAS score was measured by trained dental assistants (blinded to the study) using a manual 0.1-mm calibrated Vernier caliper (manual type).\" Comment: The outcome assessor for the recorded VAS scores was the trained dental assistant, and the paper explicitly states this assessor was blinded to the study allocation. Although the pain outcome was patient-reported on a VAS, the measurable outcome used in analysis was the assistant-measured VAS score, and the blinded assessment makes detection bias unlikely.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"One participant was lost to follow up, and 10 were excluded from the analysis due to bond failure or incomplete questionnaires. Therefore, a total of 85 participants ... were included in the analysis\" Comment: Attrition was modest overall (11/96, about 11%) and the paper reports a clear reason for most missing data (bond failure or incomplete questionnaires), which is not obviously differential by group from the information provided. The study also planned for 10–15% dropout and used a mixed model analysis, which is a plausible approach for repeated measures data. On balance, the incomplete outcome data are unlikely to have biased the result.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "Low risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

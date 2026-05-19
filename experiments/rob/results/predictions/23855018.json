@@ -1,0 +1,46 @@
+{
+  "study_id": "Miller 2014",
+  "pmid": "23855018",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Participants were randomly assigned to treatment group, stratified by race. Computer randomization occurred after the collection of baseline data.\" Comment: The study explicitly states computer randomization was used, which indicates a truly random allocation sequence; although the exact algorithm is not described, computer randomization is sufficient for low risk here.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Participants were randomly assigned to treatment group, stratified by race. Computer randomization occurred after the collection of baseline data.\" Comment: The paper reports random assignment and computer randomization, but gives no explicit description of how the allocation sequence was concealed from the person enrolling participants. No central allocation, SNOSE, identical containers, or other concealment mechanism is stated, so foreknowledge of the next assignment cannot be ruled out.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"A prospective randomized controlled trial with two parallel interventions was employed.\" and \"A dietitian led all cohorts of the DSME intervention, and the same dietitian and a social worker with extensive training in mindful meditation co-led all cohorts of the MB-EAT intervention... No information regarding mindful eating or meditation was presented.\" Comment: The trial compared two clearly different behavioral/group interventions, and the report does not describe blinding of participants or intervention personnel. Because participants and facilitators would necessarily know which program they were delivering/receiving, and the outcomes included self-reported eating behaviors, knowledge, self-efficacy, anxiety, and depression that could plausibly be influenced by that knowledge, performance bias is high.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The paper does not explicitly state that outcome assessors were blinded. Some outcomes were patient self-reported questionnaires (e.g. Block Food Frequency Questionnaire, Beck Anxiety Inventory, Beck Depression Inventory-II, self-efficacy, mindfulness scales), while weight was measured on an electronic scale. Comment: Because the study does not report blinding of outcome assessment, and the main outcomes are a mix of subjective self-report and more objective measurement, there is insufficient information to judge whether knowledge of allocation could have biased outcome measurement.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Thirty-two participants were randomized to MB-EAT-D; 27 received the allocated intervention and completed data collection. Thirty-six were randomized to SC; 25 received the allocated intervention and completed data collection. There was no significant difference in attrition between treatment groups (p > .05), and there were no significant differences in baseline participant characteristics between those who did and did not complete the study (all p > .05).\" Comment: Attrition was moderate but not excessive (5/32 and 11/36 did not complete), and it was reported as balanced between groups with no baseline differences between completers and non-completers. The statistical methods also state that mixed models were used with few missing values (≤9%) and that participants with at least two observed measures were included, which supports a low risk of bias from missing data.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Unclear risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

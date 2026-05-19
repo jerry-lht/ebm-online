@@ -1,0 +1,46 @@
+{
+  "study_id": "Vaccarino 2013",
+  "pmid": "23788695",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"participants were randomized to one of two treatment groups by blocked randomization with stratification on gender. The random allocation sequence was provided in sealed envelopes by the study statistician\" Comment: The paper reports blocked randomization with stratification, but it does not describe how the random sequence itself was generated (e.g., computer random numbers, random number table). Therefore, the method of sequence generation cannot be judged as truly random from the information provided.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The random allocation sequence was provided in sealed envelopes by the study statistician (who had no contact with participants) to a staff member not involved in data collection.\" Comment: This explicitly describes a concealment procedure using sealed envelopes and indicates the statistician had no participant contact; although it does not say \"opaque\" or \"sequentially numbered,\" the report provides a direct concealment mechanism intended to prevent recruiters from foreseeing assignment before enrollment.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"The trial was technically single-blinded given that patients were aware of which intervention they were assigned to (CRM or HE).\" Comment: Participants were not blinded to group assignment, and the interventions (meditation vs health education) were inherently distinguishable. Because many outcomes were subjective/behavioral (e.g., psychosocial scales, physical activity) and even physiologic outcomes could plausibly be influenced by participants' and providers' awareness, lack of blinding could affect outcomes overall. The paper also notes that participants were \"masked to the research hypothesis,\" but not to intervention assignment, so this does not reduce performance bias for this domain.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Investigators and the staff collecting the data were blinded to the treatment status of the participants.\" Comment: The outcome assessors/data collectors were explicitly blinded. Most key outcomes were measured using objective methods or automated laboratory/imaging systems (e.g., \"FMD ... using an Acuson ... ultrasound system\" with images \"downloaded to an analysis system that allows automatic edge detection\"; blood assays done at CDC; BP/anthropometric measurements by research staff), so lack of assessor knowledge would be unlikely to influence measurement.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Of the randomized patients, 21 and 23participants in the CRM and HE groups, respectively, attended the 6-month visit and 19 in each group attended the 12-month visit. There was no significant difference in drop-out rate between the two randomized groups.\" Comment: Attrition was moderate but balanced across groups, with 19/33 (42%) in CRM and 19/35 (46%) in HE completing the 12-month visit, and the authors report no significant difference in dropout. The trial also used ITT with repeated-measures mixed effects models, which is an appropriate method for handling missing data under plausible assumptions. Although overall attrition is higher than ideal, the balance and analysis approach make attrition bias unlikely for this domain.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

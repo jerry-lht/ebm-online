@@ -1,0 +1,46 @@
+{
+  "study_id": "Sheridan 2012",
+  "pmid": "23148458",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Randomization used computer-generated random numbers that were sealed in opaque envelopes.\" Comment: The report explicitly states that allocation was based on computer-generated random numbers, which is a truly random sequence generation method. Although sealed opaque envelopes relate more to allocation concealment, the sequence itself was randomly generated, so this domain is low risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Randomization used computer-generated random numbers that were sealed in opaque envelopes.\" Comment: The paper explicitly states a concealment mechanism using opaque envelopes, which indicates the recruiter could not foresee the upcoming assignment before enrollment. Although it does not add \"sequentially numbered\" or \"sealed\" separately beyond this wording, the described envelope-based process is the only explicit allocation concealment information provided and is consistent with concealment of assignment foreknowledge.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Men in the intervention groups watched one of our informational videos and then were guided through a coaching session by a trained health counselor... Men in the highway safety group viewed the highway safety video, but received no accompanying coaching session.\" Comment: Participants and personnel could not be blinded to whether they received the decision aid/coaching intervention versus the attention-control video, and the intervention itself was designed to change knowledge, values, and discussion behavior. Outcomes included knowledge, perceived need for a decision, intent for screening, and patient-reported participation in decision making, all of which could plausibly be influenced by knowing allocation; therefore performance bias is high.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The main outcomes were largely patient self-reported questionnaires (e.g. perception that screening is a decision, knowledge, preferred and actual participation, and intent for screening), and the paper does not explicitly state that outcome assessment was blinded. The physician was notified only about participation, not group assignment, but there is no explicit blinding of the people collecting or interpreting the questionnaire outcomes. Comment: Because outcome assessment blinding is not reported and the key outcomes are self-reported/subjective, knowledge of allocation could have influenced measurement; however, for the chart review outcome at 9 months, the abstraction process is not described as blinded.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"In total, we recruited and enrolled 130 patients (70 in the control group and 58 in the intervention group) and 128 completed the study.\" Comment: Attrition was very low overall (2/130, about 1.5%) and the report indicates essentially complete follow-up for the study as a whole. The paper also presents outcome analyses on nearly all participants, with no signal of differential dropout, exclusions, or missing-data handling that would plausibly bias the results.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Unclear risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "study_id": "Hall 2009",
+  "pmid": "24329972",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"After 8 weeks, participants were randomly assigned in a factorial trial of extended NRT (E-NRT) and extended cognitive behavioral therapy (E-CBT). ... Randomization was stratified on gender, positive history of major depressive disorder, and current smoking status.\" Comment: The paper states that participants were randomized and stratified, but it does not describe how the allocation sequence itself was generated (e.g., computer-generated random numbers, random permuted blocks). Therefore, the method of sequence generation cannot be judged to be truly random.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The report states that participants were \"randomly assigned\" and that \"Randomization was stratified\" at week 8, but it gives no description of how the upcoming assignment was concealed from the person enrolling participants. There is no explicit mention of central allocation, sealed/opaque sequential envelopes, identical containers, or any other mechanism preventing foreknowledge of the next assignment. Comment: Randomization method is described, but allocation concealment is not, so the risk of selection bias from foreknowledge cannot be judged as low.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Summary: The trial was an open factorial study of extended nicotine gum and extended cognitive behavioral therapy; the methods describe participants being assigned to receive additional gum and/or counseling versus no further services, with no indication that participants or treating personnel were blinded. Quote: \"After 8 weeks, participants were randomly assigned in a factorial trial of extended NRT (E-NRT) and extended cognitive behavioral therapy (E-CBT).\" Comment: Because the interventions were clearly distinguishable and involved active counseling and provision of nicotine gum, participants and personnel would have known allocation, and the main outcomes (self-reported abstinence and service utilization/costs) could plausibly be influenced by that knowledge.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Summary: The main smoking cessation outcome was self-reported seven-day abstinence but it was verified by carbon monoxide testing, and the review characteristics note the outcomes were biochemically validated (CO ≤ 10 ppm and anatabine/anabasine ≤ 2 mg/mL). Comment: Because verification relied on objective biochemical measures rather than subjective assessor judgement, knowledge of allocation is unlikely to have influenced outcome measurement, even though the paper does not explicitly state that outcome assessors were blinded.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Abstinence status was available for 378/402 (94.0%) of study participants.\" Comment: Follow-up for the key outcome was high, with only 24/402 participants missing at the final visit. The paper also states, \"There was no significant difference in the proportion of patients followed by treatment arm,\" which suggests missing data were not meaningfully imbalanced across groups. This level of attrition is well within a range that would not usually bias the result.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

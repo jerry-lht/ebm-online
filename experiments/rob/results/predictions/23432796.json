@@ -1,0 +1,46 @@
+{
+  "study_id": "Sandstedt 2013",
+  "pmid": "23432796",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"the randomization process has been described in detail [23].\" Comment: This paper states that participants were randomized, but it does not describe the actual sequence generation method in the text provided. Although allocation was random and the allocator was blinded, there is no explicit information here about whether a truly random method (e.g., computer random numbers, random table, coin toss) was used, so the risk of bias for random sequence generation cannot be judged as low or high from this report alone.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The paper states that participants were randomized and that 'The person carrying out the group allocation was blinded,' but it does not describe any allocation concealment mechanism (e.g., central allocation, SNOSE, or identical containers) that would prevent foreknowledge of the next assignment. This is insufficient to judge concealment, so the risk remains unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"After written consent by the parents and assent by the children, the subjects were randomized into an exercise or a control group.\" \"There were 10 dropouts from the control group after the randomization, as they had preferred to belong to the exercise group.\" \"The participants in the exercise group fulfilled about 70% of expected numbers of exercises.\" Comment: Participants clearly knew whether they were in the exercise or control arm (control participants preferred the exercise group, and adherence to the exercise programme was tracked), so blinding of participants was not achieved. Personnel delivering the intervention were also not described as blinded, and because the main outcomes included pain, disability, quality of life, and performance measures that could plausibly be influenced by knowledge of allocation and differential motivation/effort, performance bias is high overall.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The same physiotherapist, who was blinded to the previous measurement, performed all measurements.\" Comment: The outcome assessor was a physiotherapist, and the paper explicitly states that this person was blinded when performing the measurements. Most measured outcomes here (range of motion, balance test, muscle strength, step-test) were objective/standardized physical measurements, and the patient-reported questionnaires (CHAQ/CHQ, pain VAS) were self-reported by the children rather than assessed by the physiotherapist. This supports low risk of detection bias for the assessed outcomes.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"There were 10 dropouts from the control group after the randomization, as they had preferred to belong to the exercise group. There were another six dropouts after the first test occasion due to the families’ lack of time.\" Comment: Attrition was not trivial and appears imbalanced, with all 10 post-randomization dropouts from the control group, plus additional missing data later due to lack of time. The paper also reports that only 35 children completed the CHAQ at all time points and 39 completed the CHQ at all time points, indicating substantial missing outcome data. Because dropout and missingness were not balanced across groups and some reasons relate to post-randomization preference/nonadherence, the risk of bias from incomplete outcome data is high.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "High risk"
+  }
+}

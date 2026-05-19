@@ -1,0 +1,46 @@
+{
+  "study_id": "Cobo 2007",
+  "pmid": "17389922",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Then, manuscripts were randomly allocated (by AS) using a computer program that first stratifies by study type, and second allocates to intervention groups while minimizing differences in initial quality.\" Comment: The report explicitly states that a computer program was used to allocate manuscripts randomly, which is an adequate random sequence generation method. Although the program also stratified and minimized differences, the key point for this domain is that allocation was done with a computer program rather than a predictable rule.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The paper states that manuscripts were randomized using a computer program that stratified by study type and allocated while minimizing differences in initial quality, but it does not describe any mechanism to conceal the upcoming assignment from the person enrolling/allocating manuscripts. No central allocation, sealed opaque envelopes, or other concealment method is reported. Comment: Random sequence generation is described, but allocation concealment is not, so foreknowledge of assignment cannot be ruled out.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Although both authors and reviewers were warned that their material would be used to evaluate quality improvement during the editorial process, they were not warned about specific objectives.\" Comment: The participants/personnel delivering the intervention (reviewers and authors) were not blinded to the fact that the manuscripts were part of a quality-improvement study, and the intervention itself was overt (statistical reviewer vs checklist vs usual review). Knowledge of allocation could plausibly affect review behavior and manuscript revisions, so performance bias is likely.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Two evaluators (EC, RD) independently rated the reporting quality of manuscripts at initial submission and following peer review and revision, according to the MQAI. Both knew the initial and final status but were blinded to the intervention group.\" Comment: The outcome was assessed by two independent evaluators (independent assessors). They were explicitly blinded to allocation/intervention group. Although they knew whether a manuscript was an initial or final version, the key detection-bias issue for this domain is that they did not know which intervention group each manuscript belonged to. The outcome (MQAI reporting-quality score) involves some judgement, but blinding of the assessors makes bias from knowledge of allocation unlikely.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"From the 129 randomized manuscripts, 14 were lost of follow up because authors missed the deadline and the masked allocation was revealed; ... The 14 papers lost to follow-up had a heterogeneous distribution among the randomized groups ... but did not differ, in terms of baseline quality, from the originals in the accepted manuscripts population. We performed several sensitivity analyses including those papers with different imputed values for the final version that produced very similar conclusions.\" Comment: Attrition was modest overall (14/129 randomized manuscripts, about 11%) and the authors report no baseline-quality difference for lost manuscripts, plus sensitivity analyses with imputation yielded similar conclusions. This makes attrition unlikely to have biased the main result, despite some loss to follow-up.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

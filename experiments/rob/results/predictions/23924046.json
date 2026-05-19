@@ -1,0 +1,46 @@
+{
+  "study_id": "Jones 2014",
+  "pmid": "23924046",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Using restricted random assignment to force equal sample sizes, Master’s-level therapists randomly assigned the remaining 22 eligible low-income families to the HNC or TE-HNC group.\" Comment: The paper explicitly states that families were randomly assigned. Although the word \"restricted\" indicates some form of constrained allocation, the description is still compatible with a truly random sequence generation approach (e.g., restricted/randomized allocation to achieve balance), and there is no indication of a non-random or predictable method such as alternation or admission order. On the available information, this is sufficient to judge sequence generation as low risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The report states that \"Master’s-level therapists randomly assigned the remaining 22 eligible low-income families to the HNC or TE-HNC group\" and that they used \"restricted random assignment to force equal sample sizes,\" but it gives no explicit description of how the next assignment was concealed from the recruiter/enroller. There is no mention of central allocation, sealed opaque envelopes, identical containers, or any other mechanism preventing foreknowledge, so allocation concealment cannot be judged as low risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Summary: The study explicitly describes behavioral parent training delivered by therapists and notes that all families received different intervention components, including smartphone-enhancements in TE-HNC (skills videos, daily surveys, video calls, reminders) versus standard HNC. It also states the \"participants and personnel\" were assumed not blinded in the review characteristics. Because participants/caregivers and therapists necessarily knew which program they were delivering/receiving, and the main outcomes included caregiver-reported child disruptive behavior and engagement measures that could plausibly be influenced by that knowledge, performance bias is at high risk overall. Comment: Knowledge of allocation could affect caregiver behavior, therapist interaction, and reported child outcomes.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "High risk",
+        "support_text": "Summary: The primary child behavior outcome (ECBI Intensity and Problem subscales) was completed by caregivers: \"Intensity and Problem subscales on the 36-item ECBI ... served as the dependent measure of behavior change\" and \"caregivers rate the intensity...\". The review characteristics also state that parents were assumed not blinded. Because the patient/caregiver was the outcome assessor and knew the intervention they received, the self-reported behavioral outcome could clearly be influenced by lack of blinding.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Overall rate of attrition (21%) was substantially lower than what has been reported in prior BPT work with low-income samples ... The four families (HNC = 2; TE-HNC = 2) who dropped out of the study notified project staff prior to discontinuing participation and each cited a major health ... or family ... stressor necessitating dropout. Given the pilot nature of the project, we considered only complete data (i.e., data from participants available at pre- and post-treatment).\" Comment: Attrition was modest and balanced across groups (2 per arm), with reasons that were external stressors rather than clearly related to treatment efficacy or adverse effects. Although the analysis was complete-case, the small and balanced dropout does not suggest important attrition bias for the reported outcome.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "High risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

@@ -1,0 +1,30 @@
+=== Random sequence generation (selection bias) ===
+
+GT \ Pred         Unclear risk      Low risk          
+Low risk          15                50                
+High risk         2                 1                 
+Unclear risk      17                8                 
+=== Allocation concealment (selection bias) ===
+
+GT \ Pred         High risk         Unclear risk      Low risk          
+Low risk          1                 14                29                
+High risk         0                 2                 2                 
+Unclear risk      0                 34                11                
+=== Blinding of participants and personnel (performance bias) ===
+
+GT \ Pred         High risk         Unclear risk      Low risk          
+Low risk          5                 0                 16                
+High risk         27                3                 0                 
+Unclear risk      22                1                 4                 
+=== Blinding of outcome assessment (detection bias) ===
+
+GT \ Pred         High risk         Unclear risk      Low risk          
+Low risk          4                 5                 30                
+High risk         11                2                 12                
+Unclear risk      2                 8                 12                
+=== Incomplete outcome data (attrition bias) ===
+
+GT \ Pred         High risk         Low risk          
+Low risk          0                 53                
+High risk         6                 13                
+Unclear risk      3                 18                

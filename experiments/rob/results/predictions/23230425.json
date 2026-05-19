@@ -1,0 +1,46 @@
+{
+  "study_id": "Lahti 2007",
+  "pmid": "23230425",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"study participants were blindly randomized into one of the following four groups\" and from the review characteristics: \"Random sequence generation: randomised; no further details\" Comment: The paper states that participants were randomized, but it does not describe how the allocation sequence was generated (e.g., computer random numbers, random table, coin toss). By Cochrane criteria, \"randomized\" alone is insufficient to judge low risk, so the method remains unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Participants were blindly randomized into one of the following four groups\" and \"Medications were prepared in similar-looking capsules by the hospital pharmacist.\" Comment: The report explicitly states blinded randomization and that the medications were prepared by the hospital pharmacist in similar-looking capsules, which is consistent with a mechanism that would prevent recruiters from foreseeing the next assignment. Although the paper does not spell out a central randomization system or sealed envelopes, the described pharmacist-controlled preparation of identical-appearing medication supports low risk for allocation concealment.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"study participants were blindly randomized\" and \"Medications were prepared in similar-looking capsules by the hospital pharmacist. Optimal dose was determined by treating psychiatrists, who blindly adjusted medication\" Comment: The study explicitly states that participants were blindly randomized, the capsules were similar-looking, and treating psychiatrists were blinded while adjusting medication. This supports successful blinding of both participants and key personnel, making performance bias unlikely for the study outcomes.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"double\" (masking/blinding); \"Participants were scanned using H215O PET...\" and \"Participants’ symptoms were evaluated using the BPRS at each session.\" Comment: The study is described as double blind, and the main outcomes here were PET imaging measures plus BPRS ratings. PET image preprocessing and statistical analysis are objective/standardized system-based measurements, so knowledge of allocation is unlikely to influence their measurement. Although the text does not explicitly name a separate blinded outcome assessor, the outcome measurement itself is not meaningfully susceptible to detection bias for the PET outcomes, which dominate this study.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Thirty-seven patients initially provided informed consent; however, eight dropped out during the study period [details of participant drop out were reported in Lahti et al. (2009)].\" Comment: Although 8/37 participants dropped out overall, the paper indicates that the dropout details were reported elsewhere and provides complete paired analyses with degrees of freedom implying the analysed sample was small but still followed through the scheduled time points. The attrition is not described as imbalanced between treatment groups or clearly related to outcomes, and the paper does not signal differential loss that would plausibly bias the comparison.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "Low risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

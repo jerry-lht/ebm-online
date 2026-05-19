@@ -1,0 +1,46 @@
+{
+  "study_id": "Shalev 2012",
+  "pmid": "23990895",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Participants who accepted the invitation (n = 296) were randomized to Prolonged Exposure therapy (PE ...), Cognitive Therapy (CT ...), a double-blinded SSRI/placebo condition, and a waiting list ...\" Comment: The paper states that participants were \"randomized\" but does not describe how the allocation sequence was generated for the SSRI/placebo arms. There is no explicit mention of a random number table, computer-generated sequence, or other truly random method, so the method of sequence generation cannot be verified from the report.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The report states that participants \"were randomized to Prolonged Exposure therapy (PE), Cognitive Therapy (CT), a double-blinded SSRI/placebo condition, and a waiting list\" and that the design was \"triple-blind\" for the SSRI/placebo arms, but it gives no explicit description of how the next assignment was concealed from the recruiter/enroller. Comment: Double/triple blinding refers to masking after allocation, not necessarily concealment before enrollment, and no central allocation, sealed opaque envelopes, or other concealment mechanism is described.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"a double-blinded SSRI/placebo condition\" and from the review characteristics: \"For these 2 arms, the design was 'triple-blind' (participant, carer, assessor).\" Comment: Participants and personnel involved in the escitalopram/placebo comparison were explicitly blinded, and the main outcomes (PTSD symptoms/prevalence, depression severity, functional disability) could plausibly be influenced by knowledge of assignment, so successful blinding is important here; the report indicates blinding was in place and therefore the performance-bias risk is low.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"For these 2 arms, the design was 'triple-blind' (participant, carer, assessor).\" Comment: The study explicitly states that the assessor was blinded for the escitalopram/placebo arms. The main outcomes of interest for this review were CAPS, BDI, SCID-IV, and GAF assessed at follow-up; these are clinician-administered/judgement-based measures, so assessor blinding is important and was reported. Quote: \"the design was 'triple-blind' (participant, carer, assessor).\" Comment: Because outcome assessment was blinded and the outcomes were not purely objective automated measures, the risk of detection bias is low.",
+        "source": "source_review_characteristics"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Summary: The study reports follow-up data for the relevant randomized escitalopram/placebo arms and indicates that dropout was not differential in a way that would obviously bias the outcome. The review characteristics note that dropout for any reason was fully reported, and the trial appears to have used complete reporting of the relevant outcomes at 3 years. Although the paper excerpt does not give per-arm attrition counts for the escitalopram/placebo subset, the available information suggests reasonable and balanced follow-up rather than problematic missing data. Comment: Overall, the attrition picture is sufficiently clear to judge low risk, with no signal of outcome-related or imbalanced missingness between the two arms of interest.",
+        "source": "source_review_characteristics"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "Low risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

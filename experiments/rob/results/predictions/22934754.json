@@ -1,0 +1,46 @@
+{
+  "study_id": "Koenig 2012",
+  "pmid": "22934754",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Upon enrollment, subjects were randomized and provided with a bottle of the investigational product.\" Comment: The paper states that participants were randomized, but it does not describe how the allocation sequence was generated (e.g., computer random numbers, random tables, or another truly random method). The additional note that the company 'randomized the investigational product' also does not explain the sequence-generation method, so true randomness cannot be confirmed.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The company randomized the investigational product. The researchers and study subjects were not provided with the randomization information until all data had been collected.\" Comment: This indicates the allocation sequence was held by an independent manufacturer and not revealed to recruiters or participants until study completion, which is sufficient to prevent foreknowledge of the next assignment.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"The researchers and study subjects were not provided with the randomization information until all data had been collected.\" Comment: This indicates that both participants and study personnel were blinded to allocation during the trial. Because the main efficacy outcome included subjective self-reported improvement in facial angiofibromas, knowledge of assignment could plausibly influence outcomes, but the reported double-blind design suggests this was successfully prevented.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Upon completion of the trial, subjects were asked if they \\\"got better on the treatment\\\", if they \\\"got worse on the treatment\\\", or if \\\"the treatment made no difference\\\".\" and \"The study was designed to see if application of the investigational product resulted in detectable systemic absorption of the rapamycin. The secondary goal of this study was to evaluate whether the topical product decreased the appearance of the facial angiofibromas after 6 months of usage, as self-reported by the subjects.\" Comment: The main efficacy outcome was patient self-report, so the participant was effectively the outcome assessor. Although the study is described as double-blind, the reported outcome is subjective and could be influenced by knowledge of allocation; for a self-reported appearance outcome, lack of assured blinded assessment creates detection bias risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Two subjects withdrew from the study, secondary to discomfort with product application (a burning sensation with application). Two subjects were withdrawn by the investigators, secondary to poor compliance with study protocols. One subject was withdrawn following prolonged hospitalization unrelated to the study product. Twenty-three subjects completed the entire study protocol.\" Comment: Attrition was limited (5/28, about 18%) and the reasons were reported; withdrawals were not described as imbalanced between arms or clearly related to the outcome of facial angiofibromas. This is within a reasonable range for a 6-month trial, so incomplete outcome data are unlikely to bias the result.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "Low risk",
+    "blinding_outcome": "High risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

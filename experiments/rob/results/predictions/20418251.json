@@ -1,0 +1,46 @@
+{
+  "study_id": "Wearden 2010",
+  "pmid": "20418251",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Individual patients were randomly allocated to one of the three treatment arms using computer generated randomised permuted blocks (with randomly varying block sizes of 9, 12, 15, and 18), after stratification on the basis of whether the patient was non-ambulatory ... and whether the patient fulfilled London ME criteria.\" Comment: The allocation sequence was explicitly computer-generated and used randomly varying permuted blocks, which meets the criteria for a truly random sequence generation method.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Details of eligible patients were provided by telephone to an independent randomisation service within two working days. ... The random allocation was emailed to the trial manager\" Comment: Allocation was handled through an independent randomisation service, which indicates a central allocation mechanism that would prevent recruiters from foreseeing the next assignment before enrollment.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "High risk",
+        "support_text": "Summary: This was a 3-arm non-pharmacological trial of pragmatic rehabilitation, supportive listening, and GP treatment as usual. The interventions were clearly different and delivered by therapists/nurses in patients’ homes over multiple sessions, with participants informed of the treatment arms before consent. The paper reports assessor blinding and blind fidelity raters, but does not describe participant/personnel blinding, and blinding of therapists would not be feasible for these behavioral interventions. Because the main outcomes were self-reported symptoms and functioning (fatigue, SF-36 physical functioning, sleep, HADS) and could plausibly be influenced by knowledge of allocation, the dominant risk for performance bias is high.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Assessments were performed by trained researchers blind to treatment allocation; any unblindings were recorded.\" Comment: The outcome assessors were explicitly blinded. The main outcomes (SF-36 physical functioning, fatigue scale, HADS, sleep scale) were collected by these blinded researchers; although they include patient-reported measures, the study states the assessors were blind to allocation, which reduces the risk of detection bias for the assessment process.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"We revised our recruitment target to 288 in September 2006 when it became clear that our loss to follow-up was less than anticipated (13% at 70 weeks).\" Comment: Attrition was low overall, and the paper reports 257/296 (87%) assessed at 70 weeks, with per-arm follow-up numbers in Table 3 that appear reasonably balanced (70-week n: 81/95, 90/101, 86/100). The authors also used intention-to-treat analyses with weighting adjustments for missing outcomes, making attrition bias unlikely.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Low risk",
+    "allocation_concealment": "Low risk",
+    "blinding_participants": "High risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}

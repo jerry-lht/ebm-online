@@ -1,0 +1,46 @@
+{
+  "study_id": "Ahmad 2011",
+  "pmid": "21507271",
+  "model": "gpt-5.4-mini",
+  "prediction": {
+    "risk_of_bias": [
+      {
+        "domain": "Random sequence generation (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The study is described as a \"retrospective cross-sectional study\" and there is no description of any allocation procedure or randomization method. The methods indicate patients were identified from existing HCV-positive patients and included if willing for biopsy, which is not random allocation. Comment: Because no random sequence generation method is reported, and the study design does not involve randomized allocation, this domain cannot be judged as low risk.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Allocation concealment (selection bias)",
+        "judgement": "Unclear risk",
+        "support_text": "Summary: This was a retrospective cross-sectional study of patients who underwent liver biopsy and laboratory assessment; there is no random assignment to groups and no description of any allocation concealment mechanism. Comment: Because the paper does not report central allocation, sealed opaque envelopes, identical containers, or any other method preventing foreknowledge of group assignment, allocation concealment cannot be judged and remains unclear.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of participants and personnel (performance bias)",
+        "judgement": "Low risk",
+        "support_text": "Summary: This was a retrospective cross-sectional study of biopsy and laboratory data, not an intervention trial. The relevant assessment tasks were laboratory scoring and histological evaluation, and the paper states that \"Liver biopsies were evaluated by two independent pathologists without prior information to patient's history\" and that \"all biochemical tests and their scores were made without knowledge of liver biopsy results.\" Because no participants/personnel delivered a study intervention, and the outcomes assessed here are objective laboratory/histology measures unlikely to be influenced by knowledge of group assignment, performance bias is unlikely.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Blinding of outcome assessment (detection bias)",
+        "judgement": "Low risk",
+        "support_text": "Quote: \"Liver biopsies were evaluated by two independent pathologists without prior information to patient's history.\" Comment: The outcome assessor(s) were the two independent pathologists, and they were explicitly blinded to patient history. The main outcome was histological fibrosis stage based on liver biopsy, which is an imaging/pathology-style assessment made using standardized METAVIR criteria; with blinded pathologists, knowledge of allocation could not plausibly influence the measurement of this outcome.",
+        "source": "source_full_text"
+      },
+      {
+        "domain": "Incomplete outcome data (attrition bias)",
+        "judgement": "Low risk",
+        "support_text": "Summary: This was a retrospective cross-sectional study using biopsy and serum data from 157 HCV-infected patients. The results present analyses on all 157 patients with complete stage counts and no indication of post-enrollment loss to follow-up, withdrawals, or missing outcome data. Comment: Because the study is not a longitudinal RCT and the paper reports outcomes for the full sample without any attrition signal, incomplete outcome data are unlikely to have biased the results.",
+        "source": "source_full_text"
+      }
+    ]
+  },
+  "slot_map": {
+    "random_sequence_generation": "Unclear risk",
+    "allocation_concealment": "Unclear risk",
+    "blinding_participants": "Low risk",
+    "blinding_outcome": "Low risk",
+    "incomplete_outcome": "Low risk"
+  }
+}
