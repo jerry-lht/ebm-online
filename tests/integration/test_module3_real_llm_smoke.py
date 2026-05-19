@@ -174,65 +174,47 @@ def _write_synthetic_article(
                     "title": f"Synthetic randomized trial {study_id}",
                     "classification": "primary_rct",
                 },
-                "sections": [
-                    {
-                        "section_key": "abstract",
-                        "section_title_normalized": "Abstract",
-                        "blocks": [
-                            {
-                                "type": "text",
-                                "text_md": (
-                                    "This parallel-group randomized placebo-controlled trial tested duloxetine "
-                                    "for preventing catheter-related bladder discomfort after urinary catheterization."
-                                ),
-                            }
-                        ],
-                    },
-                    {
-                        "section_key": "methods",
-                        "section_title_normalized": "Methods",
-                        "blocks": [
-                            {
-                                "type": "text",
-                                "text_md": (
-                                    "Adults undergoing elective surgery with urinary catheterization were randomized "
-                                    "1:1 to oral duloxetine or matching placebo using a computer-generated sequence. "
-                                    "Outcome assessors were blinded."
-                                ),
-                            }
-                        ],
-                    },
-                    {
-                        "section_key": "results",
-                        "section_title_normalized": "Results",
-                        "blocks": [
-                            {
-                                "type": "text",
-                                "text_md": (
-                                    f"At 1 hour, catheter-related bladder discomfort occurred in {exp_events} of "
-                                    f"{exp_n} participants assigned to duloxetine and {ctrl_events} of {ctrl_n} "
-                                    "participants assigned to placebo."
-                                ),
-                            }
-                        ],
-                    },
-                    {
-                        "section_key": "tables",
-                        "section_title_normalized": "Tables",
-                        "blocks": [
-                            {
-                                "type": "table",
-                                "table_id": f"table-{study_id}",
-                                "table_title": "Catheter-related bladder discomfort at 1 hour",
-                                "table_caption": "Synthetic event-count table for real LLM smoke testing.",
-                                "table_text_raw": (
-                                    "Outcome | Duloxetine | Placebo\n"
-                                    f"CRBD at 1 hour | {exp_events}/{exp_n} | {ctrl_events}/{ctrl_n}"
-                                ),
-                            }
-                        ],
-                    },
-                ],
+                "xml_content": {
+                    "sections": [
+                        {
+                            "section": "Abstract",
+                            "text": (
+                                "This parallel-group randomized placebo-controlled trial tested duloxetine "
+                                "for preventing catheter-related bladder discomfort after urinary catheterization."
+                            ),
+                        },
+                        {
+                            "section": "Methods",
+                            "text": (
+                                "Adults undergoing elective surgery with urinary catheterization were randomized "
+                                "1:1 to oral duloxetine or matching placebo using a computer-generated sequence. "
+                                "Outcome assessors were blinded."
+                            ),
+                        },
+                        {
+                            "section": "Results",
+                            "text": (
+                                f"At 1 hour, catheter-related bladder discomfort occurred in {exp_events} of "
+                                f"{exp_n} participants assigned to duloxetine and {ctrl_events} of {ctrl_n} "
+                                "participants assigned to placebo."
+                            ),
+                        },
+                    ],
+                    "tables": [
+                        {
+                            "section_path": ["Results"],
+                            "raw_xml": (
+                                f"<table-wrap id=\"table-{study_id}\">"
+                                "<label>Table 1</label>"
+                                "<caption><p>Catheter-related bladder discomfort at 1 hour</p></caption>"
+                                "<table><tbody>"
+                                "<tr><td>Outcome</td><td>Duloxetine</td><td>Placebo</td></tr>"
+                                f"<tr><td>CRBD at 1 hour</td><td>{exp_events}/{exp_n}</td><td>{ctrl_events}/{ctrl_n}</td></tr>"
+                                "</tbody></table></table-wrap>"
+                            ),
+                        }
+                    ],
+                },
             },
             ensure_ascii=False,
         ),

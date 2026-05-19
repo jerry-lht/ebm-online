@@ -1,5 +1,10 @@
 # Phase 2 Demo Test Guide
 
+- **Status:** reference
+- **Last Reviewed:** 2026-05-15
+- **Source of Truth:** Reference for Module 1 simplified demo/index workflow.
+
+
 本文档用于验证“简化版 Module 1”路径：demo 数据集 -> PI 抽取 -> PI 映射 -> 本地轻量索引 -> 检索测试。
 
 当前 demo 数据统一放在 `data/data_for_test/`：

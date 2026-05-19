@@ -1,55 +1,38 @@
-# Online EBM Pipeline — Docs Index
+# Documentation Entry (Single Source)
 
-## 目录结构
+- **Status:** active
+- **Last Reviewed:** 2026-05-15
+- **Source of Truth:** This file is the only global docs entrypoint.
 
-```text
-docs/
-  architecture/
-    architecture-design.md
-    shared-infrastructure-design.md
-  design/
-    data-pipeline-for-online-ebm.md
-    module1-detail-design.md
-    module2-detail-design.md
-    module3-detail-design.md
-  guides/
-    phase0-test-guide.md
-    phase1-test-guide.md
-    phase2-demo-test-guide.md
-    module2-test-guide.md
-    module3-test-guide.md
-    phase5-api-test-guide.md
-    phase6-gradio-demo-guide.md
-  plans/
-    implementation-plan.md
-  README.md
-```
+## 文档状态标签规范
 
-## 阅读建议
+- `active`: 当前主链路必须维护，变更后优先更新。
+- `reference`: 设计或历史实现参考，不保证与当前代码完全同步。
+- `archived`: 历史记录，不再维护；仅用于追溯。
 
-如果你想先理解项目全貌，按这个顺序读：
+## 当前架构
 
-1. [architecture/architecture-design.md](architecture/architecture-design.md)
-2. [design/data-pipeline-for-online-ebm.md](design/data-pipeline-for-online-ebm.md)
-3. [design/module1-detail-design.md](design/module1-detail-design.md)
-4. [design/module2-detail-design.md](design/module2-detail-design.md)
-5. [design/module3-detail-design.md](design/module3-detail-design.md)
-6. [architecture/shared-infrastructure-design.md](architecture/shared-infrastructure-design.md)
+- [实现状态快照与待办](plans/implementation-plan.md) (`active`)
+- [高层架构设计](architecture/architecture-design.md) (`reference`)
+- [共享基础设施设计](architecture/shared-infrastructure-design.md) (`reference`)
+- [数据流水线设计](design/data-pipeline-for-online-ebm.md) (`reference`)
 
-如果你想直接跑当前可用链路，优先看：
+## 当前可运行链路
 
-- [guides/phase5-api-test-guide.md](guides/phase5-api-test-guide.md)
-- [guides/phase6-gradio-demo-guide.md](guides/phase6-gradio-demo-guide.md)
-- [guides/module2-test-guide.md](guides/module2-test-guide.md)
-- [guides/module3-test-guide.md](guides/module3-test-guide.md)
+- [Phase 5 API 测试指南](guides/phase5-api-test-guide.md) (`active`)
+- [Phase 6 Gradio Demo 测试指南](guides/phase6-gradio-demo-guide.md) (`active`)
+- [Phase 2 Demo 测试指南](guides/phase2-demo-test-guide.md) (`reference`)
+- [Module 2 简化版测试指南](guides/module2-test-guide.md) (`reference`)
+- [Module 3 简化版测试指南](guides/module3-test-guide.md) (`reference`, 与当前实现行为对齐，含并发与降级测试说明)
 
-如果你想看计划和历史阶段拆分，读：
+## 历史归档
 
-- [plans/implementation-plan.md](plans/implementation-plan.md)
+- [归档目录](archive/README.md)
+- [Phase 0 测试文档（归档）](archive/guides/phase0-test-guide.md)
+- [Phase 1 测试文档（归档）](archive/guides/phase1-test-guide.md)
 
-## 分类说明
+## 维护规则
 
-- `architecture/`：高层架构和共享基础设施设计
-- `design/`：模块级详细设计和功能数据流
-- `guides/`：启动、测试、验收、调试指南
-- `plans/`：实施计划、阶段拆分、历史执行记录
+- 所有文档头部必须声明：`Status`、`Last Reviewed`、`Source of Truth`。
+- 除 `docs/README.md` 外，其他文档不再维护全局目录。
+- 路径示例统一使用仓库真实路径（例如 `backend/src/ebm_backend/...`、`data/data_for_test/...`）。

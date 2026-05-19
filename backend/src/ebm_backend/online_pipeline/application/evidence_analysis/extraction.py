@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
+import os
+import re
+import xml.etree.ElementTree as ET
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
 from ebm_backend.shared.llm.gateway import LLMGateway
 from ebm_backend.online_pipeline.application.evidence_analysis.models import AnalysisSpec, EvidenceContext, ExtractedDataRow, ExtractionResult
+from ebm_backend.online_pipeline.application.question_study.cleaned_article_schema import validate_cleaned_article_payload
 from ebm_backend.online_pipeline.application.question_study.llm_io import load_prompt, load_schema
 
 
@@ -20,7 +25,7 @@ class EvidenceContextBuilder:
         if article_path and Path(article_path).exists():
             try:
                 return self._from_article_json(candidate, Path(article_path))
-            except (OSError, json.JSONDecodeError, TypeError, ValueError):
+            except (OSError, json.JSONDecodeError, TypeError):
                 pass
         return EvidenceContext(
             study_id=_study_id(candidate),
@@ -32,26 +37,40 @@ class EvidenceContextBuilder:
 
     def _from_article_json(self, candidate: Any, path: Path) -> EvidenceContext:
         payload = json.loads(path.read_text(encoding="utf-8"))
+        validate_cleaned_article_payload(payload)
         metadata = payload.get("metadata") or {}
-        sections = payload.get("sections") or []
+        xml_content = payload.get("xml_content") or {}
+        sections = xml_content.get("sections") or []
         abstract_parts: list[str] = []
         methods_parts: list[str] = []
         results_parts: list[str] = []
         tables: list[dict[str, str]] = []
+
         for section in sections:
-            key = str(section.get("section_key") or section.get("section_title_normalized") or "").lower()
-            title = str(section.get("section_title_normalized") or section.get("section_title_raw") or key)
-            text = _section_text(section)
+            title = str(section.get("section") or "")
+            key = _normalize_label(title)
+            text = str(section.get("text") or "").strip()
+            if not text:
+                continue
             if "abstract" in key:
                 abstract_parts.append(text)
             elif "method" in key or "material" in key:
                 methods_parts.append(text)
             elif "result" in key:
                 results_parts.append(text)
-            elif "table" in key:
-                tables.extend(_section_tables(section))
-            elif "table" in title.lower():
-                tables.extend(_section_tables(section))
+
+        for row in xml_content.get("tables") or []:
+            raw_xml = str(row.get("raw_xml") or "").strip()
+            if not raw_xml:
+                continue
+            tables.append(
+                {
+                    "raw_xml": raw_xml,
+                    "section_path": "/".join(str(item) for item in (row.get("section_path") or []) if str(item).strip()),
+                    "text": _table_raw_xml_text(raw_xml),
+                }
+            )
+
         return EvidenceContext(
             study_id=_study_id(candidate) or str(metadata.get("pmid") or metadata.get("pmc_id") or ""),
             title=str(_candidate_value(candidate, "title") or metadata.get("title") or ""),
@@ -68,6 +87,7 @@ class DataExtractor:
     """Extract visible numerical data for each study-analysis pair."""
 
     _PROMPT_NAME = "data_extraction"
+    _DEFAULT_CONCURRENCY = 8
 
     async def extract_with_llm(
         self,
@@ -75,15 +95,19 @@ class DataExtractor:
         *,
         analyses: list[AnalysisSpec],
         evidence_contexts: dict[str, EvidenceContext],
+        concurrency: int | None = None,
         run_id: str | None = None,
         prompt_version: str = "v1",
     ) -> ExtractionResult:
         prompt_template = load_prompt(self._PROMPT_NAME)
         response_schema = load_schema(self._PROMPT_NAME)
-        rows: list[ExtractedDataRow] = []
+        semaphore = asyncio.Semaphore(_resolve_concurrency(concurrency, "MODULE3_EXTRACTION_CONCURRENCY", self._DEFAULT_CONCURRENCY))
+        contexts = list(evidence_contexts.values())
+        ordered_rows: list[ExtractedDataRow | None] = [None] * (len(contexts) * len(analyses))
         warnings: list[str] = []
-        for context in evidence_contexts.values():
-            for analysis in analyses:
+
+        async def _extract_one(index: int, context: EvidenceContext, analysis: AnalysisSpec) -> None:
+            async with semaphore:
                 try:
                     result = await gateway.call(
                         task_type=self._PROMPT_NAME,
@@ -102,20 +126,26 @@ class DataExtractor:
                         study_id=context.study_id,
                         prompt_version=prompt_version,
                     )
-                    rows.append(self._row_from_payload(context.study_id, analysis, result.content))
+                    ordered_rows[index] = self._row_from_payload(context.study_id, analysis, result.content)
                 except Exception as exc:
                     warning = f"Extraction failed for {context.study_id}/{analysis.analysis_id}: {exc}"
                     warnings.append(warning)
-                    rows.append(
-                        ExtractedDataRow(
-                            study_id=context.study_id,
-                            analysis_id=analysis.analysis_id,
-                            outcome_type=analysis.outcome_type,
-                            effect_measure=analysis.effect_measure,
-                            extraction_status="missing",
-                            missing_reason=warning,
-                        )
+                    ordered_rows[index] = ExtractedDataRow(
+                        study_id=context.study_id,
+                        analysis_id=analysis.analysis_id,
+                        outcome_type=analysis.outcome_type,
+                        effect_measure=analysis.effect_measure,
+                        extraction_status="missing",
+                        missing_reason=warning,
                     )
+
+        tasks = []
+        for context_index, context in enumerate(contexts):
+            for analysis_index, analysis in enumerate(analyses):
+                index = context_index * len(analyses) + analysis_index
+                tasks.append(_extract_one(index, context, analysis))
+        await asyncio.gather(*tasks)
+        rows = [row for row in ordered_rows if row is not None]
         return ExtractionResult(rows=rows, warnings=warnings)
 
     def _row_from_payload(self, study_id: str, analysis: AnalysisSpec, content: dict[str, Any]) -> ExtractedDataRow:
@@ -164,33 +194,13 @@ class DataExtractor:
         return row
 
 
-def _section_text(section: dict[str, Any]) -> str:
-    parts: list[str] = []
-    for block in section.get("blocks") or []:
-        if not isinstance(block, dict):
-            continue
-        if block.get("type") == "table":
-            continue
-        text = block.get("text_md") or block.get("text") or ""
-        if text:
-            parts.append(str(text))
-    return _trim("\n".join(parts))
-
-
-def _section_tables(section: dict[str, Any]) -> list[dict[str, str]]:
-    tables: list[dict[str, str]] = []
-    for block in section.get("blocks") or []:
-        if not isinstance(block, dict) or block.get("type") != "table":
-            continue
-        tables.append(
-            {
-                "table_id": str(block.get("table_id") or ""),
-                "title": str(block.get("table_title") or ""),
-                "caption": str(block.get("table_caption") or ""),
-                "text": _trim(str(block.get("table_text_raw") or "")),
-            }
-        )
-    return tables
+def _table_raw_xml_text(raw_xml: str) -> str:
+    try:
+        node = ET.fromstring(raw_xml)
+    except ET.ParseError:
+        return _trim(raw_xml)
+    text = " ".join(part.strip() for part in node.itertext() if str(part).strip())
+    return _trim(re.sub(r"\s+", " ", text))
 
 
 def _trim(text: str, limit: int = 12000) -> str:
@@ -208,6 +218,12 @@ def _candidate_value(candidate: Any, key: str) -> Any:
 
 def _study_id(candidate: Any) -> str:
     return str(_candidate_value(candidate, "study_id") or _candidate_value(candidate, "pmid") or "unknown")
+
+
+def _normalize_label(value: str) -> str:
+    text = (value or "").lower().strip()
+    text = re.sub(r"[^a-z0-9]+", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def _float_or_none(value: Any) -> float | None:
@@ -243,3 +259,14 @@ def _has_required_raw_values(row: ExtractedDataRow) -> bool:
     if measure in {"HR", "GIV"}:
         return row.giv_effect is not None and row.giv_se is not None
     return False
+
+
+def _resolve_concurrency(value: int | None, env_name: str, default: int) -> int:
+    if isinstance(value, int) and value > 0:
+        return value
+    raw = os.getenv(env_name, str(default)).strip()
+    try:
+        parsed = int(raw)
+        return parsed if parsed > 0 else default
+    except ValueError:
+        return default

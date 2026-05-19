@@ -1,8 +1,18 @@
 # Phase 6 Gradio Demo 测试与调试指南
 
+- **Status:** active
+- **Last Reviewed:** 2026-05-15
+- **Source of Truth:** Current Phase 6 runnable demo path and test procedure.
+
+
 本文档用于验证 **Phase 6 Gradio Demo**：用户像使用模型对话界面一样输入 clinical question，页面通过 FastAPI 创建 pipeline run 并轮询 trace，在同一页展示 Phase 5 trace、Module 2 中间过程、Module 3 分析结果和完整 JSON trace。
 
 > 说明：当前 Phase 6 是轻量 demo。真实模式依赖 FastAPI 服务；`use_mock=true` 时不依赖外部 uvicorn，而是走本地 `TestClient` 做 smoke、UI 调试和自动化测试。
+
+另提供一个独立联调页用于 Module1+2 统一检索（静态/动态双模式），不触发 Module3：
+
+- `frontend/gradio_retrieval_app.py`
+- 后端接口：`POST /retrieval/run`
 
 ## 当前实现范围
 
@@ -12,17 +22,46 @@
 2. 左侧输入 clinical question、推荐 demo 问题、`top_k`、`use_mock`、本地索引路径。
 3. 右侧 ChatGPT-like 主回答和 run summary。
 4. Pipeline timeline：`question_expansion -> question_pi_extraction -> query_generation -> local_search -> module3_analysis`。
+   - 说明：timeline 当前是前端聚合视图，不逐条显示 `module3_screening` 到 `module3_grade`；完整 11-step 请看 `/pipeline/runs/{run_id}/trace`。
 5. 分 Tab 展示 PICO、eligibility、analysis plan、PI extraction、Boolean query、本地检索 query_text、候选文献、screening、extraction、Risk of Bias、aggregation/GRADE。
 6. 完整 trace JSON 页面展示，并生成可下载的 `/tmp/ebm_pipeline_trace_<run_id>.json`。
 7. failed run 会显示错误信息，同时保留已完成步骤 trace，便于调试。
 
+已完成的 Module1+2 独立联调页能力：
+
+1. 分页签：`静态检索（本地1000索引）` / `动态检索（在线优先+本地cleaned复用）`。
+2. 输入 clinical question、选择预置问题、设置 `top_k`、索引路径、`use_mock_llm`。
+3. `RCT only` 选项默认开启（检索式默认附加 RCT 过滤）。
+3. 展示 `expansion / pi / query`。
+4. 展示 Top-K 检索表格。
+5. 展示统一统计字段（动态模式显示完整统计项；静态模式显示基础命中统计）；两种模式都显示 `timings_ms` 耗时分解。
+6. 动态模式先在线 PubMed 检索候选，再检查本地 cleaned 是否已存在；已存在则直接复用，缺失时才执行清洗并沉淀到 v2。
+7. 动态模式清洗文献候选仅显示 `retrieval_cache_v2/articles_cleaned/*.json`，并支持清洗后正文全文预览；静态模式隐藏该操作入口。
+8. 动态清洗文献采用新结构：`xml_content.sections`（正文段落）与 `xml_content.tables`（`raw_xml` 表格原文）。
+
 ## 相关代码路径
 
 - `frontend/gradio_app.py` — Gradio demo 入口和 UI callback
+- `frontend/gradio_retrieval_app.py` — Module1+2 独立检索联调页
 - `backend/src/ebm_backend/online_pipeline/interfaces/api/routes_pipeline.py` — Phase 5 run 创建与 trace API
+- `backend/src/ebm_backend/online_pipeline/interfaces/api/routes_retrieval.py` — Module1+2 retrieval API
 - `backend/src/ebm_backend/online_pipeline/infrastructure/pipeline_repository.py` — run / step trace 状态结构
 - `tests/unit/test_phase6_gradio_app.py` — Gradio callback 和 Blocks 构建 smoke test
+- `tests/unit/test_gradio_retrieval_app.py` — 独立检索联调页测试
 - `docs/guides/phase5-api-test-guide.md` — 后端 API 与 orchestrator 调试指南
+
+## 清洗文献结构说明（动态模式）
+
+`retrieval_cache_v2/articles_cleaned/*.json` 当前关键字段：
+
+- 顶层必须包含：`study_id`、`metadata`、`derived`、`xml_content`
+- `xml_content.sections`: `[{ "section": string, "text": string }]`
+- `xml_content.tables`: `[{ "section_path": list[string], "raw_xml": string }]`
+
+说明：
+- 前端预览正文读取 `xml_content.sections`。
+- 表格保留 `raw_xml`，供下游（Module3）按需解析，不在清洗阶段强行扁平化。
+- 不再兼容 legacy `sections[].blocks`；预览会显示读取失败和明确错误信息。
 
 ## 安装依赖
 
@@ -66,6 +105,19 @@ python frontend/gradio_app.py --host 127.0.0.1 --port 7861
 python frontend/gradio_app.py --host 0.0.0.0 --port 7860
 ```
 
+启动 Module1+2 独立检索联调页：
+
+```bash
+PYTHONPATH=backend/src uvicorn ebm_backend.online_pipeline.interfaces.api.main:app --host 127.0.0.1 --port 8000 --log-level debug
+PYTHONPATH=backend/src python frontend/gradio_retrieval_app.py --host 127.0.0.1 --port 7861
+```
+
+打开：
+
+```text
+http://127.0.0.1:7861
+```
+
 ## 页面使用方式
 
 1. 选择一个 demo question，或直接在输入框写 clinical question。
@@ -73,6 +125,7 @@ python frontend/gradio_app.py --host 0.0.0.0 --port 7860
 3. 点击 `Run pipeline`。
 4. 先看右侧主回答区：状态、耗时、纳入/排除数量、主要结果。
 5. 展开 `Pipeline timeline` 检查每一步摘要。
+   - timeline 只展示 5 个聚合节点；若要看 Module3 分阶段，请在 `Trace JSON` 或 API `/trace` 中检查 `steps[*].name`。
 6. 依次查看各 Tab：
    - `Question`：PICO、eligibility、preliminary/module3 analysis plan、PI extraction。
    - `Search`：Boolean query、本地检索 query_text、Top candidate studies。
@@ -135,6 +188,23 @@ PYTHONPATH=backend/src pytest \
   -q
 ```
 
+只跑 Module1+2 独立联调页：
+
+```bash
+PYTHONPATH=backend/src pytest tests/unit/test_gradio_retrieval_app.py -q
+```
+
+同时回归 API + 两个 Gradio 页：
+
+```bash
+PYTHONPATH=backend/src pytest \
+  tests/unit/test_retrieval_api.py \
+  tests/unit/test_gradio_retrieval_app.py \
+  tests/unit/test_phase5_api.py \
+  tests/unit/test_phase6_gradio_app.py \
+  -q
+```
+
 更完整的 Module 2/3/5/6 回归：
 
 ```bash
@@ -189,6 +259,7 @@ python -m json.tool /tmp/ebm_pipeline_trace_<run_id>.json | less
 - `steps[*].status`
 - `steps[*].summary`
 - `steps[*].payload`
+- `steps[*].name`（应包含 11 个 step，其中 Module3 为 `module3_screening/planning/extraction/rob/aggregation/grade/analysis`）
 - `result.query.boolean_query`
 - `result.search.query_text`
 - `result.candidates`

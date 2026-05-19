@@ -40,7 +40,13 @@ TIMELINE_STEPS = [
     ("question_pi_extraction", "PI extraction"),
     ("query_generation", "Boolean query"),
     ("local_search", "Local retrieval"),
-    ("module3_analysis", "Evidence analysis"),
+    ("module3_screening", "Study screening"),
+    ("module3_planning", "Analysis planning"),
+    ("module3_extraction", "Data extraction"),
+    ("module3_rob", "Risk of bias"),
+    ("module3_aggregation", "Meta-analysis"),
+    ("module3_grade", "GRADE assessment"),
+    ("module3_analysis", "Evidence summary"),
 ]
 
 
@@ -72,6 +78,7 @@ def run_pipeline(
     top_k: int,
     use_mock: bool,
     index_path: str,
+    enable_v2_backfill: bool = False,
 ):
     """Run the synchronous Gradio callback around the async orchestrator."""
     question = (question or preset_question or "").strip()
@@ -95,6 +102,7 @@ def run_pipeline(
             top_k=int(top_k),
             use_mock=bool(use_mock),
             index_path=resolved_index_path,
+            enable_v2_backfill=bool(enable_v2_backfill),
         ):
             final_trace = trace
             elapsed = time.perf_counter() - start
@@ -129,6 +137,7 @@ def _run_pipeline_via_backend(*, question: str, top_k: int, use_mock: bool, inde
             "top_k": top_k,
             "use_mock": use_mock,
             "index_path": index_path,
+            "enable_v2_backfill": False,
         }
         return _run_pipeline_with_local_test_client(payload)
     trace: dict[str, Any] | None = None
@@ -137,6 +146,7 @@ def _run_pipeline_via_backend(*, question: str, top_k: int, use_mock: bool, inde
         top_k=top_k,
         use_mock=use_mock,
         index_path=index_path,
+        enable_v2_backfill=False,
     ):
         pass
     if trace is None:
@@ -144,12 +154,13 @@ def _run_pipeline_via_backend(*, question: str, top_k: int, use_mock: bool, inde
     return trace
 
 
-def _iter_pipeline_via_backend(*, question: str, top_k: int, use_mock: bool, index_path: str):
+def _iter_pipeline_via_backend(*, question: str, top_k: int, use_mock: bool, index_path: str, enable_v2_backfill: bool):
     payload = {
         "question": question,
         "top_k": top_k,
         "use_mock": use_mock,
         "index_path": index_path,
+        "enable_v2_backfill": enable_v2_backfill,
     }
     if use_mock:
         yield _run_pipeline_with_local_test_client(payload)
@@ -239,12 +250,17 @@ def _outputs_from_run(run: Any, elapsed: float, trace_path: str | None):
     search = result.get("search") or _step_payload(run, "local_search")
     candidates = result.get("candidates") or search.get("studies") or []
     module3 = _module3_payload(run)
-    screening = result.get("screening") or module3.get("screening") or {}
-    planning = result.get("planning") or module3.get("planning") or {}
-    extraction = result.get("extraction") or module3.get("extraction") or {}
-    rob = result.get("risk_of_bias") or module3.get("risk_of_bias") or {}
-    aggregation = result.get("aggregation") or module3.get("aggregation") or {}
-    grade = result.get("grade") or module3.get("grade") or {}
+    screening = result.get("screening") or _step_payload(run, "module3_screening") or module3.get("screening") or {}
+    planning = result.get("planning") or _step_payload(run, "module3_planning") or module3.get("planning") or {}
+    extraction = result.get("extraction") or _step_payload(run, "module3_extraction") or module3.get("extraction") or {}
+    rob = result.get("risk_of_bias") or _step_payload(run, "module3_rob") or module3.get("risk_of_bias") or {}
+    aggregation = (
+        result.get("aggregation")
+        or _step_payload(run, "module3_aggregation")
+        or module3.get("aggregation")
+        or {}
+    )
+    grade = result.get("grade") or _step_payload(run, "module3_grade") or module3.get("grade") or {}
 
     return (
         _answer_markdown(run, elapsed, expansion, screening, aggregation, grade),
@@ -255,11 +271,14 @@ def _outputs_from_run(run: Any, elapsed: float, trace_path: str | None):
         _plan_markdown(expansion, planning),
         _pi_markdown(pi),
         _query_markdown(query, search),
+        _module2_stats_markdown(search=search, screening=screening),
         _table_html(
             ["study_id", "title", "pmid", "pmcid", "score", "matched_fields", "source"],
             _candidate_rows(candidates),
             "Waiting for local search results.",
         ),
+        _cleaned_article_choices(candidates),
+        "",
         _table_html(
             ["study_id", "title", "decision", "rationale", "exclusion_reason"],
             _screening_rows(screening),
@@ -336,14 +355,14 @@ def _log_event(message: str) -> None:
 
 
 def _running_outputs(*, question: str, top_k: int, use_mock: bool, index_path: str):
-    empty_table = _table_html([], [], "Pipeline is running. Results will appear when the run completes.")
+    empty_table = _table_html([], [], "Pipeline is running. Tables will refresh as each stage completes.")
     trace = {
         "status": "running",
         "question": question,
         "top_k": top_k,
         "use_mock": use_mock,
         "index_path": index_path,
-        "message": "Pipeline started. Waiting for orchestrator to finish.",
+        "message": "Pipeline started. Waiting for first stage update.",
         "log_path": str(LOG_PATH),
     }
     return (
@@ -372,7 +391,10 @@ def _running_outputs(*, question: str, top_k: int, use_mock: bool, index_path: s
         _empty_panel("Analysis Plan", "Waiting for analysis plan."),
         _empty_panel("PI Extraction", "Waiting for PI extraction."),
         _empty_panel("Query", "Waiting for query generation and local search."),
+        _empty_panel("Module 2 联调统计", "Waiting for retrieval and screening stats."),
         empty_table,
+        gr.update(choices=[], value=None),
+        _empty_panel("清洗文献预览", "Run pipeline and select a cleaned article."),
         empty_table,
         empty_table,
         empty_table,
@@ -396,7 +418,10 @@ def _empty_outputs(message: str):
         _empty_panel("Analysis Plan", message),
         _empty_panel("PI Extraction", message),
         _empty_panel("Query", message),
+        _empty_panel("Module 2 联调统计", message),
         empty_table,
+        gr.update(choices=[], value=None),
+        _empty_panel("清洗文献预览", message),
         empty_table,
         empty_table,
         empty_table,
@@ -420,7 +445,10 @@ def _error_outputs(message: str):
         _empty_panel("Analysis Plan", message),
         _empty_panel("PI Extraction", message),
         _empty_panel("Query", message),
+        _empty_panel("Module 2 联调统计", message),
         empty_table,
+        gr.update(choices=[], value=None),
+        _empty_panel("清洗文献预览", message),
         empty_table,
         empty_table,
         empty_table,
@@ -674,6 +702,72 @@ def _query_markdown(query: dict[str, Any], search: dict[str, Any]) -> str:
     return _panel_html("Query", rows)
 
 
+def _module2_stats_markdown(*, search: dict[str, Any], screening: dict[str, Any]) -> str:
+    fallback = search.get("fallback_search") or {}
+    v2 = fallback.get("v2_backfill") or {}
+    excluded_count = sum(1 for item in screening.get("decisions") or [] if not item.get("included"))
+    included_count = sum(1 for item in screening.get("decisions") or [] if item.get("included"))
+    return _panel_html(
+        "Module 2 联调统计",
+        [
+            ("Top-K returned", search.get("returned_count", 0)),
+            ("Total hits", search.get("total_hits", 0)),
+            ("Online retrieval used", bool(v2.get("used"))),
+            ("PubMed requested", v2.get("requested", 0)),
+            ("Indexed into v2", v2.get("ingested", 0)),
+            ("LLM/RCT gate excluded", v2.get("rct_gate_excluded", 0)),
+            ("Download success", v2.get("download_success", 0)),
+            ("Cleaning success", v2.get("clean_success", 0)),
+            ("LLM screening included", included_count),
+            ("LLM screening excluded", excluded_count),
+        ],
+    )
+
+
+def _cleaned_article_choices(candidates: list[dict[str, Any]]):
+    choices: list[str] = []
+    for item in candidates:
+        path = str(item.get("article_path") or "").strip()
+        if path and Path(path).exists():
+            label = f"{item.get('study_id') or item.get('pmid') or 'study'} | {item.get('title') or ''} | {path}"
+            choices.append(label)
+    return gr.update(choices=choices, value=(choices[0] if choices else None))
+
+
+def show_cleaned_article(selected: str) -> str:
+    raw = (selected or "").strip()
+    if not raw:
+        return _empty_panel("清洗文献预览", "Please select a cleaned article.")
+    path = raw.split(" | ")[-1].strip()
+    if not path:
+        return _empty_panel("清洗文献预览", "Invalid article path.")
+    file_path = Path(path)
+    if not file_path.exists():
+        return _error_html(f"Cleaned article file not found: {path}")
+    try:
+        payload = json.loads(file_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return _error_html(f"Failed to load cleaned article JSON: {exc}")
+
+    metadata = payload.get("metadata") or {}
+    xml_content = payload.get("xml_content") or {}
+    sections = xml_content.get("sections") or []
+    section_keys = [str(section.get("section") or "") for section in sections]
+    preview = {
+        "study_id": payload.get("study_id"),
+        "pmid": metadata.get("pmid"),
+        "pmcid": metadata.get("pmc_id"),
+        "title": metadata.get("title"),
+        "publication_year": metadata.get("publication_year"),
+        "sections_count": len(sections),
+        "tables_count": len(xml_content.get("tables") or []),
+        "section_keys": section_keys[:12],
+        "derived": payload.get("derived") or {},
+        "path": str(file_path),
+    }
+    return _panel_html("清洗文献预览", f"<pre>{escape(json.dumps(preview, ensure_ascii=False, indent=2))}</pre>")
+
+
 def _candidate_rows(candidates: list[dict[str, Any]]) -> list[list[Any]]:
     return [
         [
@@ -923,6 +1017,7 @@ def build_app() -> gr.Blocks:
                 with gr.Row():
                     top_k = gr.Slider(label="Top K", minimum=1, maximum=20, step=1, value=5)
                     use_mock = gr.Checkbox(label="Use mock LLM", value=False)
+                enable_v2_backfill = gr.Checkbox(label="Enable online retrieval cache v2", value=True)
                 index_path = gr.Textbox(label="Local index path", value=DEFAULT_INDEX_PATH, lines=1)
                 run_button = gr.Button("Run pipeline", variant="primary")
             with gr.Column(scale=7, min_width=420):
@@ -942,7 +1037,10 @@ def build_app() -> gr.Blocks:
                 pi = gr.HTML(label="PI extraction")
             with gr.Tab("Search"):
                 query = gr.HTML(label="Query")
+                module2_stats = gr.HTML(label="Module 2 联调统计")
                 candidates = gr.HTML(label="Top candidate studies")
+                cleaned_choice = gr.Dropdown(label="选择清洗后文献（可查看详情）", choices=[], interactive=True)
+                cleaned_preview = gr.HTML(label="清洗文献预览")
             with gr.Tab("Screening"):
                 screening = gr.HTML(label="Screening decisions")
             with gr.Tab("Extraction"):
@@ -965,7 +1063,10 @@ def build_app() -> gr.Blocks:
             plan,
             pi,
             query,
+            module2_stats,
             candidates,
+            cleaned_choice,
+            cleaned_preview,
             screening,
             extraction,
             rob,
@@ -977,9 +1078,10 @@ def build_app() -> gr.Blocks:
         ]
         run_button.click(
             fn=run_pipeline,
-            inputs=[question, preset, top_k, use_mock, index_path],
+            inputs=[question, preset, top_k, use_mock, index_path, enable_v2_backfill],
             outputs=outputs,
         )
+        cleaned_choice.change(fn=show_cleaned_article, inputs=cleaned_choice, outputs=cleaned_preview)
         preset.change(fn=lambda value: value, inputs=preset, outputs=question)
     return demo
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import uuid
@@ -57,9 +58,11 @@ class PipelineOrchestrator:
         *,
         store: InMemoryPipelineStore | None = None,
         index_path: str | Path = DEFAULT_LOCAL_INDEX_PATH,
+        enable_v2_backfill: bool = False,
     ):
         self.store = store or DEFAULT_PIPELINE_STORE
         self.index_path = Path(index_path)
+        self.enable_v2_backfill = bool(enable_v2_backfill)
 
     def create_pending_run(
         self,
@@ -150,7 +153,7 @@ class PipelineOrchestrator:
                 },
             )
 
-            searcher = QuestionStudySearcher(index_path=resolved_index_path)
+            searcher = QuestionStudySearcher(index_path=resolved_index_path, enable_v2_backfill=self.enable_v2_backfill)
             search = await self._run_step(
                 run,
                 "local_search",
@@ -170,17 +173,97 @@ class PipelineOrchestrator:
             if use_mock and not candidates:
                 candidates = [_mock_candidate(question, expansion.pico)]
 
-            module3 = await self._run_step(
+            module3_runner = Module3AnalysisRunner(gateway)
+            screening = await self._run_step(
                 run,
-                "module3_analysis",
-                lambda: Module3AnalysisRunner(gateway).run(
+                "module3_screening",
+                lambda: module3_runner.run_screening(
                     question=question,
                     pico=expansion.pico,
                     eligibility_criteria=expansion.eligibility_criteria,
-                    preliminary_plan=expansion.preliminary_analysis_plan,
                     candidates=candidates,
                     run_id=run_id,
                 ),
+                lambda value: {
+                    "summary": f"included={len(value.included)} excluded={len(value.excluded)} warnings={len(value.warnings)}",
+                    "payload": asdict(value),
+                },
+            )
+            planning = await self._run_step(
+                run,
+                "module3_planning",
+                lambda: module3_runner.run_planning(
+                    question=question,
+                    pico=expansion.pico,
+                    preliminary_plan=expansion.preliminary_analysis_plan,
+                    screening=screening,
+                    run_id=run_id,
+                ),
+                lambda value: {
+                    "summary": f"analyses={len(value.analyses)} warnings={len(value.warnings)}",
+                    "payload": asdict(value),
+                },
+            )
+            evidence = module3_runner.build_evidence_contexts(screening=screening)
+            extraction_task = self._run_step(
+                run,
+                "module3_extraction",
+                lambda: module3_runner.extractor.extract_with_llm(
+                    module3_runner.gateway,
+                    analyses=planning.analyses,
+                    evidence_contexts=evidence,
+                    run_id=run_id,
+                ),
+                lambda value: {
+                    "summary": f"rows={len(value.rows)} warnings={len(value.warnings)}",
+                    "payload": asdict(value),
+                },
+            )
+            rob_task = self._run_step(
+                run,
+                "module3_rob",
+                lambda: module3_runner.rob_assessor.assess_with_llm(
+                    module3_runner.gateway,
+                    evidence_contexts=evidence,
+                    run_id=run_id,
+                ),
+                lambda value: {
+                    "summary": f"assessments={len(value.assessments)} warnings={len(value.warnings)}",
+                    "payload": asdict(value),
+                },
+            )
+            extraction, risk_of_bias = await asyncio.gather(extraction_task, rob_task)
+            aggregation = await self._run_step(
+                run,
+                "module3_aggregation",
+                lambda: _awaitable_value(module3_runner.run_aggregation(planning=planning, extraction=extraction)),
+                lambda value: {
+                    "summary": f"analyses={len(value.analyses)} warnings={len(value.warnings)}",
+                    "payload": asdict(value),
+                },
+            )
+            grade = await self._run_step(
+                run,
+                "module3_grade",
+                lambda: module3_runner.run_grade(aggregation=aggregation, risk_of_bias=risk_of_bias, run_id=run_id),
+                lambda value: {
+                    "summary": f"assessments={len(value.assessments)} warnings={len(value.warnings)}",
+                    "payload": asdict(value),
+                },
+            )
+            module3_result = module3_runner.compose_result(
+                screening=screening,
+                planning=planning,
+                evidence=evidence,
+                extraction=extraction,
+                risk_of_bias=risk_of_bias,
+                aggregation=aggregation,
+                grade=grade,
+            )
+            module3 = await self._run_step(
+                run,
+                "module3_analysis",
+                lambda: _awaitable_value(module3_result),
                 lambda value: {
                     "summary": _module3_summary(result_to_dict(value)),
                     "payload": result_to_dict(value),

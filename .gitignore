@@ -13,6 +13,15 @@ venv/
 
 # Environment
 .env
+*.env
+*.env.*
+!.env.example
+experiments/pico-exp/code/config/llm_providers.yaml
+experiments/**/code/config/llm_providers.yaml
+experiments/**/code/config/llm_providers.local.yaml
+experiments/**/code/config/llm_providers.yml
+experiments/**/code/config/llm_providers.local.yml
+!experiments/**/code/config/*.example.yaml
 
 # IDE
 .vscode/
@@ -41,3 +50,22 @@ logs/*.log
 
 # Data (too large for git)
 data/
+!experiments/**/data/
+!experiments/**/data/**
+
+# Experiment artifacts
+experiments/**/module/
+experiments/**/results/preds/
+experiments/**/results/logs/
+experiments/**/results/phase1-test-artifacts/
+experiments/pico-exp/results/data/
+experiments/pico-exp/data/EBM-NLP/.git/
+experiments/**/data/**/.cache/
+
+# Large generated files excluded from screening reproducibility bundle
+experiments/screening-exp/results/data/q2crbench/kdigo_ckd.evidence_profile.examples.jsonl
+experiments/screening-exp/results/data/csmed_ft/train.full_text_only.examples.jsonl
+experiments/screening-exp/results/data/csmed_ft/train.abstract_plus_full_text.examples.jsonl
+experiments/screening-exp/results/data/csmed_ft/train.abstract_only.examples.jsonl
+experiments/screening-exp/results/data/csmed_ft/test.full_text_only.examples.jsonl
+experiments/screening-exp/results/data/csmed_ft/test.abstract_plus_full_text.examples.jsonl

@@ -1,5 +1,10 @@
 # Data Pipeline for Online EBM (v2)
 
+- **Status:** reference
+- **Last Reviewed:** 2026-05-15
+- **Source of Truth:** End-to-end data flow design reference.
+
+
 ## 1 Overview
 
 ### 1.1 Overall Pipeline

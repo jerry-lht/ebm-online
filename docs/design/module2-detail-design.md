@@ -1,5 +1,10 @@
 # Module 2: Question-to-Study — 详细设计
 
+- **Status:** reference
+- **Last Reviewed:** 2026-05-15
+- **Source of Truth:** Module 2 design reference.
+
+
 ## 1 模块概览
 
 ```mermaid

@@ -44,6 +44,12 @@ def test_phase5_api_creates_run_and_exposes_trace(tmp_path):
         "question_pi_extraction",
         "query_generation",
         "local_search",
+        "module3_screening",
+        "module3_planning",
+        "module3_extraction",
+        "module3_rob",
+        "module3_aggregation",
+        "module3_grade",
         "module3_analysis",
     ]
     assert body["result"]["query"]["boolean_query"]

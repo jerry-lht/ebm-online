@@ -1516,7 +1516,7 @@ class LocalRCTIndex:
         "abstract": 1.0,
     }
 
-    def __init__(self, index_path: str | Path = "data/data_for_test/data/data_for_test/data/data_for_test/data_demo_with_mesh/index/local_rct_index.jsonl"):
+    def __init__(self, index_path: str | Path = "data/data_for_test/data_demo_with_mesh/index/local_rct_index.jsonl"):
         self.index_path = Path(index_path)
         self.documents: list[dict[str, Any]] = []
         if self.index_path.exists():

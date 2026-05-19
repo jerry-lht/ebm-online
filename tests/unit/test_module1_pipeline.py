@@ -428,6 +428,11 @@ def test_validate_module1_local_queries_smoke(tmp_path):
     assert rows[2].expected_in_top_hits is False
 
 
+def test_local_rct_index_default_path_is_normalized():
+    idx = LocalRCTIndex()
+    assert str(idx.index_path) == "data/data_for_test/data_demo_with_mesh/index/local_rct_index.jsonl"
+
+
 def test_module1_simplified_runner_smoke(tmp_path):
     db_path = tmp_path / "simp.db"
     dest = tmp_path / "data/data_for_test/data/data_for_test/data_demo_with_mesh"

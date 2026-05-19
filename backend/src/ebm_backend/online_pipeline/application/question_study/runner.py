@@ -29,12 +29,13 @@ class Module2LLMRunner:
         gateway: LLMGateway,
         *,
         index_path: str | Path = DEFAULT_LOCAL_INDEX_PATH,
+        enable_v2_backfill: bool = False,
     ):
         self.gateway = gateway
         self.expander = QuestionExpander()
         self.pi_extractor = QuestionPIExtractor()
         self.query_generator = QueryGenerator()
-        self.searcher = QuestionStudySearcher(index_path=index_path)
+        self.searcher = QuestionStudySearcher(index_path=index_path, enable_v2_backfill=enable_v2_backfill)
 
     async def run(self, question: str, *, top_k: int = 20, run_id: str | None = None) -> Module2LLMResult:
         expansion = await self.expander.expand_with_llm(self.gateway, question, run_id=run_id)
