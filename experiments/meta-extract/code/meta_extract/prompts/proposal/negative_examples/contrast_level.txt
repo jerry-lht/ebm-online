@@ -1,0 +1,1 @@
+Use row-level labels or footnotes when they justify timepoint distinctions.

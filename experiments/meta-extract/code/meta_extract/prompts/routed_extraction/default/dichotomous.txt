@@ -1,0 +1,1 @@
+Allowed direct field names: Experimental cases, Experimental N, Control cases, Control N.

@@ -1,0 +1,3 @@
+Return strict JSON only.
+First decide subgroup/timepoint items, then attach extracted rows to each predicted item.
+Do not predict comparison values.
