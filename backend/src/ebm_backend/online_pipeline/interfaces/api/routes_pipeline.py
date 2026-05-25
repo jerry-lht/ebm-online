@@ -21,6 +21,7 @@ class PipelineRunCreate(BaseModel):
     top_k: int = Field(default=5, ge=1, le=50)
     use_mock: bool = False
     index_path: str | None = None
+    enable_v2_backfill: bool = False
 
 
 class PipelineRunSummary(BaseModel):
@@ -29,6 +30,7 @@ class PipelineRunSummary(BaseModel):
     question: str
     top_k: int
     use_mock: bool
+    enable_v2_backfill: bool
     index_path: str | None
     step_count: int
     error: str | None = None
@@ -39,6 +41,7 @@ async def create_pipeline_run(request: PipelineRunCreate, background_tasks: Back
     orchestrator = PipelineOrchestrator(
         store=DEFAULT_PIPELINE_STORE,
         index_path=Path(request.index_path or DEFAULT_LOCAL_INDEX_PATH),
+        enable_v2_backfill=request.enable_v2_backfill,
     )
     run = orchestrator.create_pending_run(
         question=request.question,
@@ -120,12 +123,19 @@ def _run_pipeline_background(orchestrator: PipelineOrchestrator, run: PipelineRu
 
 
 def _summary(run: PipelineRunState) -> PipelineRunSummary:
+    enable_v2_backfill = False
+    if run.result and isinstance(run.result, dict):
+        search = run.result.get("search") or {}
+        fallback = search.get("fallback_search") or {}
+        v2 = fallback.get("v2_backfill") or {}
+        enable_v2_backfill = bool(v2)
     return PipelineRunSummary(
         run_id=run.run_id,
         status=run.status.value,
         question=run.question,
         top_k=run.top_k,
         use_mock=run.use_mock,
+        enable_v2_backfill=enable_v2_backfill,
         index_path=run.index_path,
         step_count=len(run.steps),
         error=run.error,

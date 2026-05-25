@@ -1,5 +1,10 @@
 # Online EBM Pipeline — 高层架构设计方案
 
+- **Status:** reference
+- **Last Reviewed:** 2026-05-15
+- **Source of Truth:** High-level architecture intent reference.
+
+
 ## 1 系统定位与目标
 
 本系统是一个自动化循证医学（EBM）pipeline，从用户输入的临床问题出发，自动完成文献检索、筛选、数据抽取、Meta 分析和 GRADE 评估，输出结构化的证据摘要。
@@ -46,7 +51,7 @@ graph TD
     end
 
     subgraph STORE["Storage Layer"]
-        ES["Elasticsearch<br/>(RCT Retrieval Index)"]:::storage
+        IDX["Local JSONL Indexes<br/>(demo + retrieval_cache_v2)"]:::storage
         DB["SQLite → PostgreSQL<br/>(pipeline state, results)"]:::storage
         FS["File System<br/>(full text XML/JSON)"]:::storage
     end
@@ -62,10 +67,11 @@ graph TD
     M1 --> TQ
     M2 --> TQ
     M3 --> TQ
-    M1 --> ES
-    M2 --> ES
+    M1 --> IDX
+    M2 --> IDX
     M3 --> DB
     M1 --> FS
+    M2 --> FS
     M3 --> FS
 ```
 
@@ -77,7 +83,7 @@ graph TD
 | 后端 API | FastAPI | 异步支持、自动文档、类型安全 |
 | 任务调度 | 进程内后台执行（当前） | 当前简化版优先保证闭环可跑通，后续再接任务队列 |
 | LLM 调用 | OpenAI SDK (gpt-5.2, configurable base_url) | 统一模型，通过 api_key + base_url 配置 |
-| 检索索引 | Elasticsearch (单节点 Docker) | Boolean query + 字段匹配是 ES 强项，10 万级单节点足够 |
+| 检索索引 | 本地 JSONL 索引（`LocalRCTIndex` + `retrieval_cache_v2`） | 当前简化链路默认本地优先；命中不足时在线补全并沉淀，可离线复用 |
 | 关系存储 | SQLite (初期) → PostgreSQL (扩展) | 存储 pipeline 运行状态、中间结果、审计日志 |
 | 文献全文 | 本地文件系统 | PMC XML / PubMed JSON 直接存储 |
 | 统计引擎 | 自研 Python 模块 (numpy + scipy) | 实现 IV/MH/Peto 方法，避免 rpy2 依赖 |
@@ -138,7 +144,7 @@ Pipeline Run 数据结构：
 2. **RCT Classification** — 规则 + LLM 分类为 primary RCT / related RCT / non-RCT
 3. **PI Extraction** — LLM 提取 Population 和 Intervention
 4. **PI Normalization** — 清洗、MeSH 映射、同义词扩展
-5. **Index Building** — 写入 Elasticsearch
+5. **Index Building** — 写入本地索引（并可扩展 ES）
 
 运行频率：按需（新数据入库时）或定期（如每月更新）
 
@@ -147,7 +153,7 @@ Pipeline Run 数据结构：
 子任务：
 1. **Question Expansion** — LLM 扩写为 PICO + eligibility + preliminary analysis plan
 2. **Query Generation** — P+I 映射 MeSH + free-text，生成 Boolean query
-3. **Index Search** — 在 ES 中执行检索，返回候选文献
+3. **Index Search** — 本地索引优先检索；命中不足时在线 PubMed 补全并写入 `retrieval_cache_v2`
 
 ### 4.4 Module 3: EBM Annotation and Analysis (在线)
 
@@ -260,7 +266,7 @@ def make_cache_key(task_type: str, inputs: dict, prompt_version: str) -> str:
 - 输出：pooled effect、CI、heterogeneity (chi2, I2, tau2)、Z-test
 
 #### Storage Layer
-- Elasticsearch：RCT 检索索引
+- 本地 JSONL 索引：`data/data_for_test/.../local_rct_index.jsonl`（历史）+ `data/retrieval_cache_v2/index/local_rct_index_v2.jsonl`（在线沉淀）
 - SQLite：pipeline 运行状态、中间结果 JSON
 - File System：文献全文、prompt 模板、输出报告
 

@@ -1,17 +1,74 @@
 # Phase 5 API 测试指南：1000 篇索引真实闭环
 
+- **Status:** active
+- **Last Reviewed:** 2026-05-15
+- **Source of Truth:** Current Phase 5 runnable API path and test procedure.
+
+
 本文档用于验证 **Phase 5 Pipeline Orchestrator & API**：提交一个 clinical question 后，后端立即返回 `pending run_id`，后台执行 Module 2 与 Module 3，并把中间过程保存到进程内 trace，方便查看问题拆解、检索式生成、1000 篇本地索引检索、screening、extraction、risk of bias、aggregation 和 GRADE。
 
 > 说明：当前 Phase 5 不接数据库、不使用 Redis/Celery、不实现 cache/usage tracking，也不提供 WebSocket。默认 `use_mock=false`，走真实 LLM + `data_demo_1000` 索引；`use_mock=true` 保留给无 API key 的 smoke test。
+
+## Module1+2 专用检索接口（retrieval）
+
+新增独立接口用于 Module1+2 联调，不触发 Module3：
+
+- `POST /retrieval/run`
+- 输入字段：
+  - `question`（必填）
+  - `mode`：`static` 或 `dynamic`（默认 `dynamic`）
+  - `top_k`（默认 5）
+  - `index_path`（可选）
+  - `static`：使用 `index_path`（默认 `data/data_for_test/data_demo_1000/index/local_rct_index.jsonl`）
+  - `dynamic`：online-first（先 PubMed 检索）；忽略传入 `index_path`
+  - `enable_v2_backfill`（兼容字段；`dynamic` 模式当前忽略，始终在线流程；`static` 固定 `false`）
+  - `use_mock_llm`（默认 `false`）
+  - `rct_only`（默认 `true`，会在 query 上附加 RCT 过滤块）
+- 输出字段：
+  - `expansion`, `pi`, `query`, `search`
+  - `stats`（统一统计字段）
+  - `cleaned_article_choices`（动态模式仅返回 `retrieval_cache_v2/articles_cleaned/*.json`；静态模式为空）
+
+动态模式检索策略（当前）：
+
+1. 先在线 PubMed 检索候选（online-first）
+2. 对候选逐篇检查本地是否已有 cleaned（`retrieval_cache_v2/articles_cleaned/*.json`）
+3. 已有 cleaned 直接复用，不重复清洗
+4. 仅对缺失 cleaned 的候选执行 `PMC XML -> cleaning -> v2 index` 入库
+
+`stats` 统一字段定义：
+
+- `retrieved_total`
+- `returned_top_k`
+- `online_backfill_used`
+- `pubmed_requested`
+- `rct_gate_excluded`
+- `download_success`
+- `clean_success`
+- `ingested_success`
+- `timings_ms`（毫秒，整型、非负）：
+  - `question_expansion_ms`
+  - `question_pi_extraction_ms`
+  - `query_generation_ms`
+  - `local_search_ms`
+  - `total_ms`
+
+`cleaned_article_choices` 指向的 cleaned JSON 采用严格 schema：
+
+- 必须包含：`study_id`、`metadata`、`derived`、`xml_content`
+- `xml_content.sections`: `list[{section:str, text:str}]`
+- `xml_content.tables`: `list[{section_path:list[str], raw_xml:str}]`
+- 不再兼容 `sections[].blocks`（legacy payload 会报错）
 
 ## 当前实现范围
 
 已完成的简化链路：
 
 1. `InMemoryPipelineStore`：进程内保存 `PipelineRunState`，状态支持 `pending -> running -> completed/failed`。
-2. `PipelineOrchestrator`：同步执行 `question_expansion -> question_pi_extraction -> query_generation -> local_search -> module3_analysis`。
+2. `PipelineOrchestrator`：同步执行 `question_expansion -> question_pi_extraction -> query_generation -> local_search -> module3_screening -> module3_planning -> (module3_extraction || module3_rob) -> module3_aggregation -> module3_grade -> module3_analysis`。
 3. `SimplifiedPipelineMockGateway`：覆盖 Module 2 和 Module 3 所需 structured-output task，供 `use_mock=true` smoke test 使用。
 4. FastAPI app：提供 run 创建、列表、状态、trace、results 查询接口。
+5. FastAPI app 同时提供 `retrieval` 独立接口（只跑 Module1+2）。
 5. 中间过程 trace：每个 step 保存 `status`、`summary`、`payload`、`error`、时间戳。
 6. 默认索引路径统一为 `data/data_for_test/data_demo_1000/index/local_rct_index.jsonl`。
 7. 真实模式下本地检索无命中时不注入 synthetic candidate；mock 模式仍可兜底生成 synthetic candidate，保证流程 smoke 可跑通。
@@ -22,8 +79,10 @@
 - `backend/src/ebm_backend/online_pipeline/application/run_pipeline.py` — orchestrator 与 mock gateway
 - `backend/src/ebm_backend/online_pipeline/interfaces/api/main.py` — FastAPI app 入口
 - `backend/src/ebm_backend/online_pipeline/interfaces/api/routes_pipeline.py` — Phase 5 API routes
+- `backend/src/ebm_backend/online_pipeline/interfaces/api/routes_retrieval.py` — Module1+2 retrieval routes
 - `tests/unit/test_phase5_orchestrator.py` — orchestrator trace 单元测试
 - `tests/unit/test_phase5_api.py` — FastAPI route 单元测试
+- `tests/unit/test_retrieval_api.py` — retrieval route 单元测试
 
 ## 依赖与前置条件
 
@@ -74,7 +133,7 @@ PYTHONPATH=backend/src pytest tests/unit/test_phase5_orchestrator.py tests/unit/
 
 | 测试 | 说明 |
 |------|------|
-| `test_phase5_orchestrator_records_module2_and_module3_trace` | 用临时本地 JSONL 索引跑完整 orchestrator，确认 5 个 step 和 Module 2/3 payload 都被记录 |
+| `test_phase5_orchestrator_records_module2_and_module3_trace` | 用临时本地 JSONL 索引跑完整 orchestrator，确认 Module 2 + Module 3 分阶段 trace 都被记录，且保留 `module3_analysis` 汇总 step |
 | `test_phase5_api_creates_run_and_exposes_trace` | 用 FastAPI `TestClient` 提交问题，确认 `/trace` 和 `/results` 可返回中间过程与结果 |
 | `test_phase5_api_returns_404_for_unknown_run` | 不存在的 `run_id` 返回 404 |
 
@@ -91,6 +150,16 @@ PYTHONPATH=backend/src pytest \
 ```
 
 当前验证记录：24 个测试通过。
+
+只跑 retrieval route：
+
+```bash
+PYTHONPATH=backend/src pytest tests/unit/test_retrieval_api.py -q
+```
+
+当前验证记录（2026-05-15）：
+
+- `tests/unit/test_retrieval_api.py`：6 passed
 
 真实 LLM + 1000 篇索引 integration smoke：
 
@@ -256,12 +325,18 @@ curl -s http://127.0.0.1:8000/pipeline/runs/<run_id>
 重点检查：
 
 - `status` 为 `completed`
-- `steps[*].name` 依次为：
+- `steps[*].name` 依次为（共 11 个）：
   - `question_expansion`
   - `question_pi_extraction`
   - `query_generation`
   - `local_search`
-  - `module3_analysis`
+  - `module3_screening`
+  - `module3_planning`
+  - `module3_extraction`
+  - `module3_rob`
+  - `module3_aggregation`
+  - `module3_grade`
+  - `module3_analysis`（兼容汇总）
 - 每个 step 有 `summary`
 
 ### 3. 查看完整 trace
@@ -278,11 +353,12 @@ curl -s http://127.0.0.1:8000/pipeline/runs/<run_id>/trace
 - `steps[3].payload.query_text`：Boolean query 转换后的本地检索文本
 - `steps[3].payload.studies`：本地检索候选文献，每篇包含 `relevance_score`、`matched_fields`、`article_path`
 - `steps[3].payload.fallback_search`：Boolean query 太窄且兜底检索被触发时的说明
-- `steps[4].payload.screening`：纳入/排除判断
-- `steps[4].payload.extraction.rows`：抽取出的数值行
-- `steps[4].payload.risk_of_bias.assessments`：RoB 判断
-- `steps[4].payload.aggregation.analyses`：meta-analysis aggregation 结果
-- `steps[4].payload.grade.assessments`：GRADE certainty
+- `steps[*].name=module3_screening`：纳入/排除判断
+- `steps[*].name=module3_extraction`：抽取出的数值行
+- `steps[*].name=module3_rob`：RoB 判断
+- `steps[*].name=module3_aggregation`：meta-analysis aggregation 结果
+- `steps[*].name=module3_grade`：GRADE certainty
+- `steps[*].name=module3_analysis`：完整汇总 payload（兼容旧客户端）
 
 ### 4. 查看前端友好的结果摘要
 

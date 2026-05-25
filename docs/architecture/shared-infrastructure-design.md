@@ -1,5 +1,10 @@
 # Shared Infrastructure — 详细设计
 
+- **Status:** reference
+- **Last Reviewed:** 2026-05-15
+- **Source of Truth:** Shared infrastructure design reference.
+
+
 ## 1 概览
 
 ```mermaid

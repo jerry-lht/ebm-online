@@ -9,6 +9,10 @@ from typing import Any
 
 from ebm_backend.index_construction.application import LocalRCTIndex
 from ebm_backend.online_pipeline.application.question_study.query_gen import QueryGenOutput
+from ebm_backend.online_pipeline.application.question_study.retrieval_cache_v2 import (
+    DEFAULT_V2_INDEX_PATH,
+    RetrievalCacheV2,
+)
 
 
 DEFAULT_LOCAL_INDEX_PATH = "data/data_for_test/data_demo_1000/index/local_rct_index.jsonl"
@@ -43,8 +47,32 @@ class SearchResult:
 class QuestionStudySearcher:
     """Module 2 local retriever backed by LocalRCTIndex."""
 
-    def __init__(self, index_path: str | Path = DEFAULT_LOCAL_INDEX_PATH):
+    def __init__(
+        self,
+        index_path: str | Path = DEFAULT_LOCAL_INDEX_PATH,
+        *,
+        enable_v2_backfill: bool = False,
+        v2_index_path: str | Path = DEFAULT_V2_INDEX_PATH,
+        v2_cache_root: str | Path = "data/retrieval_cache_v2",
+        v2_min_local_hits: int = 5,
+        v2_pubmed_fetch_count: int = 30,
+        v2_timeout: int = 30,
+        v2_retries: int = 1,
+        v2_requests_per_second: float = 3.0,
+    ):
         self.index = LocalRCTIndex(index_path)
+        self.enable_v2_backfill = enable_v2_backfill
+        self.v2_cache: RetrievalCacheV2 | None = None
+        if self.enable_v2_backfill:
+            self.v2_cache = RetrievalCacheV2.from_paths(
+                cache_root=v2_cache_root,
+                index_path=v2_index_path,
+                min_local_hits=v2_min_local_hits,
+                pubmed_fetch_count=v2_pubmed_fetch_count,
+                timeout=v2_timeout,
+                retries=v2_retries,
+                requests_per_second=v2_requests_per_second,
+            )
 
     def search_from_query_output(
         self,
@@ -53,30 +81,115 @@ class QuestionStudySearcher:
         top_k: int = 20,
         fallback_terms: list[str] | None = None,
     ) -> SearchResult:
+        terms = fallback_terms or []
+        if self.v2_cache is not None:
+            return self._search_dynamic_online_first(output=output, top_k=top_k, fallback_terms=terms)
+
         primary = self.search(output.boolean_query, top_k=top_k)
-        if primary.studies or not fallback_terms:
+
+        should_use_fallback_terms = not primary.studies
+        fallback_query_text = self._fallback_query_text(terms) if should_use_fallback_terms else ""
+        fallback_studies: list[CandidateStudy] = []
+        if fallback_query_text:
+            fallback_hits = self.index.search(fallback_query_text, top_k=top_k)
+            fallback_studies = [self._to_candidate(hit.document, hit.score, hit.matched_fields) for hit in fallback_hits]
+
+        merged = self._merge_studies(primary.studies, fallback_studies, top_k=top_k)
+
+        fallback_payload: dict[str, Any] = {
+            "used": bool(fallback_studies) and should_use_fallback_terms,
+            "reason": "primary_boolean_query_returned_no_hits" if not primary.studies else "primary_query_sufficient",
+            "query_text": fallback_query_text,
+            "terms": terms,
+            "returned_count": len(merged),
+        }
+
+        backfill_payload: dict[str, Any] | None = None
+        if self.v2_cache is not None:
+            try:
+                backfill_payload = self.v2_cache.maybe_backfill(
+                    output=output,
+                    fallback_terms=terms,
+                    top_k=top_k,
+                    current_local_hits=len(merged),
+                )
+            except Exception as exc:
+                backfill_payload = {
+                    "used": False,
+                    "reason": "v2_backfill_failed",
+                    "error": str(exc),
+                }
+
+            if backfill_payload and backfill_payload.get("ingested", 0) > 0:
+                v2_primary = self._search_v2(output.boolean_query, top_k=top_k)
+                v2_fallback = self._search_v2(fallback_query_text, top_k=top_k) if fallback_query_text else []
+                merged = self._merge_studies(merged, self._merge_studies(v2_primary, v2_fallback, top_k=top_k), top_k=top_k)
+
+        if backfill_payload is not None:
+            fallback_payload["v2_backfill"] = backfill_payload
+
+        if merged:
+            return SearchResult(
+                query_used=output.boolean_query,
+                query_text=primary.query_text,
+                total_hits=len(merged),
+                returned_count=len(merged),
+                studies=merged,
+                fallback_level=1 if fallback_payload.get("used") else 0,
+                fallback_search=fallback_payload,
+            )
+
+        if primary.studies:
             return primary
 
-        fallback_query_text = self._fallback_query_text(fallback_terms)
-        if not fallback_query_text:
-            return primary
-
-        hits = self.index.search(fallback_query_text, top_k=top_k)
-        studies = [self._to_candidate(hit.document, hit.score, hit.matched_fields) for hit in hits]
         return SearchResult(
             query_used=output.boolean_query,
             query_text=primary.query_text,
+            total_hits=0,
+            returned_count=0,
+            studies=[],
+            fallback_level=0,
+            fallback_search=fallback_payload,
+        )
+
+    def _search_dynamic_online_first(
+        self,
+        *,
+        output: QueryGenOutput,
+        top_k: int,
+        fallback_terms: list[str],
+    ) -> SearchResult:
+        assert self.v2_cache is not None
+        try:
+            online = self.v2_cache.online_first_retrieve(output=output, fallback_terms=fallback_terms, top_k=top_k)
+        except Exception as exc:
+            return SearchResult(
+                query_used=output.boolean_query,
+                query_text=self._query_text_for_local_search(output.boolean_query),
+                total_hits=0,
+                returned_count=0,
+                studies=[],
+                fallback_level=0,
+                fallback_search={"used": False, "reason": "v2_backfill_failed", "error": str(exc), "terms": fallback_terms},
+            )
+
+        docs = online.get("studies") or []
+        studies = [
+            self._to_candidate(
+                doc,
+                float(max(1, top_k - int(doc.get("_online_rank") or 0))),
+                ["online_pubmed"],
+            )
+            for doc in docs
+        ]
+        return SearchResult(
+            query_used=output.boolean_query,
+            query_text=online.get("query") or self._query_text_for_local_search(output.boolean_query),
             total_hits=len(studies),
             returned_count=len(studies),
             studies=studies,
-            fallback_level=1 if studies else 0,
-            fallback_search={
-                "used": bool(studies),
-                "reason": "primary_boolean_query_returned_no_hits",
-                "query_text": fallback_query_text,
-                "terms": fallback_terms,
-                "returned_count": len(studies),
-            },
+            fallback_level=0,
+            fallback_search={"used": True, "reason": "dynamic_online_first", "terms": fallback_terms, "v2_backfill": online.get("v2_backfill") or {}},
         )
 
     def search(self, boolean_query: str, *, top_k: int = 20) -> SearchResult:
@@ -129,3 +242,21 @@ class QuestionStudySearcher:
             seen.add(key)
             cleaned.append(term)
         return " ".join(cleaned)
+
+    def _search_v2(self, boolean_or_free_query: str, *, top_k: int) -> list[CandidateStudy]:
+        if self.v2_cache is None:
+            return []
+        query_text = self._query_text_for_local_search(boolean_or_free_query)
+        hits = self.v2_cache.index.search(query_text, top_k=top_k)
+        return [self._to_candidate(hit.document, hit.score, hit.matched_fields) for hit in hits]
+
+    @staticmethod
+    def _merge_studies(primary: list[CandidateStudy], secondary: list[CandidateStudy], *, top_k: int) -> list[CandidateStudy]:
+        merged: dict[str, CandidateStudy] = {}
+        for item in primary + secondary:
+            key = item.study_id or item.pmid or item.title
+            current = merged.get(key)
+            if current is None or item.relevance_score > current.relevance_score:
+                merged[key] = item
+        ordered = sorted(merged.values(), key=lambda row: (-row.relevance_score, row.study_id))
+        return ordered[:top_k]

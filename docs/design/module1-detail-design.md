@@ -1,5 +1,10 @@
 # Module 1: Index Construction — 详细设计
 
+- **Status:** reference
+- **Last Reviewed:** 2026-05-15
+- **Source of Truth:** Module 1 design reference.
+
+
 ## 1 模块概览
 
 ```mermaid
@@ -50,6 +55,7 @@ flowchart TD
 
 **实现状态：**
 - 已完成：Step 1 / Step 2 的数据接入与分类结果承接、`data_demo/` 100 篇样本集、`data_demo_with_mesh/` PI-first derived 输出、本地 JSONL 索引、`index-derived` 索引重建入口、`search-local` 自定义 query 检索入口、单篇 demo runner、真实 Chat Completions PI 抽取入口、PI 抽取 prompt/schema、PI 清洗/去重/拆分、NLM MeSH Lookup 在线查询、短语候选与本地兜底 MeSH 映射、同义词扩展、ES mapping 与 IndexDocument 组装、PostgreSQL 状态表、Module 1 Batch runner、`module1_batches` / `module1_studies` 状态回写、batch 断点恢复与跳过已完成 study 的逻辑、相关单元测试
+- 已完成（v2 在线沉淀）：新增 `retrieval_cache_v2` 独立索引层，支持 `Module2` 先在线 PubMed 检索，再复用本地已清洗全文（缺失时才执行 `PMC XML (JATS) 清洗 -> v2 索引追加写入`），并记录 `manifest/ingest_log.jsonl` 可追溯事件
 - 当前状态：简化版 Module 1 闭环已完成；100 个 derived 可全部重建到本地索引，固定 5 条 query 检索验证 5/5 通过
 - 后续扩展：提升 LLM PI 抽取质量、真实 Batch API 网络验收、失败项自动重提、真实 ES bulk 写入、全量增量更新
 
@@ -73,13 +79,56 @@ flowchart TD
 每篇文献获取以下内容：
 - PMC XML 全文（含 sections、tables、references）
 - PubMed metadata（title、abstract、MeSH terms、publication type）
-- 存储为 cleaned JSON 格式（XML → structured sections + tables）
+- 存储为 cleaned JSON 格式（XML → `xml_content.sections + xml_content.tables`）
 
 ### 2.4 增量更新策略
 
 - 按 publication date 做增量拉取（每月一次）
 - 已存在的 PMID 不重复拉取
 - 新增文献进入 Step 2 分类流程
+
+### 2.5 Module 2 在线沉淀索引（v2，新增）
+
+`Module 2` 在线检索新增独立“文献沉淀层”，不与历史 demo 索引混用：
+
+```
+data/retrieval_cache_v2/
+├── index/local_rct_index_v2.jsonl
+├── articles_raw/
+├── articles_cleaned/
+└── manifest/ingest_log.jsonl
+```
+
+在线流程：
+1. 先在线 PubMed 检索候选（online-first）
+2. 候选若已存在本地 cleaned，直接复用
+3. 本地缺失 cleaned 的候选才执行 `RCT gate + XML cleaning`，成功后写入 `articles_cleaned/` 并追加到 `local_rct_index_v2.jsonl`
+4. 失败场景（无 PMCID、XML 失败、gate 失败）写入 `manifest/ingest_log.jsonl`，不进入可分析候选
+
+v2 入库字段（核心）：
+- 主键：`study_id`（优先 `pmid:{pmid}`）
+- 元字段：`pmid`, `pmcid`, `title`, `abstract`, `publication_year`, `source`
+- 质量字段：`rct_gate_status`, `full_text_available`, `xml_status`, `clean_status`
+- 检索字段：`population`, `intervention`, `mesh_population`, `mesh_intervention`, `mesh_terms`
+- 路径字段：`raw_path`, `cleaned_path`, `article_path`, `indexed_at`
+
+`articles_cleaned/*.json` 关键结构（当前）：
+- `study_id`, `metadata`, `derived`
+- `xml_content.sections`: `[{ "section": string, "text": string }]`
+- `xml_content.tables`: `[{ "section_path": list[string], "raw_xml": string }]`
+
+严格 schema 约束（当前实现）：
+- 顶层必须包含 `study_id`、`metadata`、`derived`、`xml_content`
+- `xml_content.sections` 仅接受 `list[{section:str, text:str}]`
+- `xml_content.tables` 仅接受 `list[{section_path:list[str], raw_xml:str}]`
+- legacy `sections[].blocks` 不再兼容，读取/写入会抛出明确错误
+
+说明：
+- 表格正文保持 `raw_xml` 原样，供下游按需解析（避免清洗阶段丢失表格结构）。
+- 历史旧格式可通过 `reclean_retrieval_cache_v2` 命令回填为上述结构。
+
+`LocalRCTIndex()` 默认路径（修复后）：
+- `data/data_for_test/data_demo_with_mesh/index/local_rct_index.jsonl`
 
 ---
 

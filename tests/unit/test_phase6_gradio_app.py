@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from frontend.gradio_app import DEFAULT_QUESTION, build_app, run_pipeline
+from frontend.gradio_app import DEFAULT_QUESTION, _outputs_from_run, _run_view_from_trace, build_app, run_pipeline
 
 
 def test_phase6_gradio_mock_callback_returns_trace_and_tables(tmp_path):
@@ -20,14 +20,14 @@ def test_phase6_gradio_mock_callback_returns_trace_and_tables(tmp_path):
     first_outputs = staged_outputs[0]
     outputs = staged_outputs[-1]
 
-    assert len(outputs) == 17
+    assert len(outputs) == 20
     assert len(staged_outputs) >= 2
     assert "Running" in first_outputs[0]
     answer_markdown = outputs[0]
-    candidate_html = outputs[8]
-    extraction_html = outputs[10]
-    trace = outputs[14]
-    trace_file = Path(outputs[15])
+    candidate_html = outputs[9]
+    extraction_html = outputs[13]
+    trace = outputs[17]
+    trace_file = Path(outputs[18])
 
     assert "Completed" in answer_markdown
     assert "Duloxetine catheter-related bladder discomfort trial" in candidate_html
@@ -39,6 +39,12 @@ def test_phase6_gradio_mock_callback_returns_trace_and_tables(tmp_path):
         "question_pi_extraction",
         "query_generation",
         "local_search",
+        "module3_screening",
+        "module3_planning",
+        "module3_extraction",
+        "module3_rob",
+        "module3_aggregation",
+        "module3_grade",
         "module3_analysis",
     ]
     assert trace["result"]["candidates"]
@@ -50,9 +56,76 @@ def test_phase6_gradio_mock_callback_returns_trace_and_tables(tmp_path):
 def test_phase6_gradio_empty_question_does_not_run_pipeline():
     outputs = list(run_pipeline("", "", 1, True, ""))[0]
 
-    assert outputs[14]["status"] == "not_started"
-    assert outputs[15] is None
+    assert outputs[17]["status"] == "not_started"
+    assert outputs[18] is None
     assert "Enter a clinical question" in outputs[0]
+
+
+def test_phase6_gradio_staged_trace_uses_module3_substep_payloads():
+    trace = {
+        "run_id": "run-staged",
+        "status": "running",
+        "question": DEFAULT_QUESTION,
+        "top_k": 1,
+        "use_mock": False,
+        "index_path": "/tmp/index.jsonl",
+        "steps": [
+            {"name": "question_expansion", "status": "completed", "summary": "expanded", "payload": {}},
+            {"name": "question_pi_extraction", "status": "completed", "summary": "pi", "payload": {}},
+            {"name": "query_generation", "status": "completed", "summary": "query", "payload": {}},
+            {"name": "local_search", "status": "completed", "summary": "retrieved", "payload": {"studies": []}},
+            {
+                "name": "module3_screening",
+                "status": "completed",
+                "summary": "screening done",
+                "payload": {"decisions": [{"study_id": "s1", "title": "Trial 1", "included": True}]},
+            },
+            {
+                "name": "module3_planning",
+                "status": "completed",
+                "summary": "planning done",
+                "payload": {"analyses": [{"analysis_id": "a1", "outcome": "CRBD", "outcome_type": "binary", "effect_measure": "RR"}]},
+            },
+            {
+                "name": "module3_extraction",
+                "status": "completed",
+                "summary": "extraction done",
+                "payload": {
+                    "rows": [
+                        {
+                            "study_id": "s1",
+                            "analysis_id": "a1",
+                            "outcome_type": "binary",
+                            "effect_measure": "RR",
+                            "extraction_status": "included",
+                            "exp_events": 6,
+                            "exp_n": 32,
+                            "ctrl_events": 18,
+                            "ctrl_n": 32,
+                            "notes": "visible before module3_analysis",
+                        }
+                    ]
+                },
+            },
+            {"name": "module3_rob", "status": "running", "summary": "rob running", "payload": {}},
+            {"name": "module3_aggregation", "status": "pending", "summary": "", "payload": {}},
+            {"name": "module3_grade", "status": "pending", "summary": "", "payload": {}},
+            {"name": "module3_analysis", "status": "pending", "summary": "", "payload": {}},
+        ],
+        "result": None,
+    }
+
+    run = _run_view_from_trace(trace)
+    outputs = _outputs_from_run(run, elapsed=5.0, trace_path=None)
+    timeline_html = outputs[2]
+    extraction_html = outputs[13]
+
+    assert "Data extraction" in timeline_html
+    assert "completed" in timeline_html
+    assert "Risk of bias" in timeline_html
+    assert "running" in timeline_html
+    assert "visible before module3_analysis" in extraction_html
+    assert "Waiting for extraction rows." not in extraction_html
 
 
 def test_phase6_gradio_blocks_app_builds():

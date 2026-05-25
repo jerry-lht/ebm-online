@@ -10,15 +10,19 @@ from ebm_backend.online_pipeline.interfaces.cli.evidence_analysis import main as
 from ebm_backend.shared.llm.gateway import LLMGateway, LLMResult
 from ebm_backend.shared.llm.tracker import TokenUsage
 from ebm_backend.online_pipeline.application.evidence_analysis import (
+    AggregationResult,
+    AnalysisAggregation,
     AnalysisPlanner,
     AnalysisSpec,
     DataExtractor,
     EvidenceContextBuilder,
     EvidenceContext,
     ExtractedDataRow,
+    GradeAssessor,
     MetaAnalysisAggregator,
     Module3AnalysisRunner,
     RiskOfBiasAssessor,
+    RiskOfBiasResult,
     StudyScreener,
 )
 from ebm_backend.online_pipeline.application.question_study import EligibilityCriteria, PICO, PreliminaryAnalysisPlan
@@ -132,6 +136,47 @@ class FakeLLMGateway:
                 "warnings": [],
             }
         raise ValueError(task_type)
+
+
+class _FaultyConcurrentGateway(FakeLLMGateway):
+    async def call(self, **kwargs):
+        task_type = kwargs["task_type"]
+        inputs = kwargs.get("inputs") or {}
+        if task_type == "study_screening" and inputs.get("candidate", {}).get("study_id") == "s-fail":
+            raise RuntimeError("forced screening failure")
+        if task_type == "data_extraction" and inputs.get("evidence_context", {}).get("study_id") == "s-fail":
+            raise RuntimeError("forced extraction failure")
+        if task_type == "risk_of_bias" and inputs.get("evidence_context", {}).get("study_id") == "s-fail":
+            raise RuntimeError("forced rob failure")
+        return await super().call(**kwargs)
+
+
+class _GradeConcurrentGateway(FakeLLMGateway):
+    def __init__(
+        self,
+        *,
+        fail_analysis_ids: set[str] | None = None,
+        delays: dict[str, float] | None = None,
+    ):
+        super().__init__()
+        self.fail_analysis_ids = fail_analysis_ids or set()
+        self.delays = delays or {}
+        self._active = 0
+        self.max_active = 0
+
+    async def call(self, **kwargs):
+        if kwargs.get("task_type") != "grade_assessment":
+            return await super().call(**kwargs)
+        analysis_id = str((kwargs.get("inputs") or {}).get("aggregation", {}).get("analysis_id") or "")
+        self._active += 1
+        self.max_active = max(self.max_active, self._active)
+        try:
+            await asyncio.sleep(self.delays.get(analysis_id, 0.0))
+            if analysis_id in self.fail_analysis_ids:
+                raise RuntimeError("forced grade failure")
+            return await super().call(**kwargs)
+        finally:
+            self._active -= 1
 
 
 class _StructuredLLMResponse:
@@ -279,67 +324,52 @@ def _write_synthetic_article(path, *, study_id: str, exp_events: int, exp_n: int
     path.write_text(
         json.dumps(
             {
+                "study_id": study_id,
                 "metadata": {
                     "pmid": study_id,
                     "title": f"Synthetic RCT {study_id}",
                     "classification": "primary_rct",
                 },
-                "sections": [
-                    {
-                        "section_key": "abstract",
-                        "section_title_normalized": "Abstract",
-                        "blocks": [
-                            {
-                                "type": "text",
-                                "text_md": (
-                                    "A randomized placebo-controlled trial tested duloxetine for preventing "
-                                    "catheter-related bladder discomfort after urinary catheterization."
-                                ),
-                            }
-                        ],
-                    },
-                    {
-                        "section_key": "methods",
-                        "section_title_normalized": "Methods",
-                        "blocks": [
-                            {
-                                "type": "text",
-                                "text_md": (
-                                    "Participants were randomized using a computer-generated randomization list. "
-                                    "Allocation concealment was not fully described."
-                                ),
-                            }
-                        ],
-                    },
-                    {
-                        "section_key": "results",
-                        "section_title_normalized": "Results",
-                        "blocks": [
-                            {
-                                "type": "text",
-                                "text_md": (
-                                    f"At 1 hour, CRBD occurred in {exp_events} of {exp_n} participants in the "
-                                    f"duloxetine group and {ctrl_events} of {ctrl_n} participants in the placebo group."
-                                ),
-                            }
-                        ],
-                    },
-                    {
-                        "section_key": "tables",
-                        "section_title_normalized": "Tables",
-                        "blocks": [
-                            {
-                                "type": "table",
-                                "table_id": f"table-{study_id}",
-                                "table_title": "CRBD incidence at 1 hour",
-                                "table_caption": "Synthetic extraction table.",
-                                "table_text_raw": (
-                                    f"Outcome Duloxetine Placebo CRBD at 1 hour {exp_events}/{exp_n} {ctrl_events}/{ctrl_n}"
-                                ),
-                            }
-                        ],
-                    },
-                ],
+                "derived": {},
+                "xml_content": {
+                    "sections": [
+                        {
+                            "section": "Abstract",
+                            "text": (
+                                "A randomized placebo-controlled trial tested duloxetine for preventing "
+                                "catheter-related bladder discomfort after urinary catheterization."
+                            ),
+                        },
+                        {
+                            "section": "Methods",
+                            "text": (
+                                "Participants were randomized using a computer-generated randomization list. "
+                                "Allocation concealment was not fully described."
+                            ),
+                        },
+                        {
+                            "section": "Results",
+                            "text": (
+                                f"At 1 hour, CRBD occurred in {exp_events} of {exp_n} participants in the "
+                                f"duloxetine group and {ctrl_events} of {ctrl_n} participants in the placebo group."
+                            ),
+                        },
+                    ],
+                    "tables": [
+                        {
+                            "section_path": ["Results"],
+                            "raw_xml": (
+                                f"<table-wrap id=\"table-{study_id}\">"
+                                "<label>Table 1</label>"
+                                "<caption><p>CRBD incidence at 1 hour</p></caption>"
+                                "<table><tbody>"
+                                "<tr><td>Outcome</td><td>Duloxetine</td><td>Placebo</td></tr>"
+                                f"<tr><td>CRBD at 1 hour</td><td>{exp_events}/{exp_n}</td><td>{ctrl_events}/{ctrl_n}</td></tr>"
+                                "</tbody></table></table-wrap>"
+                            ),
+                        }
+                    ],
+                },
             },
             ensure_ascii=False,
         ),
@@ -440,6 +470,142 @@ def test_module3_runner_complete_flow_and_grade_certainty():
     ]
 
 
+def test_module3_parallel_components_keep_stable_order():
+    gateway = FakeLLMGateway()
+    analyses = [
+        AnalysisSpec(analysis_id="a1", outcome="o1", outcome_type="binary", effect_measure="RR"),
+        AnalysisSpec(analysis_id="a2", outcome="o2", outcome_type="binary", effect_measure="RR"),
+    ]
+    evidence = {
+        "s1": EvidenceContext(study_id="s1", title="t1", abstract="a1"),
+        "s2": EvidenceContext(study_id="s2", title="t2", abstract="a2"),
+    }
+    screening = asyncio.run(
+        StudyScreener().screen_with_llm(
+            gateway,
+            question="q",
+            pico=_pico(),
+            eligibility_criteria=EligibilityCriteria(),
+            candidates=[_Candidate(study_id="s1", title="t1", abstract="a1"), _Candidate(study_id="s2", title="t2", abstract="a2")],
+            concurrency=2,
+        )
+    )
+    assert [d.study_id for d in screening.decisions] == ["s1", "s2"]
+
+    extraction = asyncio.run(DataExtractor().extract_with_llm(gateway, analyses=analyses, evidence_contexts=evidence, concurrency=2))
+    assert [r.study_id for r in extraction.rows] == ["s1", "s1", "s2", "s2"]
+
+    rob = asyncio.run(RiskOfBiasAssessor().assess_with_llm(gateway, evidence_contexts=evidence, concurrency=2))
+    assert [a.study_id for a in rob.assessments] == ["s1", "s2"]
+
+
+def test_grade_parallel_stable_order_under_concurrency():
+    gateway = _GradeConcurrentGateway(
+        delays={
+            "a1": 0.04,
+            "a2": 0.01,
+            "a3": 0.0,
+        }
+    )
+    aggregation = AggregationResult(
+        analyses=[
+            AnalysisAggregation(analysis_id="a1", outcome="o1", effect_measure="RR"),
+            AnalysisAggregation(analysis_id="a2", outcome="o2", effect_measure="RR"),
+            AnalysisAggregation(analysis_id="a3", outcome="o3", effect_measure="RR"),
+        ]
+    )
+    result = asyncio.run(
+        GradeAssessor().assess_with_llm(
+            gateway,
+            aggregation=aggregation,
+            risk_of_bias=RiskOfBiasResult(),
+            concurrency=3,
+        )
+    )
+    assert [item.analysis_id for item in result.assessments] == ["a1", "a2", "a3"]
+    assert gateway.max_active >= 2
+
+
+def test_grade_single_item_failure_degrades_not_abort():
+    gateway = _GradeConcurrentGateway(
+        fail_analysis_ids={"a2"},
+        delays={"a1": 0.01, "a2": 0.0, "a3": 0.02},
+    )
+    aggregation = AggregationResult(
+        analyses=[
+            AnalysisAggregation(analysis_id="a1", outcome="o1", effect_measure="RR"),
+            AnalysisAggregation(analysis_id="a2", outcome="o2", effect_measure="RR"),
+            AnalysisAggregation(analysis_id="a3", outcome="o3", effect_measure="RR"),
+        ]
+    )
+    result = asyncio.run(
+        GradeAssessor().assess_with_llm(
+            gateway,
+            aggregation=aggregation,
+            risk_of_bias=RiskOfBiasResult(),
+            concurrency=3,
+        )
+    )
+    assert [item.analysis_id for item in result.assessments] == ["a1", "a2", "a3"]
+    fallback = result.assessments[1]
+    assert fallback.analysis_id == "a2"
+    assert fallback.certainty == "very_low"
+    assert "Unable to complete structured GRADE assessment." in fallback.downgrade_reasons
+    assert any("a2" in warning for warning in result.warnings)
+
+
+def test_grade_concurrency_resolution_explicit_overrides_env(monkeypatch):
+    aggregation = AggregationResult(
+        analyses=[
+            AnalysisAggregation(analysis_id="a1", outcome="o1", effect_measure="RR"),
+            AnalysisAggregation(analysis_id="a2", outcome="o2", effect_measure="RR"),
+            AnalysisAggregation(analysis_id="a3", outcome="o3", effect_measure="RR"),
+        ]
+    )
+    monkeypatch.setenv("MODULE3_GRADE_CONCURRENCY", "1")
+
+    explicit_gateway = _GradeConcurrentGateway(delays={"a1": 0.02, "a2": 0.02, "a3": 0.02})
+    asyncio.run(
+        GradeAssessor().assess_with_llm(
+            explicit_gateway,
+            aggregation=aggregation,
+            risk_of_bias=RiskOfBiasResult(),
+            concurrency=3,
+        )
+    )
+    assert explicit_gateway.max_active >= 2
+
+    env_gateway = _GradeConcurrentGateway(delays={"a1": 0.02, "a2": 0.02, "a3": 0.02})
+    asyncio.run(
+        GradeAssessor().assess_with_llm(
+            env_gateway,
+            aggregation=aggregation,
+            risk_of_bias=RiskOfBiasResult(),
+        )
+    )
+    assert env_gateway.max_active == 1
+
+
+def test_module3_parallel_single_item_failures_degrade_not_abort():
+    gateway = _FaultyConcurrentGateway()
+    result = asyncio.run(
+        Module3AnalysisRunner(gateway).run(
+            question="Does duloxetine reduce catheter-related bladder discomfort?",
+            pico=_pico(),
+            eligibility_criteria=EligibilityCriteria(),
+            preliminary_plan=_prelim_plan(),
+            candidates=[
+                _Candidate(study_id="s-ok", title="OK trial", abstract="ok"),
+                _Candidate(study_id="s-fail", title="Fail trial", abstract="fail"),
+            ],
+        )
+    )
+    assert result.screening.included
+    assert any("s-fail" in warning for warning in result.warnings)
+    assert any(row.study_id == "s-fail" and row.extraction_status == "missing" for row in result.extraction.rows)
+    assert any(assessment.study_id == "s-fail" and assessment.overall == "unclear" for assessment in result.risk_of_bias.assessments)
+
+
 def test_module3_synthetic_rcts_full_flow_through_llm_gateway(tmp_path):
     specs = [
         ("rct-1", 5, 100, 20, 100),
@@ -536,37 +702,28 @@ def test_evidence_context_builder_reads_article_json(tmp_path):
     article_path.write_text(
         json.dumps(
             {
+                "study_id": "s1",
                 "metadata": {"title": "Duloxetine trial", "pmid": "1"},
-                "sections": [
-                    {
-                        "section_key": "abstract",
-                        "section_title_normalized": "Abstract",
-                        "blocks": [{"type": "text", "text_md": "Abstract text"}],
-                    },
-                    {
-                        "section_key": "methods",
-                        "section_title_normalized": "Methods",
-                        "blocks": [{"type": "text", "text_md": "Randomized double-blind methods"}],
-                    },
-                    {
-                        "section_key": "results",
-                        "section_title_normalized": "Results",
-                        "blocks": [{"type": "text", "text_md": "Results: 6 vs 18 events"}],
-                    },
-                    {
-                        "section_key": "tables",
-                        "section_title_normalized": "Tables",
-                        "blocks": [
-                            {
-                                "type": "table",
-                                "table_id": "t1",
-                                "table_title": "Events",
-                                "table_caption": "Primary table",
-                                "table_text_raw": "Duloxetine 6 Control 18",
-                            }
-                        ],
-                    },
-                ],
+                "derived": {},
+                "xml_content": {
+                    "sections": [
+                        {"section": "Abstract", "text": "Abstract text"},
+                        {"section": "Methods", "text": "Randomized double-blind methods"},
+                        {"section": "Results", "text": "Results: 6 vs 18 events"},
+                    ],
+                    "tables": [
+                        {
+                            "section_path": ["Results"],
+                            "raw_xml": (
+                                "<table-wrap id=\"t1\">"
+                                "<label>Table 1</label>"
+                                "<caption><p>Events</p></caption>"
+                                "<table><tbody><tr><td>Duloxetine</td><td>6</td></tr><tr><td>Control</td><td>18</td></tr></tbody></table>"
+                                "</table-wrap>"
+                            ),
+                        }
+                    ],
+                },
             },
             ensure_ascii=False,
         ),
@@ -579,7 +736,30 @@ def test_evidence_context_builder_reads_article_json(tmp_path):
     assert context.abstract == "Abstract text"
     assert "Randomized" in context.methods
     assert "6 vs 18" in context.results
-    assert context.tables[0]["title"] == "Events"
+    assert "<table-wrap" in context.tables[0]["raw_xml"]
+
+
+def test_evidence_context_builder_rejects_legacy_blocks_schema(tmp_path):
+    article_path = tmp_path / "article_legacy.json"
+    article_path.write_text(
+        json.dumps(
+            {
+                "study_id": "s1",
+                "metadata": {"title": "Legacy article", "pmid": "1"},
+                "derived": {},
+                "xml_content": {
+                    "sections": [{"section": "Results", "blocks": [{"text": "legacy"}]}],
+                    "tables": [],
+                },
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="legacy cleaned schema is not supported"):
+        EvidenceContextBuilder().build(
+            _Candidate(study_id="s1", title="Legacy article", abstract="fallback", article_path=str(article_path))
+        )
 
 
 def test_module3_mock_cli_outputs_full_result(tmp_path, capsys):

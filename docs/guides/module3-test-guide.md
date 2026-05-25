@@ -1,5 +1,10 @@
 # Module 3 简化版测试指南
 
+- **Status:** reference
+- **Last Reviewed:** 2026-05-15
+- **Source of Truth:** Reference for Module 3 simplified testing workflow.
+
+
 本文档用于验证 **Phase 4 简化版 Module 3（EBM Annotation and Analysis）**：从 Module 2 候选文献出发，完成 screening、analysis planning、data extraction、Risk of Bias、StatsEngine aggregation 和 GRADE 的最小可跑通闭环。
 
 > 说明：当前 Module 3 不接数据库、不实现缓存、不记录 usage。单元测试包含两类：一类直接 mock gateway 验证业务编排；另一类使用真实 `LLMGateway` 类加 fake OpenAI Responses client，验证 structured-output 通路、prompt/schema 加载和 Module 3 全流程。真实外部 LLM 实例测试见「真实 LLM 实例测试」。
@@ -9,14 +14,18 @@
 已完成的简化链路：
 
 1. `StudyScreener`：逐篇候选文献调用 LLM，输出 include/exclude、rationale、exclusion_reason。LLM 失败时默认 include 并记录 warning。
+   - 并发参数：`MODULE3_SCREENING_CONCURRENCY`，默认 8；并发下结果顺序保持稳定。
 2. `AnalysisPlanner`：一次性生成 `AnalysisSpec` 列表。失败时从 PICO / preliminary plan 生成 fallback。
 3. `EvidenceContextBuilder`：优先读取 `article_path` 对应 derived article JSON，抽取 abstract、methods、results、tables；无全文时回退到 candidate 的 title/abstract。
 4. `DataExtractor`：按 `study x analysis` 调 LLM，抽取原文可见数值和 evidence spans；不做统计推导。
+   - 并发参数：`MODULE3_EXTRACTION_CONCURRENCY`，默认 8；单条失败降级为 `extraction_status="missing"`。
 5. `RiskOfBiasAssessor`：逐篇评估 RoB 1 可判断域；`selective_reporting` 由系统固定为 `unable_to_determine`。
+   - 并发参数：`MODULE3_ROB_CONCURRENCY`，默认 8；单条失败降级为 `overall="unclear"`。
 6. `MetaAnalysisAggregator`：不调用 LLM，把 extracted rows 转成 `StudyData`，调用 `StatsEngine` 计算 study effects、pooling 和 heterogeneity。
 7. `GradeAssessor`：每条 analysis 调 LLM，基于 aggregation、RoB、缺失数据生成 certainty 和 downgrade reasons。
 8. `Module3AnalysisRunner`：串起完整流程。
 9. `ebm_backend.online_pipeline.interfaces.cli.evidence_analysis --mock`：使用本地检索结果和 deterministic mock LLM 输出跑通完整 Module 3。
+   - 当前 CLI 仅支持 `--mock`，非 mock 路径会直接退出（见 `test_module3_cli_requires_mock`）。
 
 ## 相关代码路径
 
@@ -84,11 +93,14 @@ pytest tests/unit/test_module3_analysis.py -q
 | `test_extraction_mock_values_enter_aggregation` | Mock extraction 数值进入 `StatsEngine` aggregation |
 | `test_rob_auto_adds_selective_reporting` | RoB 自动补 `selective_reporting=unable_to_determine` |
 | `test_module3_runner_complete_flow_and_grade_certainty` | 完整 runner：screening → planning → extraction → RoB → aggregation → GRADE |
+| `test_module3_parallel_components_keep_stable_order` | 验证 screening / extraction / rob 在并发场景下输出顺序稳定 |
+| `test_module3_parallel_single_item_failures_degrade_not_abort` | 验证单条 screening/extraction/rob 失败时降级继续，不中断全流程 |
 | `test_module3_synthetic_rcts_full_flow_through_llm_gateway` | 造 3 篇 synthetic RCT derived JSON，使用真实 `LLMGateway(conn=None)` + fake Responses client 跑完整 Module 3，全程经过 structured output JSON 解析 |
 | `test_aggregation_tracks_missing_rows` | 数据不足时 aggregation 不 pooling，并记录 excluded rows |
 | `test_evidence_context_builder_reads_article_json` | 从 derived article JSON 抽取 abstract/methods/results/tables |
 | `test_module3_mock_cli_outputs_full_result` | CLI mock 输出完整结果 JSON |
 | `test_module3_cli_requires_mock` | 当前 CLI 非 mock 路径显式拒绝，避免误打真实 API |
+| `test_evidence_context_builder_rejects_legacy_blocks_schema` | legacy `sections[].blocks` schema 会抛错，要求新 `xml_content.sections/text` 结构 |
 
 与 Module 2 和 StatsEngine 一起回归：
 
@@ -295,7 +307,7 @@ query = QueryGenerator().generate(
     intervention=pico.intervention,
 )
 candidates = QuestionStudySearcher(
-    index_path="data_demo_with_mesh/index/local_rct_index.jsonl"
+    index_path="data/data_for_test/data_demo_with_mesh/index/local_rct_index.jsonl"
 ).search_from_query_output(query, top_k=3).studies
 
 result = asyncio.run(
@@ -330,7 +342,7 @@ print(result.grade.assessments[0].certainty)
 如果索引文件不存在，先运行：
 
 ```bash
-python -m ebm_backend.index_construction.interfaces.cli index-derived --data-root data_demo_with_mesh
+python -m ebm_backend.index_construction.interfaces.cli index-derived --data-root data/data_for_test/data_demo_with_mesh
 ```
 
 ### 2. 为什么 mock extraction 给不同研究相同事件数？
