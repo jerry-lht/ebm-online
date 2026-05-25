@@ -1,38 +1,39 @@
 {
   "study_id": "Ersoy 2013",
   "pmid": "24217302",
-  "model": "gpt-5.4-mini",
+  "model": "gpt-5.4",
+  "two_stage": false,
   "prediction": {
     "risk_of_bias": [
       {
         "domain": "Random sequence generation (selection bias)",
         "judgement": "Unclear risk",
-        "support_text": "Quote: \"20 consecutive patients ... were included in the study and randomised to two groups (levosimendan and control groups).\" Comment: The paper states that patients were randomized, but it does not describe how the allocation sequence was generated. There is no mention of a random number table, computer-generated sequence, coin toss, shuffled envelopes/cards, or other truly random method, so the sequence generation cannot be judged as truly random.",
+        "support_text": "Quote: \"Between May 2006 and July 2007, 20 consecutive patients with severe pulmonary arterial hypertension (systolic pulmonary artery pressure ≥ 60 mmHg) and low ejection fraction (< 50%) who underwent valve surgery in our clinic, were included in the study and randomised to two groups (levosimendan and control groups).\" Comment: The study states that patients were \"randomised,\" but it does not describe how the allocation sequence was generated (e.g. computer-generated list, random number table, block randomization, coin toss). 'Consecutive patients' refers to recruitment, not to the random sequence generation method. With no further context confirming a truly random method, this domain is unclear.",
         "source": "source_full_text"
       },
       {
         "domain": "Allocation concealment (selection bias)",
         "judgement": "Unclear risk",
-        "support_text": "Summary: The report says the 20 consecutive patients were \"randomised to two groups\" but gives no description of how the allocation sequence was concealed from the person enrolling participants. There is no mention of central allocation, sealed opaque sequentially numbered envelopes, identical containers, or any other mechanism preventing foreknowledge of the next assignment. Comment: Randomisation alone does not establish concealment, so this domain cannot be judged low risk.",
+        "support_text": "Quote: \"20 consecutive patients with severe pulmonary arterial hypertension (systolic pulmonary artery pressure ≥ 60 mmHg) and low ejection fraction (< 50%) who underwent valve surgery in our clinic, were included in the study and randomised to two groups (levosimendan and control groups).\" Comment: The paper states that patients were randomised, but gives no explicit description of how the upcoming assignment was concealed from the person enrolling participants. There is no mention of central allocation, sequentially numbered opaque sealed envelopes, pharmacy-controlled allocation, or any other concealment mechanism. Randomisation alone does not establish allocation concealment.",
         "source": "source_full_text"
       },
       {
         "domain": "Blinding of participants and personnel (performance bias)",
         "judgement": "Unclear risk",
-        "support_text": "Summary: The report states that patients were randomized to levosimendan or control and that \"The anaesthetic and surgical management of all patients was the same in both groups,\" but it does not say whether participants, surgeons, anesthetists, or other key personnel were blinded, nor whether a placebo was used. Comment: Because the paper provides no explicit blinding information for participants/personnel, blinding status cannot be determined confidently; although the outcomes are haemodynamic measures, the report is insufficient to judge whether knowledge of allocation could have affected care or outcome measurement.",
+        "support_text": "Summary: The report describes randomisation to levosimendan versus control and states that \"Ten patients to whom levosimendan was not administered were regarded as the control group (group II)\" and that \"The anaesthetic and surgical management of all patients was the same in both groups,\" but it does not state that participants or clinical personnel were blinded, nor does it describe use of placebo or any masking procedure. Comment: Because the article provides insufficient information about whether participants and personnel knew group assignment, this domain is unclear. Although some outcomes could be influenced by knowledge of allocation, High risk cannot be assigned without positive evidence that blinding was absent or incomplete.",
         "source": "source_full_text"
       },
       {
         "domain": "Blinding of outcome assessment (detection bias)",
         "judgement": "Low risk",
-        "support_text": "Summary: The outcomes were measured by invasive haemodynamic monitoring with a 7F thermodilution catheter and a computer system, with values recorded at prespecified time points. \"Measurements were performed using a 7F Multiflex thermodilution catheter... Five measurements were carried out for each parameter... averages... were obtained. On the other hand, PVR and SVR values were calculated and recorded by the computer system.\" Comment: These are objective, instrument-based haemodynamic outcomes that are unlikely to be influenced by whether the assessor knew the allocation, so lack of explicit blinding of the outcome assessor is unlikely to introduce detection bias.",
+        "support_text": "Quote: \"Measurements were performed using a 7F Multiflex thermodilution catheter... Five measurements were carried out for each parameter, minimum and maximum values were excluded, and averages of the remaining values were obtained. On the other hand, PVR and SVR values were calculated and recorded by the computer system.\" Comment: The outcomes assessed were mainly haemodynamic parameters (CO, CI, SVR, PVR, MPAP) obtained via thermodilution catheter and computer-calculated recordings, with additional objective clinical outcomes in Table 3 (mortality, low cardiac output, acute renal failure, ICU/hospital stay). The likely assessors were a lab/imaging/monitoring system with clinician-operated invasive monitoring, and the measurements were objective and largely instrument-based. The report does not state that outcome assessors were blinded, but all reported outcomes appear objective and unlikely to be materially influenced by knowledge of allocation; no subjective patient-reported or clinician-rated scales were reported. Therefore detection bias is judged low risk.",
         "source": "source_full_text"
       },
       {
         "domain": "Incomplete outcome data (attrition bias)",
         "judgement": "Low risk",
-        "support_text": "Quote: \"N lost to follow‐up or withdrawn:0\" and Table 1 / Table 3 report outcomes for Group I (n = 10) and Group II (n = 10), with no indication of participant loss or exclusion after randomisation. Comment: Follow-up appears complete for all 20 randomised participants, and the paper reports analyses on the full randomized sample without any signal of differential dropout or missing outcome data that could bias the results.",
-        "source": "source_review_characteristics"
+        "support_text": "Quote: \"20 consecutive patients ... were included in the study and randomised to two groups (levosimendan and control groups).\" and Table 1: \"Group I (levosimendan) (n = 10)\" / \"Group II (control) (n = 10)\"; Results/Table 3 report outcome data for both groups, including haemodynamic measurements through 24 hours and clinical outcomes such as \"Mortality 0 / 0\" and \"Low cardiac output 0 / 0.\" Comment: The paper reports 10 randomized participants per arm and presents analysed results for both arms at the planned postoperative time points up to 24 hours, with no withdrawals, exclusions, or losses to follow-up described. On the reported outcomes of interest, follow-up appears complete (0/10 lost in each arm based on the available results), with no arm imbalance in missing data.",
+        "source": "source_full_text"
       }
     ]
   },

@@ -1,46 +1,47 @@
 {
   "study_id": "Blom 2013",
   "pmid": "22396225",
-  "model": "gpt-5.4-mini",
+  "model": "gpt-5.4",
+  "two_stage": false,
   "prediction": {
     "risk_of_bias": [
       {
         "domain": "Random sequence generation (selection bias)",
         "judgement": "Low risk",
-        "support_text": "Quote: \"A computer program generated a random number sequence, which was used to allocate subjects to the treatment or wait-list control group.\" Comment: This explicitly states that allocation was based on a computer-generated random number sequence, which is a truly random method. The use of permuted blocks does not reduce confidence because the random generation method is described.",
+        "support_text": "Quote: \"Randomisation to one of two study arms is done by sealed envelope method using the permuted block design, with blocks of two and four subjects to maintain the adequacy of randomisation. A computer program generated a random number sequence, which was used to allocate subjects to the treatment or wait-list control group.\" Comment: The study explicitly describes a proper random sequence generation method: computer-generated random numbers with permuted block randomization. This supports truly random allocation.",
         "source": "source_full_text"
       },
       {
         "domain": "Allocation concealment (selection bias)",
-        "judgement": "Low risk",
-        "support_text": "Quote: \"Randomisation to one of two study arms is done by sealed envelope method... The randomisation schedule and sealed envelopes were prepared by an individual who worked closely with the Centre for Statistical Design and Analysis and was not directly involved in the study.\" Comment: The report explicitly states a sealed-envelope allocation method, with the envelopes and schedule prepared by someone not involved in the study. Although it does not spell out every SNOSE feature (opaque, sequentially numbered), the described procedure is the only clear concealment mechanism reported and indicates the recruiter could not foresee assignments.",
+        "judgement": "Unclear risk",
+        "support_text": "Quote: \"Randomisation to one of two study arms is done by sealed envelope method using the permuted block design... The randomisation schedule and sealed envelopes were prepared by an individual who worked closely with the Centre for Statistical Design and Analysis and was not directly involved in the study.\" Comment: The study mentions sealed envelopes and that they were prepared by someone not directly involved, but it does not explicitly state that envelopes were sequentially numbered, opaque, and sealed (all 3 SNOSE features required). Therefore concealment is not adequately described, so allocation concealment is unclear.",
         "source": "source_full_text"
       },
       {
         "domain": "Blinding of participants and personnel (performance bias)",
         "judgement": "High risk",
-        "support_text": "Quote: \"Blinding is not possible for the HARMONY Study due to the wait-list control design of the study. However, those delivering the MBSR therapy are not informed as to which arm subjects are randomised to.\" Comment: Participants were not blinded because the trial used an obvious wait-list control, and although therapists were blinded to allocation, participants knew whether they were receiving immediate MBSR or waiting. Because the main outcomes were ambulatory and office blood pressure, participant knowledge could plausibly influence behaviour (e.g., lifestyle changes, adherence, reporting) and thus the outcomes.",
+        "support_text": "Quote: \"Blinding is not possible for the HARMONY Study due to the wait-list control design of the study. However, those delivering the MBSR therapy are not informed as to which arm subjects are randomised to.\" Comment: The paper explicitly states that participant blinding was not possible in this wait-list controlled behavioural intervention. Knowledge of allocation could plausibly influence at least some study outcomes overall, particularly participant-reported questionnaire outcomes such as anxiety, depression, perceived stress, mindfulness and other psychosocial measures. Therefore performance bias is at high risk despite the objective primary BP outcome.",
         "source": "source_full_text"
       },
       {
         "domain": "Blinding of outcome assessment (detection bias)",
-        "judgement": "Low risk",
-        "support_text": "Quote: \"Blinding is not possible for the HARMONY Study due to the wait-list control design of the study. However, those delivering the MBSR therapy are not informed as to which arm subjects are randomised to.\" Comment: Outcome assessment for the primary outcome was based on ambulatory blood pressure monitoring (ABPM), which is an automated measurement system: \"Participants wear an ambulatory blood pressure monitor... Blood pressure is recorded every 15 min during the day and every 30 min between 23:00 and 7:00. Mean values calculated for systolic and diastolic blood pressure.\" Because the primary outcome is objectively recorded by the device rather than by a subjective assessor judgement, lack of assessor blinding is unlikely to influence measurement of the outcome.",
+        "judgement": "High risk",
+        "support_text": "Quote: \"Blinding is not possible for the HARMONY Study due to the wait-list control design of the study.\" and \"The following questionnaires were included in the study protocol... Hospital Anxiety and Depression Scale... Perceived Stress Scale... Clinical Outcome Routine Evaluation Outcome Measure... All questionnaires are administered at baseline with questionnaires 2, 4, 5 and 6 repeated at each study visit.\" Comment: Outcome assessment included patient self-report questionnaires, so the patient was the outcome assessor for at least some outcomes. Because participants were explicitly not blinded, knowledge of allocation could influence these subjective measurements. Although many other outcomes (eg, ambulatory blood pressure, labs) were objective/automated, the study also included unblinded subjective self-reported outcomes; by the worst-outcome rule, this makes detection bias High risk overall.",
         "source": "source_full_text"
       },
       {
         "domain": "Incomplete outcome data (attrition bias)",
-        "judgement": "Low risk",
-        "support_text": "Quote: \"The primary outcome will be examined using an intent-to-treat analysis. An intent-to-treat population is defined as all subjects in the study who completed at least one session of MBSR.\" Comment: The report indicates ITT analysis and the study appears to have only modest, manageable attrition: 50 randomized to intervention and 51 to comparison, with 3 control participants starting antihypertensive medication and their ambulatory BP censored from that point onward. There is no clear signal of substantial or imbalanced dropout for the primary 12-week outcome, so attrition is unlikely to have biased the result.",
-        "source": "source_full_text"
+        "judgement": "Unclear risk",
+        "support_text": "Summary: The supplied article text is a study protocol/methods paper and does not report observed post-randomization attrition on the analysed outcomes. It states only planned handling and expectations, e.g. Quote: \"The primary outcome will be examined using an intent-to-treat analysis. An intent-to-treat population is defined as all subjects in the study who completed at least one session of MBSR.\" and Quote: \"To account for potential dropouts and subjects lost to analysis (25% lost in the study by Linden23), the number of subjects was increased to 50 subjects per group.\" Comment: These are not actual per-arm numbers analysed at the 12-week outcome time point, and no CONSORT-style flow or reasons for observed loss are reported. Therefore the risk from incomplete outcome data cannot be determined from this paper and should be judged unclear rather than high.",
+        "source": "source_protocol"
       }
     ]
   },
   "slot_map": {
     "random_sequence_generation": "Low risk",
-    "allocation_concealment": "Low risk",
+    "allocation_concealment": "Unclear risk",
     "blinding_participants": "High risk",
-    "blinding_outcome": "Low risk",
-    "incomplete_outcome": "Low risk"
+    "blinding_outcome": "High risk",
+    "incomplete_outcome": "Unclear risk"
   }
 }
