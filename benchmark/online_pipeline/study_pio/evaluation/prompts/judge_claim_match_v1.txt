@@ -1,0 +1,17 @@
+Judge Study-level PIO semantic claim coverage for one included clinical study.
+For each field, split the gold and predicted text into concise semantic claims. Match a predicted claim to a gold claim only when they describe the same study-level population, intervention/comparator, or outcome information.
+Allow synonyms, abbreviations, and reasonable summarization.
+Do not match wrong population, wrong arm/comparator, wrong outcome, unsupported expansion, or question-level PICO copied without study support.
+
+Input JSON:
+{{input_json}}
+
+Return only JSON with this shape:
+{
+  "fields": {
+    "population": {"gold_claims": ["..."], "predicted_claims": ["..."], "matches": [{"gold_index": 0, "predicted_index": 0, "rationale": "..."}]},
+    "intervention_comparator": {"gold_claims": [], "predicted_claims": [], "matches": []},
+    "outcomes": {"gold_claims": [], "predicted_claims": [], "matches": []}
+  }
+}
+Use each gold_index and predicted_index at most once per field.

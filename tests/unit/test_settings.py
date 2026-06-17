@@ -1,63 +1,57 @@
-"""Smoke tests for configuration loading."""
+"""Smoke tests for online-pipeline configuration loading."""
 
-import os
-
-from pydantic_settings import SettingsConfigDict
+import pytest
 
 
-def test_settings_loads_from_env(monkeypatch):
-    from ebm_backend.shared.config.settings import Settings
+def test_llm_config_loads_from_json(tmp_path):
+    from ebm_backend.online_pipeline.infrastructure.llm import load_llm_config
 
-    s = Settings(
-        openai_api_key="sk-test-key",
-        openai_base_url="http://localhost:8080/v1",
-        llm_model="gpt-5.2",
-    )
-    assert s.openai_api_key == "sk-test-key"
-    assert s.openai_base_url == "http://localhost:8080/v1"
-    assert s.llm_model == "gpt-5.2"
-    assert s.llm_temperature == 0.0
-    assert s.database_url == "postgresql://ebm:ebm123@localhost:5432/ebm_online"
-
-
-def test_settings_custom_values(monkeypatch):
-    from ebm_backend.shared.config.settings import Settings
-
-    s = Settings(
-        openai_api_key="sk-custom",
-        llm_model="gpt-4o",
-        database_url="postgresql://user:pass@db:5432/mydb",
-    )
-    assert s.llm_model == "gpt-4o"
-    assert s.database_url == "postgresql://user:pass@db:5432/mydb"
-
-
-def test_settings_prefers_dotenv_over_shell_env(tmp_path, monkeypatch):
-    env_file = tmp_path / ".env"
-    env_file.write_text(
-        "\n".join(
-            [
-                "OPENAI_API_KEY=sk-dotenv",
-                "OPENAI_BASE_URL=https://dotenv.example/v1",
-                "LLM_MODEL=dotenv-model",
-            ]
-        ),
+    config_path = tmp_path / "llm.local.json"
+    config_path.write_text(
+        '{"api_key":"sk-json","base_url":"https://llm.example/v1","model":"model-json","api_mode":"chat"}',
         encoding="utf-8",
     )
-    monkeypatch.setenv("OPENAI_API_KEY", "sk-shell")
-    monkeypatch.setenv("OPENAI_BASE_URL", "https://shell.example/v1")
-    monkeypatch.setenv("LLM_MODEL", "shell-model")
 
-    from ebm_backend.shared.config.settings import Settings
+    config = load_llm_config(config_path)
 
-    class TestSettings(Settings):
-        model_config = SettingsConfigDict(
-            env_file=str(env_file),
-            env_file_encoding="utf-8",
-            extra="ignore",
-        )
+    assert config is not None
+    assert config.api_key == "sk-json"
+    assert config.base_url == "https://llm.example/v1"
+    assert config.model == "model-json"
+    assert config.api_mode == "chat"
 
-    s = TestSettings()
-    assert s.openai_api_key == "sk-dotenv"
-    assert s.openai_base_url == "https://dotenv.example/v1"
-    assert s.llm_model == "dotenv-model"
+
+def test_llm_config_ignores_legacy_env(tmp_path, monkeypatch):
+    from ebm_backend.online_pipeline.infrastructure.llm import load_llm_config
+
+    monkeypatch.setenv("UNRELATED_API_KEY", "sk-env")
+    monkeypatch.setenv("UNRELATED_MODEL", "model-env")
+    config_path = tmp_path / "llm.local.json"
+    config_path.write_text('{"api_key":"sk-json","model":"model-json"}', encoding="utf-8")
+
+    config = load_llm_config(config_path)
+
+    assert config is not None
+    assert config.api_key == "sk-json"
+    assert config.model == "model-json"
+
+
+def test_llm_config_does_not_fallback_to_legacy_env(tmp_path, monkeypatch):
+    from ebm_backend.online_pipeline.infrastructure.llm import load_llm_config
+
+    monkeypatch.setenv("UNRELATED_API_KEY", "sk-env")
+    monkeypatch.setenv("UNRELATED_BASE_URL", "https://env.example/v1")
+    monkeypatch.setenv("UNRELATED_MODEL", "model-env")
+
+    with pytest.raises(FileNotFoundError):
+        load_llm_config(tmp_path / "missing.json")
+
+
+def test_llm_config_requires_json_key_and_model(tmp_path):
+    from ebm_backend.online_pipeline.infrastructure.llm import load_llm_config
+
+    config_path = tmp_path / "llm.local.json"
+    config_path.write_text('{"base_url":"https://llm.example/v1"}', encoding="utf-8")
+
+    with pytest.raises(ValueError, match="api_key"):
+        load_llm_config(config_path)

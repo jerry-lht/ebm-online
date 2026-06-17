@@ -1,0 +1,35 @@
+Extract the outcome concept and outcome measure for one meta-analysis analysis family.
+
+Return only valid JSON. Use only the provided source fields.
+
+Field definitions:
+- `outcome_concept` is the specific outcome target synthesized by this analysis setting. It should be specific enough to identify the corresponding result rows in the included studies.
+- `outcome_measure` is an additional measurement specification for the same outcome target, only when the source explicitly distinguishes how that target is measured, scored, defined, summarized, or represented.
+
+Source use:
+- The main source is `analysis_name`.
+- `analysis_group_name` is mainly comparison context; use it only when it is needed to avoid copying intervention/comparator text into the outcome.
+- `subgroup_labels_preview` are context for avoiding confusion with subgroup levels, not primary outcome evidence.
+
+Boundary decisions:
+- Prefer the actual analysis target over a broad source heading. If the source heading names a broad category and the analysis name identifies a more specific target under that category, use the specific target as `outcome_concept`.
+- Do not put a specific outcome target into `outcome_measure` merely because it appears under a broader heading.
+- Use `outcome_measure` only for information that changes how the same outcome target is measured, scored, defined, summarized, or represented.
+- Keep clinically or operationally meaningful qualifiers in `outcome_concept` when they are part of the target being synthesized.
+- Put assessment timing or follow-up windows in `timepoint`, not in outcome fields.
+- Do not put intervention/comparator text, subgroup level text, generic numbering, data type, statistical method, or meta-analysis effect measure into outcome fields.
+- If no separate measurement specification is explicit, return null for `outcome_measure`.
+- If a field is not clearly present, return null.
+
+Output schema:
+{
+  "outcome": {
+    "outcome_concept": "string or null",
+    "outcome_measure": "string or null"
+  },
+  "confidence": "high | medium | low",
+  "warnings": []
+}
+
+Input JSON:
+{{input_json}}

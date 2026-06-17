@@ -16,12 +16,8 @@ venv/
 *.env
 *.env.*
 !.env.example
-experiments/pico-exp/code/config/llm_providers.yaml
-experiments/**/code/config/llm_providers.yaml
-experiments/**/code/config/llm_providers.local.yaml
-experiments/**/code/config/llm_providers.yml
-experiments/**/code/config/llm_providers.local.yml
-!experiments/**/code/config/*.example.yaml
+llm.local.json
+!llm.local.example.json
 
 # IDE
 .vscode/
@@ -47,25 +43,25 @@ htmlcov/
 
 # Runtime artifacts
 logs/*.log
+archive/
+
+# Benchmark generated artifacts
+benchmark/online_pipeline/*/runs/
+benchmark/online_pipeline/meta_analysis/runs/
+benchmark/online_pipeline/grade/runs/
+benchmark/online_pipeline/meta_analysis/*/runs/
+benchmark/online_pipeline/grade/*/runs/
+benchmark/online_pipeline/archive/
+benchmark/online_pipeline/raw_data/grade/intermediate/alignment_v2/table_family_predictions.jsonl
+benchmark/online_pipeline/raw_data/grade/intermediate/alignment_v2/row_setting_predictions.jsonl
+benchmark/online_pipeline/raw_data/meta_analysis/intermediate/field_candidates/
+benchmark/online_pipeline/raw_data/meta_analysis/intermediate/field_cleaning_cache/
+benchmark/online_pipeline/raw_data/meta_analysis/intermediate/*.preview30.jsonl
+benchmark/online_pipeline/raw_data/meta_analysis/intermediate/*.preview30.json
+benchmark/online_pipeline/raw_data/meta_analysis/intermediate/*.preview30.md
+benchmark/online_pipeline/raw_data/meta_analysis/intermediate/*.preview30.tsv
+benchmark/online_pipeline/raw_data/meta_analysis/intermediate/*.preview30.html
 
 # Data (too large for git)
 data/
-!experiments/**/data/
-!experiments/**/data/**
-
-# Experiment artifacts
-experiments/**/module/
-experiments/**/results/preds/
-experiments/**/results/logs/
-experiments/**/results/phase1-test-artifacts/
-experiments/pico-exp/results/data/
-experiments/pico-exp/data/EBM-NLP/.git/
-experiments/**/data/**/.cache/
-
-# Large generated files excluded from screening reproducibility bundle
-experiments/screening-exp/results/data/q2crbench/kdigo_ckd.evidence_profile.examples.jsonl
-experiments/screening-exp/results/data/csmed_ft/train.full_text_only.examples.jsonl
-experiments/screening-exp/results/data/csmed_ft/train.abstract_plus_full_text.examples.jsonl
-experiments/screening-exp/results/data/csmed_ft/train.abstract_only.examples.jsonl
-experiments/screening-exp/results/data/csmed_ft/test.full_text_only.examples.jsonl
-experiments/screening-exp/results/data/csmed_ft/test.abstract_plus_full_text.examples.jsonl
+sr-cleaned/

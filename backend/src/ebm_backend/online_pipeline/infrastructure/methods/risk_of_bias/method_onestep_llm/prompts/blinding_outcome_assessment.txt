@@ -1,0 +1,18 @@
+Evaluate whether outcome assessor was blinded to allocation, and whether outcome measurement could be influenced by lack of blinding.
+
+First identify who assessed outcomes: patient self-report, clinician judgement, independent assessor, blinded coder, lab/imaging system, or chart abstractor.
+
+Apply the worst-outcome rule: if the study reports a mix of objective and subjective/patient-reported outcomes and the subjective outcomes are unblinded, the overall judgement is High risk.
+
+Low risk:
+- Outcome assessor explicitly blinded and unlikely to be broken
+- Assessor unblinded but all outcomes are objective and measurement cannot be influenced
+
+High risk:
+- Assessor unblinded or likely unblinded and at least one outcome is subjective or judgement-dependent
+- Patient self-report outcomes when participants are not blinded
+- Mix of objective and subjective outcomes with no blinding for subjective outcomes
+
+Unclear risk:
+- Does not state whether outcome assessors were blinded and outcome types unclear
+- Only says double blind without clarifying outcome assessment

@@ -1,29 +1,20 @@
-# API & Web
-fastapi~=0.115.0
-uvicorn[standard]~=0.32.0
-httpx~=0.28.0
+# Backend API
+fastapi>=0.115,<0.116
+uvicorn[standard]>=0.32,<0.33
 
 # LLM
-openai~=1.82.0
+openai>=1.82,<3
+certifi>=2024.8.30
 
-# Configuration
-pydantic~=2.11.0
-pydantic-settings~=2.8.0
+# Configuration and schemas
+pydantic>=2.11,<3
 
-# Search
-elasticsearch~=8.17.0
-
-# Scientific Computing
-numpy~=2.2.0
-scipy~=1.15.0
-
-# Frontend
-gradio~=5.29.0
-
-# Database
-psycopg2-binary~=2.9.9
+# Benchmark data builders
+datasets>=3.0,<4
+numpy>=1.26,<2
+pandas>=2.2,<3
+pyarrow>=16,<19
+scipy>=1.13,<2
 
 # Testing
-pytest~=8.3.0
-pytest-asyncio~=0.25.0
-pytest-cov~=6.1.0
+pytest>=8.3,<9

@@ -1,0 +1,34 @@
+Extract the timepoint for one meta-analysis analysis family.
+
+Return only valid JSON. Use only the provided source fields.
+
+Field definition:
+- `timepoint` is the time, follow-up point, follow-up window, assessment window, or temporal assessment position at which the outcome is measured, assessed, recorded, or analyzed.
+- It answers: when was the outcome measured or assessed?
+
+Source use:
+- The main source is `analysis_name`.
+- `analysis_group_name` may be used as auxiliary timing context when it contains an explicit follow-up or assessment timing attached to the comparison or analysis family.
+- `study_row_footnotes` are auxiliary context only. Use them only when they clearly describe the timing of outcome measurement or follow-up for this analysis.
+- Footnotes should not override a clearer timepoint in `analysis_name`.
+
+Boundary decisions:
+- Extract a timepoint only when the source explicitly provides assessment timing, follow-up timing, time window, or temporal assessment position.
+- Do not infer timepoint from punctuation, ordering, or layout. A phrase appearing after a dash, colon, comma, parenthesis, or at the end of `analysis_name` is not by itself evidence of timepoint.
+- If a phrase describes what happened, what was measured, a clinical state, an event, a score, an endpoint, or a subgroup rather than when it was measured, do not use it as timepoint.
+- If `analysis_group_name` contains both comparison text and an explicit timing phrase, extract only the timing phrase and do not include intervention or comparator text in the timepoint.
+- Do not infer timepoint from intervention duration or study duration unless the source makes clear that it is also the outcome assessment timing.
+- If no explicit measurement or follow-up timing is present, return null.
+
+Output schema:
+{
+  "timepoint": {
+    "label": "string or null",
+    "window": "string or null"
+  },
+  "confidence": "high | medium | low",
+  "warnings": []
+}
+
+Input JSON:
+{{input_json}}

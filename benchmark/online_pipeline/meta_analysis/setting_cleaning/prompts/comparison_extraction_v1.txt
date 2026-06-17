@@ -1,0 +1,47 @@
+Extract the comparison for one meta-analysis analysis family.
+
+Return only valid JSON. Use only the provided source fields.
+
+Field definition:
+- `comparison` is the intervention, exposure, strategy, treatment, control, or reference group information being synthesized.
+- `experimental` is the intervention/group treated as the experimental or index arm in this analysis.
+- `comparator` is the control, placebo, usual care, alternative intervention, or reference arm.
+- `comparison_structure` describes whether the available source supports a current-workflow pairwise comparison or only partial/unclear comparison information.
+
+Source use:
+- Prefer `explicit_labels` when both labels are present and clinically meaningful.
+- Otherwise extract the comparison from `analysis_group_name`.
+- Use `analysis_name` only as secondary context when it is needed to disambiguate the comparison.
+
+Boundaries:
+- Do not use outcome, timepoint, subgroup level, data type, effect measure, or statistical method as comparison arms.
+- Do not standardize or rewrite into different medical terminology.
+- Extract visible arm information when present, even if only one arm is recoverable.
+- If only an index intervention/group is recoverable, fill `experimental` and return null for `comparator`.
+- If the source mentions multiple arms that cannot be represented as one experimental arm versus one comparator, preserve the clearest visible arm text where possible and mark `comparison_structure.type` as `multi_arm`.
+- If the source text is an outcome/category/subgroup rather than comparison information, return null for both arms and mark the structure as `unclear`.
+- If no comparison information is present, return null for both arms and mark the structure as `not_reported`.
+
+Comparison structure types:
+- `pairwise`: one experimental/index arm and one comparator/reference arm are clearly recoverable.
+- `single_arm_or_index_only`: only one intervention/index group is recoverable; no comparator/reference arm is explicit.
+- `multi_arm`: more than two arms or a non-pairwise comparison structure is explicit.
+- `unclear`: source text exists but it is not clear whether it represents comparison information.
+- `not_reported`: no usable comparison information is provided.
+
+Output schema:
+{
+  "comparison": {
+    "experimental": "string or null",
+    "comparator": "string or null"
+  },
+  "comparison_structure": {
+    "type": "pairwise | single_arm_or_index_only | multi_arm | unclear | not_reported",
+    "rationale": "string"
+  },
+  "confidence": "high | medium | low",
+  "warnings": []
+}
+
+Input JSON:
+{{input_json}}

@@ -1,21 +1,19 @@
-"""FastAPI application entry point."""
+"""FastAPI application entry point for the Online EBM module backend."""
 
 from __future__ import annotations
 
 from fastapi import FastAPI
 
-from ebm_backend.online_pipeline.interfaces.api.routes_pipeline import router as pipeline_router
-from ebm_backend.online_pipeline.interfaces.api.routes_retrieval import router as retrieval_router
+from ebm_backend.online_pipeline.interfaces.api.routes_modules import router as modules_router
 
 
 def create_app() -> FastAPI:
     app = FastAPI(
         title="Online EBM Pipeline",
-        version="0.5.0",
-        description="Simplified Phase 5 API for inspecting Module 2 and Module 3 pipeline traces.",
+        version="1.0.0",
+        description="Module-level APIs for the Online EBM backend. Some modules remain placeholder interfaces until concrete methods are added.",
     )
-    app.include_router(pipeline_router)
-    app.include_router(retrieval_router)
+    app.include_router(modules_router)
 
     @app.get("/health")
     def health() -> dict[str, str]:

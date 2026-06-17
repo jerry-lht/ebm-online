@@ -1,0 +1,8 @@
+benchmark/online_pipeline/**/*.jsonl filter=lfs diff=lfs merge=lfs -text
+benchmark/online_pipeline/**/*.json filter=lfs diff=lfs merge=lfs -text
+benchmark/online_pipeline/**/*.csv filter=lfs diff=lfs merge=lfs -text
+benchmark/online_pipeline/**/*.tsv filter=lfs diff=lfs merge=lfs -text
+benchmark/online_pipeline/**/*.xml filter=lfs diff=lfs merge=lfs -text
+benchmark/online_pipeline/**/*.zip filter=lfs diff=lfs merge=lfs -text
+benchmark/online_pipeline/**/*.parquet filter=lfs diff=lfs merge=lfs -text
+benchmark/online_pipeline/**/*.pkl filter=lfs diff=lfs merge=lfs -text

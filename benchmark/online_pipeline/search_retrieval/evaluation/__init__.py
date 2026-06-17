@@ -1,0 +1,1 @@
+"""Search retrieval smoke evaluation."""

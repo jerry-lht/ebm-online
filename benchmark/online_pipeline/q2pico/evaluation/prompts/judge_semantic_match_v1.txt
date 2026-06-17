@@ -1,0 +1,23 @@
+Judge semantic matches between gold and predicted PICO slot items for one clinical question.
+Use only the provided question and slot texts. Allow synonyms, abbreviations, and small granularity differences.
+Do not match wrong entities, wrong PICO dimensions, unsupported expansion, or clear over-generalization.
+
+Clinical question:
+{{question_text}}
+
+Gold slots JSON:
+{{gold_json}}
+
+Predicted slots JSON:
+{{predicted_json}}
+
+Return only JSON with this shape:
+{
+  "slots": {
+    "P": {"matches": [{"gold_index": 0, "predicted_index": 0, "rationale": "..."}]},
+    "I": {"matches": []},
+    "C": {"matches": []},
+    "O": {"matches": []}
+  }
+}
+Each gold_index and predicted_index is zero-based within that slot. Use each item at most once.

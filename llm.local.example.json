@@ -1,0 +1,8 @@
+{
+  "api_key": "sk-your-key-here",
+  "base_url": "https://api.openai.com/v1",
+  "model": "gpt-5.4-mini",
+  "api_mode": "responses",
+  "timeout_seconds": 180,
+  "temperature": 0
+}

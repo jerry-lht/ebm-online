@@ -1,0 +1,1 @@
+"""Indirectness GRADE domain methods."""
