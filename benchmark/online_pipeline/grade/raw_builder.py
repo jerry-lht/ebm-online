@@ -86,6 +86,11 @@ def main() -> None:
     base_url = args.base_url if args.base_url != "https://api.openai.com" else llm_config.get("base_url", args.base_url)
     model = args.model if args.model != "gpt-4.1-mini" else llm_config.get("model", args.model)
     api_mode = args.api_mode or llm_config.get("api_mode", "responses")
+    if args.command in {"build-alignment-v3", "all-v3"} and args.alignment_name == "alignment_v3" and not args.use_llm:
+        raise RuntimeError(
+            "alignment_v3 is the formal grade_v4 alignment and requires --use-llm. "
+            "For structural dry-run smoke, pass a non-default --alignment-name."
+        )
     if args.command == "freeze-source":
         freeze_raw_snapshot(raw_root=raw_root)
         print(raw_root / "source_manifest.json")
@@ -164,6 +169,7 @@ def main() -> None:
     elif args.command == "build-dataset-v3":
         result = build_dataset_v3(
             dataset_name=args.dataset_name if args.dataset_name != DEFAULT_DATASET_NAME else SOURCE_V3,
+            source=SOURCE_V3,
             raw_root=raw_root,
             shared_settings_root=Path(args.shared_settings_root),
             sample_size=args.sample_size,
@@ -264,6 +270,7 @@ def main() -> None:
         )
         result = build_dataset_v3(
             dataset_name=args.dataset_name if args.dataset_name != DEFAULT_DATASET_NAME else SOURCE_V3,
+            source=SOURCE_V3,
             raw_root=raw_root,
             shared_settings_root=Path(args.shared_settings_root),
             sample_size=args.sample_size,
@@ -304,7 +311,8 @@ def main() -> None:
             alignment_name=args.alignment_name,
         )
         result = build_dataset_v3(
-            dataset_name=args.dataset_name if args.dataset_name != DEFAULT_DATASET_NAME else "grade_v3_smoke",
+            dataset_name=args.dataset_name if args.dataset_name != DEFAULT_DATASET_NAME else "grade_v4_smoke",
+            source=SOURCE_V3,
             raw_root=raw_root,
             shared_settings_root=Path(args.shared_settings_root),
             sample_size=args.sample_size,

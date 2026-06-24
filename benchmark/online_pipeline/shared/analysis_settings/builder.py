@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import shutil
 import sys
@@ -16,6 +15,14 @@ from typing import Any
 if __package__ in {None, ""}:  # pragma: no cover
     sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
+from benchmark.online_pipeline.meta_analysis.setting_cleaning.cache import (
+    comparison_cache_cleaning_metadata,
+    comparison_cache_key,
+    comparison_cache_row,
+    comparison_cache_metadata,
+    is_valid_comparison_cache_row,
+    setting_has_valid_comparison_cache,
+)
 from benchmark.online_pipeline.meta_analysis.setting_cleaning.llm import extract_field_with_llm
 from benchmark.online_pipeline.meta_analysis.setting_cleaning.sources import (
     assemble_setting,
@@ -74,17 +81,26 @@ def build_grade_required_settings(
         cleaning_target_families = cleaning_target_families[: max(0, limit)]
     family_by_candidate = {row["candidate_id"]: row for row in families}
     candidates_by_field = build_field_candidates(families)
+    comparison_candidate_by_id = {row["candidate_id"]: row for row in candidates_by_field["comparison"]}
 
     write_jsonl(paths["family_sources"], families, sort_keys=False)
     for field, rows in candidates_by_field.items():
         write_jsonl(paths["field_candidates"][field], rows, sort_keys=False)
 
-    existing_cleaned = _load_existing_cleaned_settings(meta_raw_root=meta_raw_root)
-    completed = _completed_candidate_ids(paths["settings"]) if resume else set()
+    existing_cleaned = _load_existing_cleaned_settings(
+        meta_raw_root=meta_raw_root,
+        candidate_lookup=comparison_candidate_by_id,
+    )
     if resume and paths["settings"].exists():
-        settings_by_candidate = {row["candidate_id"]: row for row in read_jsonl(paths["settings"])}
+        settings_by_candidate = _load_valid_existing_settings(
+            paths["settings"],
+            candidate_lookup=comparison_candidate_by_id,
+            allowed_candidate_ids={family["candidate_id"] for family in families},
+        )
+        _rewrite_settings(paths["settings"], settings_by_candidate)
     else:
         settings_by_candidate = {}
+    completed = set(settings_by_candidate)
 
     reused = []
     for family in cleaning_target_families:
@@ -129,7 +145,15 @@ def build_grade_required_settings(
         append_jsonl(paths["failures"], failures, sort_keys=False)
 
     settings = sorted(settings_by_candidate.values(), key=lambda row: row["candidate_id"])
-    _prune_resolved_failures(paths["failures"], completed_candidate_ids={row["candidate_id"] for row in settings})
+    _prune_resolved_failures(
+        paths["failures"],
+        completed_candidate_ids={
+            row["candidate_id"]
+            for row in settings
+            if row.get("candidate_id") in comparison_candidate_by_id
+            and setting_has_valid_comparison_cache(row, comparison_candidate_by_id[row["candidate_id"]])
+        },
+    )
     raw_material = _build_raw_material(families=families, settings=settings)
     write_jsonl(paths["raw_material"], raw_material, sort_keys=False)
     report = _report(
@@ -166,7 +190,7 @@ def _clean_pending_with_llm(
         field: {row["candidate_id"]: row for row in rows}
         for field, rows in candidates_by_field.items()
     }
-    comparison_cache = _load_comparison_cache(paths["comparison_cache"])
+    comparison_cache = _load_comparison_cache(paths["comparison_cache"], candidate_lookup=candidate_lookup["comparison"])
     comparison_cache_lock = threading.Lock()
     failures: list[dict[str, Any]] = []
     failure_count = 0
@@ -188,12 +212,12 @@ def _clean_pending_with_llm(
     def clean_one(family: dict[str, Any]) -> dict[str, Any]:
         candidate_id = family["candidate_id"]
         comparison_candidate = candidate_lookup["comparison"][candidate_id]
-        comparison_key = _comparison_cache_key(comparison_candidate)
+        comparison_key = comparison_cache_key(comparison_candidate)
         with comparison_cache_lock:
             comparison = comparison_cache.get(comparison_key)
         if comparison is None:
             fetched = extract_field_with_llm(field="comparison", candidate=comparison_candidate, llm_config=llm_config)
-            fetched = {**fetched, "cache_key": comparison_key}
+            fetched = comparison_cache_row(comparison_candidate, fetched)
             with comparison_cache_lock:
                 comparison = comparison_cache.get(comparison_key)
                 if comparison is None:
@@ -218,7 +242,7 @@ def _clean_pending_with_llm(
             "field_methods": {field: fields[field].get("method") for field in FIELDS},
             "field_confidence": {field: fields[field].get("confidence") for field in FIELDS},
             "field_warnings": {field: fields[field].get("warnings") or [] for field in FIELDS},
-            "field_cache_keys": {"comparison": comparison_key},
+            **comparison_cache_cleaning_metadata(comparison_candidate),
             "artifact": ARTIFACT_NAME,
         }
         return setting
@@ -304,19 +328,49 @@ def _filter_normalized(normalized: dict[str, list[dict[str, Any]]], *, review_id
     }
 
 
-def _load_existing_cleaned_settings(*, meta_raw_root: Path) -> dict[str, dict[str, Any]]:
+def _load_existing_cleaned_settings(*, meta_raw_root: Path, candidate_lookup: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     path = meta_raw_root / "intermediate" / "setting_cleaned.jsonl"
     if not path.exists():
         return {}
-    return {row["candidate_id"]: row for row in read_jsonl(path)}
+    return {
+        row["candidate_id"]: row
+        for row in read_jsonl(path)
+        if row.get("candidate_id") in candidate_lookup
+        and setting_has_valid_comparison_cache(row, candidate_lookup[row["candidate_id"]])
+    }
 
 
 def _same_family_identity(*, setting: dict[str, Any], family: dict[str, Any]) -> bool:
     return (
-        str(setting.get("review_id")) == str(family.get("review_id"))
+        str(setting.get("candidate_id")) == str(family.get("candidate_id"))
+        and str(setting.get("review_id")) == str(family.get("review_id"))
         and str(setting.get("analysis_group")) == str(family.get("analysis_group"))
         and str(setting.get("analysis_number")) == str(family.get("analysis_number"))
+        and _identity_text(setting.get("analysis_name")) == _identity_text(family.get("analysis_name"))
+        and _identity_text(setting.get("analysis_group_name")) == _identity_text(family.get("analysis_group_name"))
     )
+
+
+def _load_valid_existing_settings(
+    path: Path,
+    *,
+    candidate_lookup: dict[str, dict[str, Any]],
+    allowed_candidate_ids: set[str],
+) -> dict[str, dict[str, Any]]:
+    settings: dict[str, dict[str, Any]] = {}
+    for row in read_jsonl(path):
+        candidate_id = str(row.get("candidate_id") or "")
+        if candidate_id not in allowed_candidate_ids:
+            continue
+        candidate = candidate_lookup.get(candidate_id)
+        if candidate is None or not setting_has_valid_comparison_cache(row, candidate):
+            continue
+        settings[candidate_id] = row
+    return settings
+
+
+def _rewrite_settings(path: Path, settings_by_candidate: dict[str, dict[str, Any]]) -> None:
+    write_jsonl(path, sorted(settings_by_candidate.values(), key=lambda row: row["candidate_id"]), sort_keys=False)
 
 
 def _with_reuse_marker(setting: dict[str, Any]) -> dict[str, Any]:
@@ -327,33 +381,32 @@ def _with_reuse_marker(setting: dict[str, Any]) -> dict[str, Any]:
     return {**setting, "cleaning": cleaning}
 
 
-def _completed_candidate_ids(path: Path) -> set[str]:
+def _completed_candidate_ids(path: Path, *, candidate_lookup: dict[str, dict[str, Any]]) -> set[str]:
     if not path.exists():
         return set()
-    return {str(row.get("candidate_id") or "") for row in read_jsonl(path)}
+    completed = set()
+    for row in read_jsonl(path):
+        candidate_id = str(row.get("candidate_id") or "")
+        candidate = candidate_lookup.get(candidate_id)
+        if candidate is not None and setting_has_valid_comparison_cache(row, candidate):
+            completed.add(candidate_id)
+    return completed
 
 
-def _load_comparison_cache(path: Path) -> dict[str, dict[str, Any]]:
+def _load_comparison_cache(path: Path, *, candidate_lookup: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     if not path.exists():
         return {}
-    return {str(row.get("cache_key")): row for row in read_jsonl(path) if row.get("cache_key")}
-
-
-def _comparison_cache_key(candidate: dict[str, Any]) -> str:
-    explicit = candidate.get("explicit_labels") or {}
-    payload = {
-        "analysis_group_name": _normalized_cache_text(candidate.get("analysis_group_name")),
-        "explicit_labels": {
-            "experimental_group_label": _normalized_cache_text(explicit.get("experimental_group_label")),
-            "control_group_label": _normalized_cache_text(explicit.get("control_group_label")),
-        },
+    return {
+        str(row.get("cache_key")): row
+        for row in read_jsonl(path)
+        if row.get("cache_key")
+        and candidate_lookup.get(str(row.get("candidate_id") or "")) is not None
+        and is_valid_comparison_cache_row(row, candidate_lookup[str(row.get("candidate_id") or "")])
     }
-    digest = hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
-    return f"comparison::{digest[:16]}"
 
 
-def _normalized_cache_text(value: Any) -> str:
-    return " ".join(str(value or "").lower().split())
+def _identity_text(value: Any) -> str:
+    return " ".join(str(value or "").split())
 
 
 def _build_raw_material(*, families: list[dict[str, Any]], settings: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -412,11 +465,13 @@ def _read_failures(path: Path) -> list[dict[str, Any]]:
 def _prune_resolved_failures(path: Path, *, completed_candidate_ids: set[str]) -> None:
     if not path.exists():
         return
-    unresolved = [
-        row for row in read_jsonl(path)
-        if str(row.get("candidate_id") or "") not in completed_candidate_ids
-    ]
-    write_jsonl(path, unresolved, sort_keys=False)
+    unresolved_by_candidate: dict[str, dict[str, Any]] = {}
+    for row in read_jsonl(path):
+        candidate_id = str(row.get("candidate_id") or "")
+        if not candidate_id or candidate_id in completed_candidate_ids:
+            continue
+        unresolved_by_candidate[candidate_id] = row
+    write_jsonl(path, sorted(unresolved_by_candidate.values(), key=lambda row: str(row.get("candidate_id") or "")), sort_keys=False)
 
 
 def _report(

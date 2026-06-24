@@ -72,13 +72,14 @@ def build_dataset(
     if module == "grade":
         from pathlib import Path
 
-        from benchmark.online_pipeline.grade.builder import build_dataset_v3 as build_grade_dataset
+        from benchmark.online_pipeline.grade.builder import LEGACY_SOURCE_V3, SOURCE_V3, build_dataset_v3 as build_grade_dataset
         from benchmark.online_pipeline.shared.building import RAW_DATA_DIR
 
-        if source not in {"grade_v3", "cochrane_grade_v3"}:
-            raise ValueError("Reproducible grade build supports source 'grade_v3'")
+        if source not in {SOURCE_V3, LEGACY_SOURCE_V3, "cochrane_grade_v3"}:
+            raise ValueError(f"Reproducible grade build supports source '{SOURCE_V3}'")
         return build_grade_dataset(
             dataset_name=dataset_name,
+            source=LEGACY_SOURCE_V3 if source == "cochrane_grade_v3" else source,
             raw_root=Path(source_url) if source_url else RAW_DATA_DIR / "grade",
             sample_size=sample_size,
             seed=seed,
@@ -94,6 +95,6 @@ def _resolve_source(*, module: str, source: str) -> str:
         "study_screening": "builtin_smoke",
         "study_pio": "cochrane_study_pio",
         "risk_of_bias": "cochrane_rob1",
-        "meta_analysis": "cochrane_meta_v1",
-        "grade": "grade_v3",
+        "meta_analysis": "cochrane_meta_v2",
+        "grade": "grade_v4",
     }.get(module, source)

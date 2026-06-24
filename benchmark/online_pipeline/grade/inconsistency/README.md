@@ -1,94 +1,147 @@
 # GRADE Domain: Inconsistency
 
-本 domain 评估 GRADE 四域中的不一致性降级判断。评估单位是一个 SoF row 对应的 evidence body。
+This domain evaluates the GRADE inconsistency judgement for one evidence body
+aligned to a Summary of Findings row.
 
-## 1. 任务边界
+The method must judge whether between-study results are importantly
+inconsistent. It does not re-extract study results, choose meta-analysis
+models, or read SoF/gold rationale.
 
-method 需要判断不同研究的结果方向、效应大小或统计异质性是否存在重要不一致，从而需要 GRADE 降级。
+## Input Boundary
 
-该 domain 不重新抽取 study result rows，也不重新选择 meta-analysis model；这些由 Meta Analysis 模块提供。
+The benchmark adapter passes only leak-safe upstream workflow artifacts:
 
-## 2. 当前数据分布
+- `analysis_setting`: comparison, outcome, timepoint, subgroup, data type, and effect measure.
+- `population_context`: outcome population when available, otherwise question P.
+- `effect_estimate`: overall effect estimate and confidence interval.
+- `heterogeneity`: I2, Chi2, df, p value, tau2 when available.
+- `study_result_rows`: study-level result rows from the meta-analysis module.
+- `subgroup_estimates` and `subgroup_difference_tests`: subgroup evidence when available.
+- `study_characteristics`: matched Characteristics of Included Studies rows.
 
-<table>
-  <thead>
-    <tr>
-      <th>Dataset</th>
-      <th>All</th>
-      <th>Smoke</th>
-      <th>Dev</th>
-      <th>Test</th>
-      <th>Schema</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>grade_v3</code></td>
-      <td>709</td>
-      <td>5</td>
-      <td>278</td>
-      <td>210</td>
-      <td><a href="datasets/grade_v3/schema.md">schema.md</a></td>
-    </tr>
-  </tbody>
-</table>
+The method input intentionally excludes:
 
-## 3. 输入依据
+- SoF row text
+- GRADE footnotes
+- gold labels
+- alignment rationale
+- review conclusions
+- web retrieval results
 
-<table>
-  <thead>
-    <tr>
-      <th>字段</th>
-      <th>作用</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>analysis_setting</code></td>
-      <td>当前 SoF row 对齐到的 analysis setting。</td>
-    </tr>
-    <tr>
-      <td><code>study_result_rows</code></td>
-      <td>study-level result rows，用于判断研究间结果方向和效应大小是否一致。</td>
-    </tr>
-    <tr>
-      <td><code>effect_estimate</code></td>
-      <td>overall effect estimate、heterogeneity summary 和相关统计上下文。</td>
-    </tr>
-    <tr>
-      <td><code>domain_evidence</code></td>
-      <td>不一致性相关证据，例如 heterogeneity、subgroup estimates 或 subgroup difference tests。</td>
-    </tr>
-  </tbody>
-</table>
+This restriction avoids leakage. It also means some gold downgrades based on
+review-author explanation may not be fully observable to the method.
 
-## 4. 输出与指标
+## Methods
 
-Gold 和 prediction 都是一个 GRADE domain judgement：
+### `method_test`
 
-- `judgement.downgraded`
-- `judgement.severity`
-- `judgement.levels`
-- `judgement.level_evaluable`
+Current default and reproducible benchmark method.
 
-主要指标：
+It uses deterministic evidence extraction and a transparent decision profile:
 
-- `all_fields_exact_rate`
-- `downgraded_exact_rate`
-- `severity_exact_rate`
-- `levels_exact_rate`
-- `evaluable_exact_rate`
+1. Extract heterogeneity statistics and study-level effect patterns.
+2. Build a conservative clinical/methodological heterogeneity profile from
+   study rows and study characteristics.
+3. Combine statistical and pattern signals into the final GRADE domain
+   judgement.
 
-## 5. 运行
+The current decision policy deliberately avoids a separate mechanical override
+from weak/moderate I2 plus visual effect-pattern conflict. Error analysis showed
+that override created false positives.
+
+### `method_llm_profile`
+
+Production-style ablation method.
+
+The LLM reads only clean local evidence and outputs a structured characteristic
+profile. It does not use web, SoF text, gold labels, footnotes, alignment
+rationale, or review conclusions. The final judgement remains deterministic.
+
+Use this method for ablation or production explanation/audit when OpenAI access
+is allowed and LLM profiles can be cached or precomputed. It is not the current
+default benchmark method.
+
+## Dataset
+
+The full v3 inconsistency dataset is built from the grade v3 source.
+
+The maintained evaluation dataset is `grade_v3_lite`. It is a balanced lite
+benchmark that keeps `unclear` severity rows for downgrade yes/no evaluation but
+excludes them from level/severity metrics.
+
+`grade_v3_lite_stratified` is the recommended dev/test evaluation view. It
+keeps the same 244 lite rows but rebuilds dev/test splits from the lite root
+using review-grouped stratification by gold label, severity, I2 bin, study
+count, and data type. This avoids the earlier dev/test difficulty gap.
+
+Current `grade_v3_lite` distribution:
+
+| Split | N | Gold yes | Gold no | Gold unclear severity |
+| --- | ---: | ---: | ---: | ---: |
+| all | 244 | 122 | 122 | 40 |
+| dev | 76 | 38 | 38 | 15 |
+| test | 78 | 39 | 39 | 6 |
+| smoke | 6 | 3 | 3 | 1 |
+
+All lite instances currently include `study_characteristics`.
+
+Current `grade_v3_lite_stratified` distribution:
+
+| Split | N | Gold yes | Gold no | Gold unclear severity |
+| --- | ---: | ---: | ---: | ---: |
+| dev | 122 | 61 | 61 | 20 |
+| test | 122 | 61 | 61 | 20 |
+
+## Run Commands
+
+Run the deterministic baseline:
 
 ```bash
-PYTHONPATH=backend/src python benchmark/online_pipeline/grade/inconsistency/evaluation/runner.py \
+PYTHONPATH=backend/src:. .venv/bin/python benchmark/online_pipeline/grade/inconsistency/evaluation/runner.py \
+  --dataset benchmark/online_pipeline/grade/inconsistency/datasets/grade_v3_lite_stratified/splits/test \
   --method method_test \
-  --run-id smoke-inconsistency
+  --run-id test-inconsistency-lite-deterministic
 ```
 
-结果写入：
+Run the LLM characteristic-profile ablation:
+
+```bash
+PYTHONPATH=backend/src:. .venv/bin/python benchmark/online_pipeline/grade/inconsistency/evaluation/runner.py \
+  --dataset benchmark/online_pipeline/grade/inconsistency/datasets/grade_v3_lite_stratified/splits/test \
+  --method method_llm_profile \
+  --run-id test-inconsistency-lite-llm-profile
+```
+
+LLM profiles are cached under:
+
+```text
+.cache/grade_inconsistency_llm_profile/
+```
+
+Benchmark outputs are written to:
 
 ```text
 benchmark/online_pipeline/grade/inconsistency/runs/<run_id>/
 ```
+
+## Current Results
+
+`method_test` v8 on `grade_v3_lite_stratified`:
+
+| Split | Exact | Precision | Recall | F1 | Level Exact |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| all | 0.725 | 0.704 | 0.779 | 0.739 | 0.686 |
+| dev | 0.721 | 0.701 | 0.770 | 0.734 | 0.667 |
+| test | 0.730 | 0.706 | 0.787 | 0.744 | 0.706 |
+
+`method_llm_profile` v8 on the earlier `grade_v3_lite` split:
+
+| Split | Exact | Precision | Recall | F1 | Level Exact |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| dev | 0.684 | 0.659 | 0.763 | 0.707 | 0.623 |
+| test | 0.769 | 0.714 | 0.897 | 0.795 | 0.694 |
+
+## Notes
+
+See [ITERATION_NOTES.md](ITERATION_NOTES.md) for the iteration history, error
+analysis, and rationale for keeping `method_test` as the current default.

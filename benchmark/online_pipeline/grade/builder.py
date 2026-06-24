@@ -37,7 +37,11 @@ from benchmark.online_pipeline.meta_analysis.builder import build_raw as build_m
 MODULE = "grade"
 SOURCE = "grade_v1"
 SOURCE_V2 = "grade_v2"
-SOURCE_V3 = "grade_v3"
+SOURCE_V3 = "grade_v4"
+LEGACY_SOURCE_V3 = "grade_v3"
+BUILDER_VERSION_V3 = "online-pipeline-builder-v4-grade"
+ALIGNMENT_BUILDER_VERSION_V3 = "online-pipeline-builder-v4-grade-alignment"
+ALIGNMENT_TASK_CACHE_VERSION = "grade-alignment-task-v2"
 SMOKE_SIZE = 5
 DEFAULT_V2_REVIEWS = (
     "CD000031",
@@ -64,6 +68,73 @@ DEFAULT_ALIGNMENT_REVIEWS = (
 
 def _default_shared_settings_root() -> Path:
     return RAW_DATA_DIR / "analysis_settings" / "grade_required_v1"
+
+
+def _grade_meta_workflow_root(raw_root: Path, *, alignment_name: str) -> Path:
+    return raw_root / "intermediate" / f"meta_analysis_workflow_for_{alignment_name}"
+
+
+def _prepare_grade_meta_workflow_root(*, workflow_root: Path) -> None:
+    meta_root = RAW_DATA_DIR / "meta_analysis"
+    source_root = meta_root / "source"
+    if not (source_root / "official_analysis_csv_snapshot").exists():
+        raise FileNotFoundError(f"Missing meta-analysis source snapshot: {source_root / 'official_analysis_csv_snapshot'}")
+    target_source = workflow_root / "source"
+    target_source.mkdir(parents=True, exist_ok=True)
+    target_snapshot = target_source / "official_analysis_csv_snapshot"
+    if not target_snapshot.exists():
+        shutil.copytree(source_root / "official_analysis_csv_snapshot", target_snapshot)
+    source_manifest = meta_root / "source_manifest.json"
+    if source_manifest.exists():
+        shutil.copy2(source_manifest, workflow_root / "source_manifest.json")
+
+
+def _alignment_summary_path(raw_root: Path, *, alignment_name: str) -> Path:
+    return raw_root / "intermediate" / alignment_name / "alignment_summary.json"
+
+
+def _load_alignment_summary(raw_root: Path, *, alignment_name: str) -> dict[str, Any]:
+    summary_path = _alignment_summary_path(raw_root, alignment_name=alignment_name)
+    if not summary_path.exists():
+        return {}
+    try:
+        return json.loads(summary_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+
+
+def _required_alignment_builder_version(*, alignment_name: str, source: str = SOURCE_V3) -> str | None:
+    if source == SOURCE_V3 and alignment_name.startswith("alignment_v3"):
+        return ALIGNMENT_BUILDER_VERSION_V3
+    return None
+
+
+def _alignment_version_is_current(*, raw_root: Path, alignment_name: str, source: str = SOURCE_V3) -> bool:
+    required = _required_alignment_builder_version(alignment_name=alignment_name, source=source)
+    if required is None:
+        return True
+    summary = _load_alignment_summary(raw_root, alignment_name=alignment_name)
+    return summary.get("builder_version") == required
+
+
+def _alignment_is_formal_source(*, raw_root: Path, alignment_name: str, source: str = SOURCE_V3) -> bool:
+    if source != SOURCE_V3:
+        return True
+    summary = _load_alignment_summary(raw_root, alignment_name=alignment_name)
+    return summary.get("mode") == "llm"
+
+
+def _task_cache_metadata(task: dict[str, Any]) -> dict[str, str]:
+    return {
+        "task_cache_version": ALIGNMENT_TASK_CACHE_VERSION,
+        "task_payload_sha256": sha256_json(
+            {
+                "task_type": task.get("task_type"),
+                "task_id": task.get("task_id"),
+                "payload": task.get("payload") or {},
+            }
+        ),
+    }
 
 
 def build_alignment_v2(
@@ -133,6 +204,7 @@ def build_alignment_v2(
             table_predictions_path,
             key_fields=("task_id",),
             allowed_keys=table_task_ids,
+            expected_task_metadata={task["task_id"]: _task_cache_metadata(task) for task in table_tasks},
             reusable_statuses={"ok"},
         )
         if resume
@@ -180,6 +252,7 @@ def build_alignment_v2(
             row_predictions_path,
             key_fields=("task_id",),
             allowed_keys=row_task_ids,
+            expected_task_metadata={task["task_id"]: _task_cache_metadata(task) for task in row_tasks},
             reusable_statuses={"ok"},
         )
         if resume
@@ -312,11 +385,13 @@ def build_alignment_v3(
     settings_root = shared_settings_root or _default_shared_settings_root()
     if not (settings_root / "setting_cleaned.jsonl").exists():
         build_grade_required_settings(output_root=settings_root, use_llm=False, resume=True)
+    workflow_root = _grade_meta_workflow_root(raw_root, alignment_name=alignment_name)
+    _prepare_grade_meta_workflow_root(workflow_root=workflow_root)
     build_meta_analysis_raw(
-        raw_root=RAW_DATA_DIR / "meta_analysis",
+        raw_root=workflow_root,
         shared_settings_root=settings_root,
     )
-    workflow_rows = _build_workflow_row_universe(raw_data_root=RAW_DATA_DIR / "meta_analysis")
+    workflow_rows = _build_workflow_row_universe(raw_data_root=workflow_root)
     target_reviews = reviews or _all_gold_review_ids_for_alignment(raw_root=raw_root)
     return build_alignment_v2(
         raw_root=raw_root,
@@ -340,6 +415,7 @@ def build_alignment_v3(
 def build_dataset_v3(
     *,
     dataset_name: str,
+    source: str = SOURCE_V3,
     raw_root: Path = RAW_DATA_DIR / MODULE,
     shared_settings_root: Path | None = None,
     sample_size: int | None = None,
@@ -359,7 +435,30 @@ def build_dataset_v3(
     alignment_name: str = "alignment_v3",
 ) -> dict[str, Any]:
     alignment_dir = raw_root / "intermediate" / alignment_name
-    if not (alignment_dir / "alignment_results.jsonl").exists() or use_llm:
+    if (
+        not (alignment_dir / "alignment_results.jsonl").exists()
+        or use_llm
+        or not _alignment_version_is_current(raw_root=raw_root, alignment_name=alignment_name, source=source)
+        or not _alignment_is_formal_source(raw_root=raw_root, alignment_name=alignment_name, source=source)
+    ):
+        if source == SOURCE_V3 and not use_llm:
+            summary = _load_alignment_summary(raw_root, alignment_name=alignment_name)
+            if not (alignment_dir / "alignment_results.jsonl").exists():
+                raise RuntimeError(
+                    f"{SOURCE_V3} requires a live LLM alignment. Build it first with "
+                    "`grade/raw_builder.py build-alignment-v3 --use-llm --resume`, then rerun dataset build."
+                )
+            required = _required_alignment_builder_version(alignment_name=alignment_name, source=source)
+            if summary.get("builder_version") != required:
+                raise RuntimeError(
+                    f"Existing {alignment_name} was built with builder_version={summary.get('builder_version')!r}; "
+                    f"{SOURCE_V3} requires {required!r}. Rebuild alignment with --use-llm --resume after "
+                    "the shared GRADE settings are complete, or build legacy source grade_v3 explicitly."
+                )
+            raise RuntimeError(
+                f"Existing {alignment_name} has mode={summary.get('mode')!r}; {SOURCE_V3} requires a live LLM alignment. "
+                "Rebuild alignment with --use-llm --resume after the shared GRADE settings are complete."
+            )
         build_alignment_v3(
             raw_root=raw_root,
             shared_settings_root=shared_settings_root,
@@ -377,14 +476,14 @@ def build_dataset_v3(
             retries=retries,
             alignment_name=alignment_name,
         )
-    records, manifest, analysis = load_source_v3(raw_root=raw_root, alignment_name=alignment_name)
+    records, manifest, analysis = load_source_v3(raw_root=raw_root, alignment_name=alignment_name, source=source)
     selected = select_records(records, sample_size=sample_size, seed=seed, module=MODULE)
     splits = build_splits(selected, seed=seed, legacy_split_root=raw_root / "source" / "legacy_release_splits")
     dataset_result = write_dataset(
         dataset_name=dataset_name,
         records=selected,
         splits=splits,
-        source=SOURCE_V3,
+        source=source,
         source_manifest_data=manifest,
         seed=seed,
         sample_size=sample_size,
@@ -423,21 +522,34 @@ def load_source_v2(*, raw_root: Path) -> tuple[list[dict[str, Any]], dict[str, A
     return records, manifest, analysis
 
 
-def load_source_v3(*, raw_root: Path, alignment_name: str = "alignment_v3") -> tuple[list[dict[str, Any]], dict[str, Any], dict[str, Any]]:
+def load_source_v3(*, raw_root: Path, alignment_name: str = "alignment_v3", source: str = SOURCE_V3) -> tuple[list[dict[str, Any]], dict[str, Any], dict[str, Any]]:
     alignment_dir = raw_root / "intermediate" / alignment_name
     results_path = alignment_dir / "alignment_results.jsonl"
     if not results_path.exists():
         build_alignment_v3(raw_root=raw_root, alignment_name=alignment_name)
+    if not _alignment_version_is_current(raw_root=raw_root, alignment_name=alignment_name, source=source):
+        required = _required_alignment_builder_version(alignment_name=alignment_name, source=source)
+        existing = _load_alignment_summary(raw_root, alignment_name=alignment_name).get("builder_version")
+        raise RuntimeError(
+            f"Existing {alignment_name} was built with builder_version={existing!r}; "
+            f"{source} requires {required!r}. Rebuild the alignment before loading this source."
+        )
+    if not _alignment_is_formal_source(raw_root=raw_root, alignment_name=alignment_name, source=source):
+        mode = _load_alignment_summary(raw_root, alignment_name=alignment_name).get("mode")
+        raise RuntimeError(
+            f"Existing {alignment_name} has mode={mode!r}; {SOURCE_V3} requires a live LLM alignment. "
+            "Use a non-default alignment_name for dry-run smoke artifacts."
+        )
     records = _records_from_alignment(raw_root=raw_root, alignment_name=alignment_name)
     analysis = json.loads((alignment_dir / "alignment_summary.json").read_text(encoding="utf-8"))
     analysis = {**analysis, "dataset_input_coverage": _grade_dataset_input_coverage(records)}
     manifest = source_manifest(
-        source=SOURCE_V3,
+        source=source,
         records=records,
         source_url=str(raw_root),
         raw_sha256=_raw_snapshot_sha256_alignment(raw_root, alignment_name=alignment_name),
         extra={
-            "builder_version": "online-pipeline-builder-v3-grade",
+            "builder_version": BUILDER_VERSION_V3,
             "loader": "sof_rows_gold_domains_plus_shared_grade_required_analysis_settings_alignment_v3",
             "raw_root": str(raw_root),
             "alignment_dir": str(alignment_dir),
@@ -511,6 +623,7 @@ def run_alignment_probe(
             table_predictions_path,
             key_fields=("task_id",),
             allowed_keys=table_task_ids,
+            expected_task_metadata={task["task_id"]: _task_cache_metadata(task) for task in table_tasks},
             reusable_statuses={"ok"},
         )
         if resume
@@ -560,6 +673,7 @@ def run_alignment_probe(
             row_predictions_path,
             key_fields=("task_id",),
             allowed_keys=row_task_ids,
+            expected_task_metadata={task["task_id"]: _task_cache_metadata(task) for task in row_tasks},
             reusable_statuses={"ok"},
         )
         if resume
@@ -655,8 +769,31 @@ def freeze_raw_snapshot(*, raw_root: Path = RAW_DATA_DIR / MODULE) -> dict[str, 
     split_root.mkdir(parents=True, exist_ok=True)
 
     copied_files: list[str] = []
+    required_existing = [
+        legacy_root / "intermediate" / "04_sof_rows_cleaned.jsonl",
+        legacy_root / "intermediate" / "05_sof_gold_domains.jsonl",
+        split_root / "review_dev.txt",
+        split_root / "review_test.txt",
+    ]
+    if not UPSTREAM_GRADE_ROOT.exists() and all(path.exists() for path in required_existing):
+        summary = {
+            "source": "grade_raw_v2_sources",
+            "upstream_grade_root": str(UPSTREAM_GRADE_ROOT),
+            "upstream_missing": True,
+            "raw_data_snapshot_reused": True,
+            "legacy_release_root": str(LEGACY_RELEASE_ROOT),
+            "copied_file_count": 0,
+            "question_text_policy": "review.title",
+            "question_pico_policy": "review.pico",
+            "note": "Existing frozen raw_data/grade/source snapshot reused; ordinary benchmark builds do not require sr-cleaned.",
+        }
+        write_json(raw_root / "source_manifest.json", summary)
+        return summary
     if not UPSTREAM_GRADE_ROOT.exists():
-        raise FileNotFoundError(f"Missing upstream GRADE source root: {UPSTREAM_GRADE_ROOT}")
+        raise FileNotFoundError(
+            f"Missing upstream GRADE source root: {UPSTREAM_GRADE_ROOT}; "
+            f"also missing required frozen raw_data files under {source_dir}"
+        )
 
     upstream_files = [
         UPSTREAM_GRADE_ROOT / "intermediate" / "04_sof_rows_cleaned.jsonl",
@@ -686,6 +823,8 @@ def freeze_raw_snapshot(*, raw_root: Path = RAW_DATA_DIR / MODULE) -> dict[str, 
     summary = {
         "source": "grade_raw_v2_sources",
         "upstream_grade_root": str(UPSTREAM_GRADE_ROOT),
+        "upstream_missing": False,
+        "raw_data_snapshot_reused": False,
         "legacy_release_root": str(LEGACY_RELEASE_ROOT),
         "copied_file_count": len(copied_files),
         "question_text_policy": "review.title",
@@ -778,8 +917,8 @@ def write_dataset(
     dataset_analysis_data: dict[str, Any],
 ) -> dict[str, Any]:
     builder_version = (
-        "online-pipeline-builder-v3-grade"
-        if source == SOURCE_V3
+        BUILDER_VERSION_V3
+        if source in {SOURCE_V3, LEGACY_SOURCE_V3}
         else "online-pipeline-builder-v2-grade"
         if source == SOURCE_V2
         else "online-pipeline-builder-v1-grade"
@@ -951,7 +1090,8 @@ def _build_workflow_row_universe(*, raw_data_root: Path) -> list[dict[str, Any]]
                     "participant_count": estimate.get("participant_count"),
                 },
                 "provenance": {
-                    "meta_analysis_dataset": "cochrane_meta_v1",
+                    "meta_analysis_dataset": "cochrane_meta_v2",
+                    "meta_analysis_workflow_root": str(raw_data_root),
                     "estimate_type": "overall",
                 },
             }
@@ -993,7 +1133,8 @@ def _build_workflow_row_universe(*, raw_data_root: Path) -> list[dict[str, Any]]
                         "participant_count": estimate.get("participant_count"),
                     },
                     "provenance": {
-                        "meta_analysis_dataset": "cochrane_meta_v1",
+                        "meta_analysis_dataset": "cochrane_meta_v2",
+                        "meta_analysis_workflow_root": str(raw_data_root),
                         "estimate_type": "subgroup",
                     },
                 }
@@ -2174,6 +2315,7 @@ def _normalize_llm_prediction(
     result = {
         "task_id": task["task_id"],
         "task_type": task["task_type"],
+        **_task_cache_metadata(task),
         "review_id": task["review_id"],
         "sof_table_id": task.get("sof_table_id"),
         "match": _coerce_bool(parsed.get("match")) if status == "ok" else False,
@@ -2222,6 +2364,7 @@ def _dry_table_prediction(task: dict[str, Any]) -> dict[str, Any]:
     return {
         "task_id": task["task_id"],
         "task_type": "table_family",
+        **_task_cache_metadata(task),
         "review_id": task["review_id"],
         "sof_table_id": task["sof_table_id"],
         "analysis_group": task["analysis_group"],
@@ -2239,6 +2382,7 @@ def _dry_row_prediction(task: dict[str, Any]) -> dict[str, Any]:
     return {
         "task_id": task["task_id"],
         "task_type": "row_setting",
+        **_task_cache_metadata(task),
         "sample_id": task["sample_id"],
         "review_id": task["review_id"],
         "sof_table_id": task["sof_table_id"],
@@ -2258,6 +2402,7 @@ def _load_existing_predictions(
     *,
     key_fields: tuple[str, ...],
     allowed_keys: set[str] | None = None,
+    expected_task_metadata: dict[str, dict[str, str]] | None = None,
     reusable_statuses: set[str] | None = None,
 ) -> dict[str, dict[str, Any]]:
     if not path.exists():
@@ -2267,8 +2412,16 @@ def _load_existing_predictions(
         rows = [row for row in rows if str(row.get("llm_status") or "") in reusable_statuses]
     indexed = {"::".join(str(row.get(field) or "") for field in key_fields): row for row in rows}
     if allowed_keys is None:
-        return indexed
-    return {key: row for key, row in indexed.items() if key in allowed_keys}
+        allowed = indexed
+    else:
+        allowed = {key: row for key, row in indexed.items() if key in allowed_keys}
+    if not expected_task_metadata:
+        return allowed
+    return {
+        key: row
+        for key, row in allowed.items()
+        if all(row.get(field) == expected_value for field, expected_value in expected_task_metadata.get(key, {}).items())
+    }
 
 
 def _resolve_alignment_results(
@@ -2580,8 +2733,8 @@ def _alignment_v2_summary(
     row_task_count_by_sample: dict[str, int] = Counter(str(task.get("sample_id") or "") for task in row_tasks)
     return {
         "builder_version": (
-            "online-pipeline-builder-v3-grade-alignment"
-            if alignment_name == "alignment_v3"
+            ALIGNMENT_BUILDER_VERSION_V3
+            if alignment_name.startswith("alignment_v3")
             else "online-pipeline-builder-v2-grade-alignment"
         ),
         "alignment_name": alignment_name,
@@ -2705,7 +2858,7 @@ def _records_from_alignment(*, raw_root: Path, alignment_name: str) -> list[dict
             included_study_ids=evidence_body["included_study_ids"],
             sr_cache=sr_cache,
         )
-        source_prefix = "grade-v3" if alignment_name.startswith("alignment_v3") else "grade-v2"
+        source_prefix = "grade-v4" if alignment_name.startswith("alignment_v3") else "grade-v2"
         for domain in DOMAIN_NAMES:
             gold = gold_domains.get(domain)
             if not gold:
@@ -2773,6 +2926,8 @@ def _grade_v2_instance(
         "sof_row_id": alignment_result["sof_row_id"],
         "sof_context": _sof_context(sof_row),
         "analysis_setting": setting,
+        "study_characteristics": upstream.get("study_characteristics") or [],
+        "study_characteristics_missing_study_ids": upstream.get("missing_study_characteristics_study_ids") or [],
         "alignment": alignment,
     }
     return {
@@ -3256,6 +3411,8 @@ def _domain_evidence_v2(
             "subgroup_estimates": evidence_body.get("subgroup_estimates") or [],
             "subgroup_difference_tests": evidence_body.get("subgroup_difference_tests") or [],
             "study_result_rows": evidence_body.get("study_result_rows") or [],
+            "study_characteristics": upstream.get("study_characteristics") or [],
+            "study_characteristics_missing_study_ids": upstream.get("missing_study_characteristics_study_ids") or [],
         }
     if domain == "indirectness":
         return {

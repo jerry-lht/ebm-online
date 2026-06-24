@@ -1,94 +1,129 @@
-# GRADE Domain: Indirectness
+# GRADE Indirectness Benchmark
 
-本 domain 评估 GRADE 四域中的间接性降级判断。评估单位是一个 SoF row 对应的 evidence body。
+This benchmark evaluates one GRADE domain judgement for one aligned analysis
+row: whether certainty should be downgraded for indirectness.
 
-## 1. 任务边界
+## Method Input Boundary
 
-method 需要判断纳入证据是否在 population、intervention/comparator、outcome 或适用场景上偏离目标临床问题。
+Benchmark conversion lives in `evaluation/input_adapter.py`. Backend methods
+must not perform benchmark-specific conversion.
 
-该 domain 不重新做文献筛选，也不重新抽取 study PIO；它只基于上游 question PICO、screening criteria、study-level PIO 和 analysis setting 判断间接性。
+Allowed method input:
 
-## 2. 当前数据分布
+- `review_scope_pico`: broad question/review PICO
+- `synthesis_target_pico`: row-specific synthesis target built from
+  `analysis_setting`, with population/setting fallback when unavailable
+- `sof_display_context`: SoF P/I/C/O/timepoint/setting as display and fallback
+  context only
+- `evidence_found`: the included studies and result rows contributing evidence
+- included study IDs
+- study characteristics
+- study result rows for the current analysis
 
-<table>
-  <thead>
-    <tr>
-      <th>Dataset</th>
-      <th>All</th>
-      <th>Smoke</th>
-      <th>Dev</th>
-      <th>Test</th>
-      <th>Schema</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>grade_v3</code></td>
-      <td>709</td>
-      <td>3</td>
-      <td>278</td>
-      <td>210</td>
-      <td><a href="datasets/grade_v3/schema.md">schema.md</a></td>
-    </tr>
-  </tbody>
-</table>
+Forbidden method input:
 
-## 3. 输入依据
+- SoF comments
+- SoF footnotes
+- source SoF row text/spans
+- alignment rationale
+- gold labels
 
-<table>
-  <thead>
-    <tr>
-      <th>字段</th>
-      <th>作用</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>question_text</code> / <code>question_pico</code></td>
-      <td>目标临床问题和 question-level PICO。</td>
-    </tr>
-    <tr>
-      <td><code>screening_criteria</code></td>
-      <td>纳入/排除标准，用于判断证据适用性。</td>
-    </tr>
-    <tr>
-      <td><code>analysis_setting</code></td>
-      <td>当前 SoF row 对齐到的 comparison、outcome、timepoint 和 setting context。</td>
-    </tr>
-    <tr>
-      <td><code>domain_evidence</code></td>
-      <td>间接性相关证据，例如 study-level PIO 与目标 PICO 的差异。</td>
-    </tr>
-  </tbody>
-</table>
+This boundary simulates a real GRADE setting after meta-analysis, where the SoF
+footnote is not available to the method.
 
-## 4. 输出与指标
+The method should compare `synthesis_target_pico`, interpreted within
+`review_scope_pico`, against `evidence_found`. It should not treat
+`sof_display_context` as a footnote, gold rationale, or proof of directness.
 
-Gold 和 prediction 都是一个 GRADE domain judgement：
+Current method prompts also require `evidence_profile` and
+`directness_ratings` before final judgement. The profile extracts
+applicability-relevant coverage from the already-pooled evidence body, including
+intervention variants, comparator/current-practice context, outcome measurement,
+follow-up, setting/era context, and overall representativeness limits.
+`directness_ratings` then asks whether the evidence is sufficiently direct for
+each domain before the final downgrade decision.
 
-- `judgement.downgraded`
-- `judgement.severity`
-- `judgement.levels`
-- `judgement.level_evaluable`
+## Datasets
 
-主要指标：
+`grade_v3` is the original broad dataset. Its negative labels are weak because
+`severity=none` usually means indirectness was not mentioned in the footnote.
 
-- `all_fields_exact_rate`
-- `downgraded_exact_rate`
-- `severity_exact_rate`
-- `levels_exact_rate`
-- `evaluable_exact_rate`
+`grade_v3_lite` is the curated benchmark set:
 
-## 5. 运行
+- root: 144 rows = 48 explicit downgrade + 96 curated high-confidence no
+- dev: 48 rows = 16 yes + 32 no
+- test: 36 rows = 12 yes + 24 no
+- smoke: 5 rows = 2 yes + 3 no
+
+Negative examples in `grade_v3_lite` have audit records in `audit.jsonl`.
+
+## Recommended Development Flow
+
+Use smoke for interface checks:
 
 ```bash
-PYTHONPATH=backend/src python benchmark/online_pipeline/grade/indirectness/evaluation/runner.py \
-  --method method_test \
-  --run-id smoke-indirectness
+PYTHONPATH=backend/src:. python benchmark/online_pipeline/grade/indirectness/evaluation/runner.py \
+  --method grade.indirectness.method_llm \
+  --dataset benchmark/online_pipeline/grade/indirectness/datasets/grade_v3_lite/splits/smoke \
+  --run-id indirectness-agentic-llm-smoke \
+  --workers 1 \
+  --batch-size 5 \
+  --resume \
+  --progress
 ```
 
-结果写入：
+Use dev for iteration:
+
+```bash
+PYTHONPATH=backend/src:. python benchmark/online_pipeline/grade/indirectness/evaluation/runner.py \
+  --method grade.indirectness.method_llm \
+  --dataset benchmark/online_pipeline/grade/indirectness/datasets/grade_v3_lite/splits/dev \
+  --run-id indirectness-agentic-llm-dev \
+  --workers 8 \
+  --batch-size 4 \
+  --resume \
+  --progress
+```
+
+Run aggregate diagnostics:
+
+```bash
+PYTHONPATH=backend/src:. python benchmark/online_pipeline/grade/indirectness/evaluation/aggregate_diagnostics.py \
+  benchmark/online_pipeline/grade/indirectness/runs/<run_id>
+```
+
+Run field completeness audit:
+
+```bash
+PYTHONPATH=backend/src:. python benchmark/online_pipeline/grade/indirectness/evaluation/field_audit.py \
+  --dataset benchmark/online_pipeline/grade/indirectness/datasets/grade_v3_lite \
+  --output benchmark/online_pipeline/grade/indirectness/datasets/grade_v3_lite/field_audit.json
+```
+
+Use test only after the dev iteration is frozen.
+
+## Runner Features
+
+`evaluation/runner.py` supports:
+
+- `--workers` for instance-level parallelism
+- `--batch-size` for method-level batch LLM adjudication when supported
+- `--resume` for checkpoint recovery
+- `--progress` for progress logging
+- immediate append to `predictions.jsonl`
+- `indirectness_traces.jsonl` for method debug summaries
+
+It also supports single-domain method specs:
 
 ```text
-benchmark/online_pipeline/grade/indirectness/runs/<run_id>/
+grade.indirectness.method_llm
 ```
+
+## Web / RAG Policy
+
+Web search is not part of benchmark prediction. It is allowed for developers to
+read official documentation, but not for method execution on benchmark rows.
+
+Dynamic RAG is not part of the current benchmark method. If added later, it
+should be a static official-guidance-only resource and must not contain review,
+article, SoF, footnote, or benchmark gold data.
