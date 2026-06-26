@@ -29,17 +29,14 @@ class Method(GradeAssessmentMethod):
 
     def __init__(self, *, domain_method_name: str = "method_test") -> None:
         self.domain_method_name = domain_method_name
-        self.domain_methods = {
-            domain: get_grade_domain_method(domain, domain_method_name)
-            for domain in sorted(GRADE_DOMAIN_NAMES)
-        }
+        self.domain_methods: dict[str, Any] = {}
 
     def run_instance(self, *, instance: dict[str, Any]) -> dict[str, Any]:
         domain = str(instance.get("domain") or "")
-        domain_method = self.domain_methods.get(domain)
-        if domain_method is None:
+        if domain not in GRADE_DOMAIN_NAMES:
             judgement = unclear(domain or "unknown", "Unsupported GRADE domain.")
         else:
+            domain_method = self._domain_method(domain)
             judgement = domain_method.run(
                 domain_evidence=_dict_value(instance.get("domain_evidence")),
                 evidence_body=_dict_value(instance.get("evidence_body")),
@@ -51,6 +48,11 @@ class Method(GradeAssessmentMethod):
             "domain": instance.get("domain"),
             "judgement": judgement,
         }
+
+    def _domain_method(self, domain: str):
+        if domain not in self.domain_methods:
+            self.domain_methods[domain] = get_grade_domain_method(domain, self.domain_method_name)
+        return self.domain_methods[domain]
 
     def run(
         self,

@@ -21,6 +21,14 @@ from benchmark.online_pipeline.study_pio.evaluation.runner import run_benchmark 
 from benchmark.online_pipeline.study_screening.evaluation.runner import run_benchmark as run_study_screening
 
 
+GRADE_DOMAIN_DIRS = {
+    "risk_of_bias": "risk_of_bias_downgrade",
+    "risk_of_bias_downgrade": "risk_of_bias_downgrade",
+    "inconsistency": "inconsistency",
+    "indirectness": "indirectness",
+    "imprecision": "imprecision",
+}
+
 METRICS_INDEX_FIELDS = [
     "timestamp",
     "run_id",
@@ -158,7 +166,7 @@ def _dataset_root_from_build_result(args: argparse.Namespace, result: dict[str, 
     if args.module == "grade":
         if not args.domain:
             raise ValueError("--domain is required for grade all")
-        return Path(dataset_dirs[args.domain])
+        return Path(dataset_dirs[_grade_domain_name(args.domain)])
     raise ValueError(f"Build result for {args.module} did not include a runnable dataset_dir")
 
 
@@ -363,7 +371,7 @@ def _dataset_root_from_args(args: argparse.Namespace) -> Path:
     if args.module == "grade":
         if not args.domain:
             raise ValueError("--domain is required for grade runs")
-        return ROOT / "grade" / args.domain / "datasets" / args.dataset_name
+        return ROOT / "grade" / _grade_domain_dir(args.domain) / "datasets" / args.dataset_name
     return ROOT / args.module / "datasets" / args.dataset_name
 
 
@@ -382,13 +390,14 @@ def _load_meta_analysis_runner(subtask: str | None) -> Any:
 
 
 def _load_grade_runner(domain: str | None) -> Any:
-    if domain == "risk_of_bias":
-        from benchmark.online_pipeline.grade.risk_of_bias.evaluation.runner import run_benchmark
-    elif domain == "inconsistency":
+    normalized = _grade_domain_name(domain)
+    if normalized == "risk_of_bias":
+        from benchmark.online_pipeline.grade.risk_of_bias_downgrade.evaluation.runner import run_benchmark
+    elif normalized == "inconsistency":
         from benchmark.online_pipeline.grade.inconsistency.evaluation.runner import run_benchmark
-    elif domain == "indirectness":
+    elif normalized == "indirectness":
         from benchmark.online_pipeline.grade.indirectness.evaluation.runner import run_benchmark
-    elif domain == "imprecision":
+    elif normalized == "imprecision":
         from benchmark.online_pipeline.grade.imprecision.evaluation.runner import run_benchmark
     else:
         raise ValueError(f"Unsupported grade domain: {domain}")
@@ -413,8 +422,21 @@ def _metrics_index_csv_from_args(args: argparse.Namespace) -> Path:
     if args.module == "grade":
         if not args.domain:
             raise ValueError("--domain is required for grade indexes")
-        return ROOT / "grade" / args.domain / "runs" / "metrics_index.csv"
+        return ROOT / "grade" / _grade_domain_dir(args.domain) / "runs" / "metrics_index.csv"
     return _module_metrics_index_csv(args.module)
+
+
+def _grade_domain_name(domain: str | None) -> str:
+    if domain == "risk_of_bias_downgrade":
+        return "risk_of_bias"
+    if domain in {"risk_of_bias", "inconsistency", "indirectness", "imprecision"}:
+        return str(domain)
+    raise ValueError(f"Unsupported grade domain: {domain}")
+
+
+def _grade_domain_dir(domain: str | None) -> str:
+    normalized = _grade_domain_name(domain)
+    return GRADE_DOMAIN_DIRS[normalized]
 
 
 if __name__ == "__main__":

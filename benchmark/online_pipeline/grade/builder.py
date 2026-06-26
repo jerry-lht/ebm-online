@@ -57,6 +57,12 @@ DOMAIN_NAMES = (
     "indirectness",
     "imprecision",
 )
+DOMAIN_DATASET_DIR_NAMES = {
+    "risk_of_bias": "risk_of_bias_downgrade",
+    "inconsistency": "inconsistency",
+    "indirectness": "indirectness",
+    "imprecision": "imprecision",
+}
 DEFAULT_ALIGNMENT_REVIEWS = (
     "CD000031",
     "CD001431",
@@ -934,7 +940,8 @@ def write_dataset(
     dataset_dirs: dict[str, str] = {}
     for domain in DOMAIN_NAMES:
         domain_records = [record for record in records if record["domain"] == domain]
-        domain_dir = ROOT / MODULE / domain / "datasets" / dataset_name
+        domain_dir_name = DOMAIN_DATASET_DIR_NAMES[domain]
+        domain_dir = ROOT / MODULE / domain_dir_name / "datasets" / dataset_name
         dataset_dirs[domain] = str(domain_dir)
         if domain_dir.exists():
             shutil.rmtree(domain_dir)
@@ -983,7 +990,7 @@ def write_dataset(
             domain: {
                 "count": counts["all"],
                 "split_counts": {name: count for name, count in counts.items() if name != "all"},
-                "dataset_path": str(Path(domain) / "datasets" / dataset_name),
+                "dataset_path": str(Path(DOMAIN_DATASET_DIR_NAMES[domain]) / "datasets" / dataset_name),
             }
             for domain, counts in subtask_counts.items()
         },

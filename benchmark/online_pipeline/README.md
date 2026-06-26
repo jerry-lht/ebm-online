@@ -159,11 +159,11 @@ PYTHONPATH=backend/src:. python benchmark/online_pipeline/benchmark.py run \
 ```bash
 PYTHONPATH=backend/src:. python benchmark/online_pipeline/benchmark.py run \
   --module grade \
-  --domain risk_of_bias \
+  --domain risk_of_bias_downgrade \
   --dataset-name grade_v3 \
   --split smoke \
   --method method_test \
-  --run-id grade-rob-smoke \
+  --run-id grade-rob-downgrade-smoke \
   --limit 1
 ```
 
@@ -401,13 +401,13 @@ benchmark runner 直接调用 Python method，不调用 HTTP API。
       <td><a href="meta_analysis/subtask5_overall_estimates/datasets/cochrane_meta_v1/schema.md">schema.md</a></td>
     </tr>
     <tr>
-      <td>GRADE / 偏倚风险</td>
-      <td><code>grade/risk_of_bias/datasets/grade_v3</code></td>
+      <td>GRADE / 偏倚风险降级</td>
+      <td><code>grade/risk_of_bias_downgrade/datasets/grade_v3</code></td>
       <td>569</td>
       <td>1</td>
       <td>278</td>
       <td>210</td>
-      <td><a href="grade/risk_of_bias/datasets/grade_v3/schema.md">schema.md</a></td>
+      <td><a href="grade/risk_of_bias_downgrade/datasets/grade_v3/schema.md">schema.md</a></td>
     </tr>
     <tr>
       <td>GRADE / 不一致性</td>

@@ -8,25 +8,17 @@ characteristics.
 from __future__ import annotations
 
 import json
-import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
 from ebm_backend.online_pipeline.domain.article import ArticleTable, CleanedArticle
-from ebm_backend.online_pipeline.domain.risk_of_bias import RiskOfBiasAssessment, RoB1DomainJudgement
+from ebm_backend.online_pipeline.domain.risk_of_bias import ROB1_DOMAINS, RiskOfBiasAssessment, RoB1DomainJudgement
 from ebm_backend.online_pipeline.infrastructure.llm import LLMConfig, call_llm_json, load_llm_config
 
 
 PROMPT_DIR = Path(__file__).resolve().parent / "prompts"
-LLM_DOMAINS = [
-    "random_sequence_generation",
-    "allocation_concealment",
-    "blinding_participants_personnel",
-    "blinding_outcome_assessment",
-    "incomplete_outcome_data",
-]
-BASELINE_DOMAINS = ["selective_reporting", "other_bias"]
+LLM_DOMAINS = list(ROB1_DOMAINS)
 DOMAIN_LABELS = {
     "random_sequence_generation": "Random sequence generation (selection bias)",
     "allocation_concealment": "Allocation concealment (selection bias)",
@@ -68,13 +60,12 @@ class Method:
                 continue
             evidence = _article_evidence(article)
             judgements = self._run_domains(config=config, evidence=evidence)
-            judgements.extend(_baseline_domains(article))
             results.append(
                 RiskOfBiasAssessment(
                     study_id=study_id,
                     domains=judgements,
                     overall="unclear",
-                    notes="Five-domain LLM method plus baseline fallbacks for selective reporting and other bias.",
+                    notes="Seven-domain article-only LLM method using Cochrane RoB1 criteria.",
                 )
             )
         return results
@@ -92,15 +83,28 @@ def build_method() -> Method:
 
 def _run_llm_domain(*, config: LLMConfig, domain_id: str, evidence: str) -> RoB1DomainJudgement:
     prompt = _system_prompt(domain_id)
-    parsed = call_llm_json(
-        config=config,
-        system=prompt,
-        prompt=f"{evidence}\n\nAssess {DOMAIN_LABELS[domain_id]}. Output JSON only.",
-    )
+    user_prompt = f"{evidence}\n\nAssess {DOMAIN_LABELS[domain_id]}. Output JSON only."
+    last_error: Exception | None = None
+    for attempt in range(2):
+        try:
+            parsed = call_llm_json(config=config, system=prompt, prompt=user_prompt)
+            return RoB1DomainJudgement(
+                domain=domain_id,
+                judgement=_normalize_judgement(parsed.get("judgement")),
+                rationale=str(parsed.get("support_text") or parsed.get("rationale") or ""),
+            )
+        except (json.JSONDecodeError, ValueError) as exc:
+            last_error = exc
+            if attempt == 0:
+                user_prompt = (
+                    f"{evidence}\n\nAssess {DOMAIN_LABELS[domain_id]} again. "
+                    "Your previous response could not be parsed. Return exactly one strict JSON object "
+                    'with double-quoted keys and string values for "domain", "judgement", and "support_text".'
+                )
     return RoB1DomainJudgement(
         domain=domain_id,
-        judgement=_normalize_judgement(parsed.get("judgement")),
-        rationale=str(parsed.get("support_text") or parsed.get("rationale") or ""),
+        judgement="unclear_risk",
+        rationale=f"LLM call failed or returned invalid JSON for {DOMAIN_LABELS[domain_id]}: {last_error}",
     )
 
 
@@ -128,25 +132,6 @@ Rules:
 - judgement must be exactly one of: Low risk, High risk, Unclear risk
 - support_text must include evidence or note its absence and explain the reasoning
 - Output JSON only, no text outside the JSON object"""
-
-
-def _baseline_domains(article: CleanedArticle) -> list[RoB1DomainJudgement]:
-    evidence_text = _all_article_text(article).lower()
-    reporting_support = _first_keyword_sentence(evidence_text, ("protocol", "registered", "registration", "primary outcome", "secondary outcome"))
-    other_support = _first_keyword_sentence(evidence_text, ("funding", "conflict of interest", "competing interests", "baseline", "deviation"))
-    return [
-        RoB1DomainJudgement(
-            domain="selective_reporting",
-            judgement="unclear_risk",
-            rationale=reporting_support or "Baseline fallback: selective reporting is not assessed by the imported five-domain LLM method.",
-        ),
-        RoB1DomainJudgement(
-            domain="other_bias",
-            judgement="unclear_risk",
-            rationale=other_support or "Baseline fallback: other bias is not assessed by the imported five-domain LLM method.",
-        ),
-    ]
-
 
 def _article_evidence(article: CleanedArticle) -> str:
     front: list[str] = []
@@ -212,20 +197,6 @@ def _rows_text(rows: list[dict[str, str]]) -> str:
         else:
             lines.append(" | ".join(f"{key}: {value}" for key, value in row.items()))
     return "\n".join(lines)
-
-
-def _all_article_text(article: CleanedArticle) -> str:
-    sections = "\n".join(section.text for section in article.xml_content.sections)
-    tables = "\n".join(_rows_text(table.rows) for table in article.tables)
-    return f"{sections}\n{tables}"
-
-
-def _first_keyword_sentence(text: str, keywords: tuple[str, ...]) -> str:
-    for sentence in re.split(r"(?<=[.!?])\s+", re.sub(r"\s+", " ", text or "")):
-        if any(keyword in sentence for keyword in keywords):
-            return sentence[:1000]
-    return ""
-
 
 def _normalize_judgement(value: Any) -> str:
     text = str(value or "").lower().strip()

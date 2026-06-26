@@ -7,6 +7,9 @@ Low risk requires explicit mention of a concealment mechanism:
 - Sequentially numbered, opaque, sealed envelopes with all three features
 - Sequentially numbered identical drug containers
 - Other mechanism that clearly prevents foreknowledge
+- Electronic or software-based allocation at/after enrolment, including REDCap, web system, tablet/iPad app, interactive voice/web response system, or randomization algorithm embedded in software
+- Allocation sequence generated or held by an independent statistician/programmer/data manager, pharmacy, coordinating center, or remote trials unit
+- Numbered or preset envelopes opened sequentially after enrolment, especially when the sequence was computer-generated or prepared by someone separate from recruitment
 
 High risk:
 - Open random allocation schedule visible to recruiters
@@ -17,5 +20,5 @@ High risk:
 
 Unclear risk:
 - Paper describes randomization but says nothing about assignment concealment
-- Mentions envelopes without all necessary details
+- Mentions envelopes without numbering/order or any indication that the sequence was prepared separately from recruitment
 - No information about concealment

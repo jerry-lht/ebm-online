@@ -1,6 +1,8 @@
-# GRADE Domain: Risk of Bias
+# GRADE Domain: Risk-of-Bias Downgrade
 
 本 domain 评估 GRADE 四域中的偏倚风险降级判断。评估单位是一个 SoF row 对应的 evidence body。
+
+目录名使用 `risk_of_bias_downgrade`，用于和 article-level `benchmark/online_pipeline/risk_of_bias` 模块区分。数据和 prediction 内部的 GRADE 标准 domain label 仍为 `risk_of_bias`。
 
 ## 1. 任务边界
 
@@ -82,13 +84,13 @@ Gold 和 prediction 都是一个 GRADE domain judgement：
 ## 5. 运行
 
 ```bash
-PYTHONPATH=backend/src python benchmark/online_pipeline/grade/risk_of_bias/evaluation/runner.py \
+PYTHONPATH=backend/src python benchmark/online_pipeline/grade/risk_of_bias_downgrade/evaluation/runner.py \
   --method method_test \
-  --run-id smoke-risk-of-bias
+  --run-id smoke-risk-of-bias-downgrade
 ```
 
 结果写入：
 
 ```text
-benchmark/online_pipeline/grade/risk_of_bias/runs/<run_id>/
+benchmark/online_pipeline/grade/risk_of_bias_downgrade/runs/<run_id>/
 ```

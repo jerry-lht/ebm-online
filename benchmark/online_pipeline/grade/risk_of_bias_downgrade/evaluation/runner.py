@@ -12,8 +12,8 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[5]))
 
 from ebm_backend.online_pipeline.domain.serialization import to_jsonable
-from benchmark.online_pipeline.grade.risk_of_bias.evaluation.io import load_dataset
-from benchmark.online_pipeline.grade.risk_of_bias.evaluation.metrics import build_comparisons, evaluate_predictions
+from benchmark.online_pipeline.grade.risk_of_bias_downgrade.evaluation.io import load_dataset
+from benchmark.online_pipeline.grade.risk_of_bias_downgrade.evaluation.metrics import build_comparisons, evaluate_predictions
 from benchmark.online_pipeline.shared.jsonl import write_jsonl
 from benchmark.online_pipeline.shared.method_loader import load_method
 from benchmark.online_pipeline.shared.report_utils import write_json, write_summary_markdown
