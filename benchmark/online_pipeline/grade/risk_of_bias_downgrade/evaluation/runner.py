@@ -45,14 +45,17 @@ def run_benchmark(
     method: str = "gold",
     run_id: str | None = None,
     runs_root: str | Path | None = None,
+    offset: int = 0,
     limit: int | None = None,
 ) -> dict[str, Any]:
     resolved_run_id = run_id or default_run_id()
     dataset_path = Path(dataset)
     run_dir = Path(runs_root or DOMAIN_DIR / "runs") / resolved_run_id
     instances, gold_by_id = load_dataset(dataset_path)
-    if limit is not None:
-        instances = instances[:limit]
+    if offset or limit is not None:
+        start = max(0, int(offset or 0))
+        stop = None if limit is None else start + max(0, int(limit))
+        instances = instances[start:stop]
         gold_by_id = {str(instance["instance_id"]): gold_by_id[str(instance["instance_id"])] for instance in instances}
     method_obj = None if method in {"gold", "grade.gold", "oracle"} else load_method(method, default_module=MODULE_NAME)
     predictions = [
@@ -84,6 +87,7 @@ def main() -> None:
     parser.add_argument("--method", default="gold")
     parser.add_argument("--run-id", default=None)
     parser.add_argument("--runs-root", default=None)
+    parser.add_argument("--offset", type=int, default=0)
     parser.add_argument("--limit", type=int, default=None)
     args = parser.parse_args()
     result = run_benchmark(
@@ -91,6 +95,7 @@ def main() -> None:
         method=args.method,
         run_id=args.run_id,
         runs_root=args.runs_root,
+        offset=args.offset,
         limit=args.limit,
     )
     print(result["run_dir"])

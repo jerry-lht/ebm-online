@@ -84,6 +84,65 @@ def test_guardrail_uses_matched_downgrade_clause_for_level():
     assert result["levels"] == 2
 
 
+def test_guardrail_uses_rob_specific_one_each_level():
+    result = method_llm._apply_sof_guardrails(
+        _judge("very_serious", levels=3),
+        _payload("Downgraded three levels: one each for serious risk of bias, imprecision, and inconsistency."),
+    )
+
+    assert result["downgraded"] == "yes"
+    assert result["severity"] == "serious"
+    assert result["levels"] == 1
+
+
+def test_guardrail_does_not_take_imprecision_level_as_rob_level():
+    result = method_llm._apply_sof_guardrails(
+        _judge("very_serious", levels=2),
+        _payload(
+            "Downgraded twice due to serious imprecision from very low participant and event numbers and once due to concerns about risk of bias for randomisation, blinding, attrition and selective reporting"
+        ),
+    )
+
+    assert result["downgraded"] == "yes"
+    assert result["severity"] == "serious"
+    assert result["levels"] == 1
+
+
+def test_guardrail_marks_total_levels_with_other_domain_before_rob_as_unclear():
+    result = method_llm._apply_sof_guardrails(
+        _judge("very_serious", levels=2),
+        _payload(
+            "Downgraded 2 levels due to imprecision and risk of bias. Imprecision: few events resulting in wide CI. Risk of bias: high risk of selection bias and detection bias."
+        ),
+    )
+
+    assert result["downgraded"] == "yes"
+    assert result["severity"] == "unclear"
+    assert result["levels"] == "unclear"
+
+
+def test_guardrail_marks_benchmark_unclear_named_bias_list():
+    result = method_llm._apply_sof_guardrails(
+        _judge("serious", levels=1),
+        _payload("Downgraded one level for risk of performance, detection, and attrition bias"),
+    )
+
+    assert result["downgraded"] == "yes"
+    assert result["severity"] == "unclear"
+    assert result["levels"] == "unclear"
+
+
+def test_guardrail_marks_publication_bias_only_as_unclear_for_benchmark():
+    result = method_llm._apply_sof_guardrails(
+        _judge("none", levels=0, downgraded="no"),
+        _payload("Downgraded one level for suspicion of publication bias: asymmetrical funnel plot"),
+    )
+
+    assert result["downgraded"] == "yes"
+    assert result["severity"] == "unclear"
+    assert result["levels"] == "unclear"
+
+
 def test_guardrail_does_not_treat_not_accounted_as_not_downgraded():
     result = method_llm._apply_sof_guardrails(
         _judge("none", levels=0, downgraded="no"),

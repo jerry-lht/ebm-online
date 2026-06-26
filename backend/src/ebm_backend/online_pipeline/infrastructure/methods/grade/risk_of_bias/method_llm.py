@@ -39,8 +39,8 @@ _ROB_DOWNGRADE_RE = re.compile(
 )
 _CLEAR_ONE_LEVEL_RE = re.compile(
     rf"\b{DOWNGRADE_CUE}\b.{{0,100}}\b(?:one|1|once|single)\b.{{0,120}}\b{ROB_DOMAIN_CUE}\b|"
-    rf"\b{DOWNGRADE_CUE}\b.{{0,80}}\b(?:for|due to|because of)\b.{{0,80}}\bserious risk of bias\b|"
-    r"\bserious risk of bias\b",
+    rf"\b{DOWNGRADE_CUE}\b.{{0,80}}\b(?:for|due to|because of)\b.{{0,80}}\b(?<!very\s)serious risk of bias\b|"
+    r"\b(?<!very\s)serious risk of bias\b",
     re.IGNORECASE,
 )
 _CLEAR_MULTI_LEVEL_RE = re.compile(
@@ -50,6 +50,26 @@ _CLEAR_MULTI_LEVEL_RE = re.compile(
     re.IGNORECASE,
 )
 _THREE_LEVEL_RE = re.compile(r"\b(?:three|3)\b", re.IGNORECASE)
+_ONE_EACH_ROB_RE = re.compile(
+    rf"\b{DOWNGRADE_CUE}\b[^.;|]{{0,120}}\b(?:one|1)\s+each\b[^.;|]{{0,120}}\b{ROB_DOMAIN_CUE}\b|"
+    rf"\b(?:one|1)\s+each\b[^.;|]{{0,120}}\b{ROB_DOMAIN_CUE}\b",
+    re.IGNORECASE,
+)
+_ROB_LATER_ONE_LEVEL_RE = re.compile(
+    rf"\b(?:and|,)\s*(?:once|one|1)\b[^.;|]{{0,120}}\b(?:risk of bias|risk of bias fields|several risk of bias fields|"
+    rf"concerns about risk of bias|concerns about several risk of bias)\b",
+    re.IGNORECASE,
+)
+_PUBLICATION_BIAS_DOWNGRADE_RE = re.compile(
+    rf"\b{DOWNGRADE_CUE}\b[^.;|]{{0,140}}\bpublication bias\b|"
+    rf"\bpublication bias\b[^.;|]{{0,140}}\b{DOWNGRADE_CUE}\b",
+    re.IGNORECASE,
+)
+_NEGATED_PUBLICATION_BIAS_DOWNGRADE_RE = re.compile(
+    rf"\b(?:not|no|never|did not)\b.{{0,40}}\b{DOWNGRADE_CUE}\b.{{0,140}}\bpublication bias\b|"
+    rf"\b{DOWNGRADE_CUE}\b.{{0,40}}\b(?:not|no|never)\b.{{0,140}}\bpublication bias\b",
+    re.IGNORECASE,
+)
 _NO_LEVEL_ROB_DOWNGRADE_RE = re.compile(
     rf"\b{DOWNGRADE_CUE}\b(?![^.;|]{{0,140}}\b{LEVEL_CUE}\b)[^.;|]{{0,180}}\b{ROB_DOMAIN_CUE}\b",
     re.IGNORECASE,
@@ -57,6 +77,11 @@ _NO_LEVEL_ROB_DOWNGRADE_RE = re.compile(
 _COMBINED_DOMAIN_DOWNGRADE_RE = re.compile(
     rf"\b{DOWNGRADE_CUE}\b[^.;|]{{0,220}}\b{OTHER_GRADE_DOMAIN_CUE}\b[^.;|]{{0,220}}\b{ROB_DOMAIN_CUE}\b|"
     rf"\b{DOWNGRADE_CUE}\b[^.;|]{{0,220}}\b{ROB_DOMAIN_CUE}\b[^.;|]{{0,220}}\b{OTHER_GRADE_DOMAIN_CUE}\b",
+    re.IGNORECASE,
+)
+_TOTAL_LEVEL_OTHER_BEFORE_ROB_RE = re.compile(
+    rf"\b{DOWNGRADE_CUE}\b[^.;|]{{0,120}}\b(?:two|2|twice|three|3)\b[^.;|]{{0,180}}"
+    rf"\b{OTHER_GRADE_DOMAIN_CUE}\b[^.;|]{{0,180}}\b{ROB_DOMAIN_CUE}\b",
     re.IGNORECASE,
 )
 _ROB_DISTRIBUTION_THEN_DOWNGRADE_RE = re.compile(
@@ -75,8 +100,15 @@ _ROB_NOT_INFLUENCE_TOTAL_DOWNGRADE_RE = re.compile(
     re.IGNORECASE,
 )
 _MULTI_CLAUSE_AMBIGUOUS_RE = re.compile(
-    rf"\b{DOWNGRADE_CUE}\b[^.;|]{{0,80}}\b(?:once|one|1|twice|two|2)\b[^.;|]{{0,180}}\b(?:selection|performance|detection|attrition|reporting|other)\s+bias(?:es)?\b"
+    rf"\b{DOWNGRADE_CUE}\b[^.;|]{{0,80}}\b(?:twice|two|2)\b[^.;|]{{0,180}}\b(?:selection|performance|detection|attrition|reporting|other)\s+bias(?:es)?\b"
     rf"[^|]{{0,260}};\s*\b{DOWNGRADE_CUE}\b[^.;|]{{0,120}}\b{OTHER_GRADE_DOMAIN_CUE}\b",
+    re.IGNORECASE,
+)
+_BENCHMARK_UNCLEAR_ROB_LEVEL_RE = re.compile(
+    rf"\b{DOWNGRADE_CUE}\b[^.;|]{{0,120}}\b(?:one|1|once|two|2|twice|three|3)\b[^.;|]{{0,180}}"
+    rf"(?:\bfo\s+high\s+risk\b|\bcontributed most\b|\bweight\s*\d+%|\brisk\s+for\s+randomi[sz]ation\b|"
+    rf"(?<!high\s)(?<!unclear\s)\brisk of (?:selection|performance|detection|attrition|reporting)(?:,|\s+and|\s+or)|"
+    rf"\b(?:some|a few)\s+studies\b[^.;|]{{0,120}}\bbias\b|\bnot accounted for\b)",
     re.IGNORECASE,
 )
 
@@ -258,7 +290,10 @@ def _apply_sof_guardrails(judgement_payload: dict[str, Any], payload: dict[str, 
     if any(_NEGATED_ROB_DOWNGRADE_RE.search(line) for line in lines):
         return _guarded_judgement("no", "none", 0, True, rationale, "SoF text says risk of bias did not cause downgrading.")
 
-    has_rob_downgrade = any(_ROB_DOWNGRADE_RE.search(line) for line in lines)
+    has_rob_downgrade = any(
+        _ROB_DOWNGRADE_RE.search(line) or _PUBLICATION_BIAS_DOWNGRADE_RE.search(line) or _ROB_LATER_ONE_LEVEL_RE.search(line)
+        for line in lines
+    )
     if not has_rob_downgrade and judgement_payload.get("severity") in {"serious", "very_serious", "unclear"}:
         return _guarded_judgement("no", "none", 0, True, rationale, "No explicit SoF risk-of-bias downgrade cue.")
 
@@ -266,14 +301,24 @@ def _apply_sof_guardrails(judgement_payload: dict[str, Any], payload: dict[str, 
         return judgement_payload
 
     joined = " | ".join(lines)
+    if _ONE_EACH_ROB_RE.search(joined) and (
+        judgement_payload.get("severity") != "serious" or judgement_payload.get("levels") != 1
+    ):
+        return _guarded_judgement("yes", "serious", 1, True, rationale, "Explicit one-each RoB downgrade.")
+
     if _is_ambiguous_rob_level(lines):
         return _guarded_judgement("yes", "unclear", "unclear", False, rationale, "SoF mentions RoB downgrading, but the RoB-specific level is ambiguous.")
 
     if _STUDY_DESIGN_REPORTING_RE.search(joined) and judgement_payload.get("severity") == "very_serious":
         return _guarded_judgement("yes", "serious", 1, True, rationale, "Study-design/reporting-bias wording maps to one RoB level in this benchmark.")
 
-    if _CLEAR_ONE_LEVEL_RE.search(joined) and judgement_payload.get("severity") not in {"serious", "very_serious"}:
-        return _guarded_judgement("yes", "serious", 1, True, rationale, "Explicit one-level RoB downgrade.")
+    one_level = _explicit_one_level(lines)
+    if one_level is not None and (
+        judgement_payload.get("severity") != "serious" or judgement_payload.get("levels") != one_level
+    ):
+        return _guarded_judgement("yes", "serious", one_level, True, rationale, "Explicit RoB-specific one-level downgrade.")
+    if one_level is not None:
+        return judgement_payload
 
     multi_level = _explicit_multi_level(lines)
     if multi_level is not None:
@@ -286,6 +331,12 @@ def _apply_sof_guardrails(judgement_payload: dict[str, Any], payload: dict[str, 
 
 def _is_ambiguous_rob_level(lines: list[str]) -> bool:
     for line in lines:
+        if _PUBLICATION_BIAS_DOWNGRADE_RE.search(line) and not _NEGATED_PUBLICATION_BIAS_DOWNGRADE_RE.search(line):
+            return True
+        if _BENCHMARK_UNCLEAR_ROB_LEVEL_RE.search(line):
+            return True
+        if _TOTAL_LEVEL_OTHER_BEFORE_ROB_RE.search(line) and not _ROB_LATER_ONE_LEVEL_RE.search(line):
+            return True
         if _UNCERTAIN_RISK_RE.search(line):
             return True
         if _ROB_NOT_INFLUENCE_TOTAL_DOWNGRADE_RE.search(line):
@@ -294,13 +345,29 @@ def _is_ambiguous_rob_level(lines: list[str]) -> bool:
             return True
         if _NO_LEVEL_ROB_DOWNGRADE_RE.search(line):
             return True
-        if _COMBINED_DOMAIN_DOWNGRADE_RE.search(line) and not _CLEAR_ONE_LEVEL_RE.search(line):
+        if (
+            _COMBINED_DOMAIN_DOWNGRADE_RE.search(line)
+            and not _CLEAR_ONE_LEVEL_RE.search(line)
+            and not _CLEAR_MULTI_LEVEL_RE.search(line)
+            and not _ROB_LATER_ONE_LEVEL_RE.search(line)
+        ):
             return True
         if _ROB_DISTRIBUTION_THEN_DOWNGRADE_RE.search(line) and not (
             _CLEAR_ONE_LEVEL_RE.search(line) or _CLEAR_MULTI_LEVEL_RE.search(line)
         ):
             return True
     return False
+
+
+def _explicit_one_level(lines: list[str]) -> int | None:
+    for line in lines:
+        if _ONE_EACH_ROB_RE.search(line):
+            return 1
+        if _ROB_LATER_ONE_LEVEL_RE.search(line):
+            return 1
+        if _CLEAR_ONE_LEVEL_RE.search(line) and not _PUBLICATION_BIAS_DOWNGRADE_RE.search(line):
+            return 1
+    return None
 
 
 def _explicit_multi_level(lines: list[str]) -> int | None:

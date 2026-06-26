@@ -27,6 +27,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Re-score an existing method_llm run without new API calls.")
     parser.add_argument("--source-run-dir", required=True)
     parser.add_argument("--dataset", default=str(DEFAULT_DATASET))
+    parser.add_argument("--offset", type=int, default=0)
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--runs-root", default=str(DEFAULT_RUNS_ROOT))
@@ -34,10 +35,17 @@ def main() -> None:
 
     dataset = Path(args.dataset)
     source_run_dir = Path(args.source_run_dir)
-    predictions = _rescored_predictions(source_run_dir=source_run_dir, dataset=dataset, limit=args.limit)
+    predictions = _rescored_predictions(
+        source_run_dir=source_run_dir,
+        dataset=dataset,
+        offset=args.offset,
+        limit=args.limit,
+    )
     instances, gold_by_id = load_dataset(dataset)
-    if args.limit is not None:
-        instances = instances[: args.limit]
+    if args.offset or args.limit is not None:
+        start = max(0, int(args.offset or 0))
+        stop = None if args.limit is None else start + max(0, int(args.limit))
+        instances = instances[start:stop]
         gold_by_id = {str(instance["instance_id"]): gold_by_id[str(instance["instance_id"])] for instance in instances}
     comparisons = build_comparisons(predictions, gold_by_id)
     metrics = evaluate_predictions(predictions, gold_by_id)
@@ -51,14 +59,16 @@ def main() -> None:
         dataset=dataset,
         run_id=args.run_id,
     )
-    summary = analyze_run(run_dir=run_dir, dataset=dataset, limit=args.limit)
+    summary = analyze_run(run_dir=run_dir, dataset=dataset, offset=args.offset, limit=args.limit)
     print({"run_dir": str(run_dir), "metrics": metrics, "analysis": summary})
 
 
-def _rescored_predictions(*, source_run_dir: Path, dataset: Path, limit: int | None) -> list[dict[str, Any]]:
+def _rescored_predictions(*, source_run_dir: Path, dataset: Path, offset: int = 0, limit: int | None) -> list[dict[str, Any]]:
     instances, _ = load_dataset(dataset)
-    if limit is not None:
-        instances = instances[:limit]
+    if offset or limit is not None:
+        start = max(0, int(offset or 0))
+        stop = None if limit is None else start + max(0, int(limit))
+        instances = instances[start:stop]
     instances_by_id = {str(instance["instance_id"]): instance for instance in instances}
     rows = read_jsonl(source_run_dir / "predictions.jsonl")
     result = []
@@ -87,11 +97,19 @@ def _rescored_predictions(*, source_run_dir: Path, dataset: Path, limit: int | N
 
 def _prediction_judgement(prediction: dict[str, Any]) -> dict[str, Any]:
     if isinstance(prediction.get("judgement"), dict):
-        return prediction["judgement"]
+        return _without_previous_guardrail(prediction["judgement"])
     payload = prediction.get("prediction")
     if isinstance(payload, dict) and isinstance(payload.get("judgement"), dict):
-        return payload["judgement"]
+        return _without_previous_guardrail(payload["judgement"])
     return {}
+
+
+def _without_previous_guardrail(judgement: dict[str, Any]) -> dict[str, Any]:
+    result = dict(judgement)
+    rationale = str(result.get("rationale") or "")
+    if " Guardrail:" in rationale:
+        result["rationale"] = rationale.split(" Guardrail:", 1)[0]
+    return result
 
 
 if __name__ == "__main__":

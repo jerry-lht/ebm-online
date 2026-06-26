@@ -29,6 +29,7 @@ def main() -> None:
     parser.add_argument("--dataset-root", default=str(DEFAULT_DATASET_ROOT))
     parser.add_argument("--split", default="dev", choices=("all", "smoke", "dev", "test"))
     parser.add_argument("--method", default="method_test")
+    parser.add_argument("--offset", type=int, default=0)
     parser.add_argument("--limit", type=int, default=100)
     parser.add_argument("--run-id-prefix", default="grade-rob-downgrade-batch")
     parser.add_argument("--runs-root", default=str(DEFAULT_RUNS_ROOT))
@@ -49,23 +50,26 @@ def main() -> None:
         gold_result = run_benchmark(
             dataset=dataset,
             method="gold",
-            run_id=f"{args.run_id_prefix}-gold-{args.split}-{args.limit}",
+            run_id=f"{args.run_id_prefix}-gold-{_sample_suffix(args.split, args.offset, args.limit)}",
             runs_root=args.runs_root,
+            offset=args.offset,
             limit=args.limit,
         )
 
     method_result = run_benchmark(
         dataset=dataset,
         method=args.method,
-        run_id=f"{args.run_id_prefix}-{_slug(args.method)}-{args.split}-{args.limit}",
+        run_id=f"{args.run_id_prefix}-{_slug(args.method)}-{_sample_suffix(args.split, args.offset, args.limit)}",
         runs_root=args.runs_root,
+        offset=args.offset,
         limit=args.limit,
     )
     run_dir = Path(method_result["run_dir"])
-    analysis = analyze_run(run_dir=run_dir, dataset=dataset, limit=args.limit)
+    analysis = analyze_run(run_dir=run_dir, dataset=dataset, offset=args.offset, limit=args.limit)
     summary = {
         "dataset": str(dataset),
         "split": args.split,
+        "offset": args.offset,
         "limit": args.limit,
         "method": args.method,
         "method_run_dir": str(run_dir),
@@ -80,12 +84,14 @@ def main() -> None:
     print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True))
 
 
-def analyze_run(*, run_dir: Path, dataset: Path, limit: int | None) -> dict[str, Any]:
+def analyze_run(*, run_dir: Path, dataset: Path, offset: int = 0, limit: int | None = None) -> dict[str, Any]:
     comparisons = read_jsonl(run_dir / "comparisons.jsonl")
     predictions = read_jsonl(run_dir / "predictions.jsonl")
     gold_rows = read_jsonl(dataset / "gold.jsonl")
-    if limit is not None:
-        gold_rows = gold_rows[:limit]
+    if offset or limit is not None:
+        start = max(0, int(offset or 0))
+        stop = None if limit is None else start + max(0, int(limit))
+        gold_rows = gold_rows[start:stop]
 
     mismatches = [row for row in comparisons if not row.get("exact_match")]
     by_instance: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -195,6 +201,7 @@ def _write_markdown(path: Path, summary: dict[str, Any]) -> None:
         "",
         f"- method: {summary['method']}",
         f"- dataset: {summary['dataset']}",
+        f"- offset: {summary['offset']}",
         f"- limit: {summary['limit']}",
         f"- run_dir: {summary['method_run_dir']}",
         "",
@@ -230,6 +237,13 @@ def _write_markdown(path: Path, summary: dict[str, Any]) -> None:
 
 def _slug(value: str) -> str:
     return "".join(char if char.isalnum() else "-" for char in value).strip("-").lower() or "method"
+
+
+def _sample_suffix(split: str, offset: int, limit: int | None) -> str:
+    limit_label = "all" if limit is None else str(limit)
+    if offset:
+        return f"{split}-offset-{offset}-limit-{limit_label}"
+    return f"{split}-{limit_label}"
 
 
 if __name__ == "__main__":
